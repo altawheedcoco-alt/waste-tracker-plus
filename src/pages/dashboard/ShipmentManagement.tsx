@@ -116,6 +116,28 @@ const ShipmentManagement = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const { toast } = useToast();
+
+  const [newShipment, setNewShipment] = useState({
+    generator_id: '',
+    transporter_id: '',
+    recycler_id: '',
+    waste_type: '',
+    quantity: '',
+    pickup_address: '',
+    delivery_address: '',
+    notes: '',
+  });
+  const [expandedShipments, setExpandedShipments] = useState<Set<string>>(new Set());
+  const [mapShipment, setMapShipment] = useState<any>(null);
+  const [printShipment, setPrintShipment] = useState<any>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSignOpen, setBatchSignOpen] = useState(false);
+
+  // Cast shipments for compatibility
+  const shipments = rawShipments as any[];
 
   const handleCreateShipment = async () => {
     // === SUBSCRIPTION CHECK ===
