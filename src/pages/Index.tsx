@@ -145,6 +145,21 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
 };
 
 const Index = () => {
+  // Fast redirect: if user is authenticated (especially on PWA), skip homepage entirely
+  const hasSession = sessionStorage.getItem('__tab_active_org_id') || 
+    document.cookie.includes('sb-') ||
+    localStorage.getItem('sb-dgununqfxohodimmgxuk-auth-token');
+  
+  if (hasSession && typeof window !== 'undefined') {
+    // Use replace to avoid homepage flash
+    window.location.replace('/dashboard');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   useVisitorTracking();
   // Fetch homepage section config from DB
   const { data: sections } = useQuery({
