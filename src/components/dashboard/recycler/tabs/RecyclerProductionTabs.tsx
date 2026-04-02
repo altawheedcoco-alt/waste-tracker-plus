@@ -23,6 +23,7 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const RecyclerDeclarations = lazy(() => import('@/components/recycler/RecyclerDeclarations'));
+const ContainerManagementPanel = lazy(() => import('@/components/containers/ContainerManagementPanel'));
 
 interface RecyclerProductionTabsProps {
   organizationId?: string;
@@ -124,6 +125,12 @@ const RecyclerProductionTabs = ({ organizationId }: RecyclerProductionTabsProps)
     <TabsContent value="declarations" className="mt-4">
       <Suspense fallback={<TabFallback />}>
         <RecyclerDeclarations />
+      </Suspense>
+    </TabsContent>
+
+    <TabsContent value="containers" className="mt-4">
+      <Suspense fallback={<TabFallback />}>
+        <ContainerManagementPanel />
       </Suspense>
     </TabsContent>
   </>
