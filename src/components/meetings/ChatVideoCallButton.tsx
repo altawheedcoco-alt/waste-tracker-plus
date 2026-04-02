@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Video, Phone, X } from 'lucide-react';
+import { Video, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { sendDualNotification } from '@/services/unifiedNotifier';
-import JitsiMeetingRoom from './JitsiMeetingRoom';
+import WebRTCMeetingRoom from './WebRTCMeetingRoom';
 
 interface ChatVideoCallButtonProps {
   partnerName: string;
@@ -67,7 +67,6 @@ const ChatVideoCallButton = ({ partnerName, partnerUserId }: ChatVideoCallButton
         invited_by: user.id,
       });
 
-      // Send notification
       const partnerProfile = await supabase
         .from('profiles')
         .select('organization_id')
@@ -135,12 +134,13 @@ const ChatVideoCallButton = ({ partnerName, partnerUserId }: ChatVideoCallButton
             <DialogTitle>مكالمة {callType === 'video' ? 'فيديو' : 'صوتية'} مع {partnerName}</DialogTitle>
           </DialogHeader>
           {roomId && meetingId && callType && (
-            <JitsiMeetingRoom
+            <WebRTCMeetingRoom
               roomId={roomId}
               meetingId={meetingId}
               displayName={profile?.full_name || 'مستخدم'}
               isHost={true}
               meetingType={callType}
+              partnerUserId={partnerUserId}
               onLeave={endCall}
             />
           )}

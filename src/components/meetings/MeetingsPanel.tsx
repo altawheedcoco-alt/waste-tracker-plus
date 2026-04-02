@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import CreateMeetingDialog from './CreateMeetingDialog';
-import JitsiMeetingRoom from './JitsiMeetingRoom';
+import WebRTCMeetingRoom from './WebRTCMeetingRoom';
 import MeetingSummaryPanel from './MeetingSummaryPanel';
 
 interface Meeting {
@@ -141,7 +141,7 @@ const MeetingsPanel = () => {
             <Play className="w-3 h-3 me-1" /> جارٍ الآن
           </Badge>
         </div>
-        <JitsiMeetingRoom
+        <WebRTCMeetingRoom
           roomId={activeMeeting.room_id}
           meetingId={activeMeetingId}
           displayName={profile?.full_name || 'مستخدم'}
