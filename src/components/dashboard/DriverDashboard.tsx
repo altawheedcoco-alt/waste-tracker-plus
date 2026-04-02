@@ -63,6 +63,10 @@ const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard
 const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverStats'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
+const DriverQuickFAB = lazy(() => import('@/components/driver/DriverQuickFAB'));
+
+import DriverPerformanceStrip from '@/components/driver/DriverPerformanceStrip';
+import DriverTodayProgress from '@/components/driver/DriverTodayProgress';
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -268,6 +272,19 @@ const DriverDashboard = () => {
           </Button>
         </div>
       </div>
+
+      {/* Performance Strip */}
+      {driverInfo && (
+        <DriverPerformanceStrip
+          rating={driverInfo.rating}
+          totalTrips={driverInfo.total_trips}
+          acceptanceRate={driverInfo.acceptance_rate}
+          isVerified={driverInfo.is_verified}
+        />
+      )}
+
+      {/* Today Progress */}
+      <DriverTodayProgress shipments={shipments} />
 
       <DriverAssignmentAlert />
 
@@ -628,6 +645,13 @@ const DriverDashboard = () => {
             <DriverSOSButton driverId={driverInfo.id} organizationId={driverInfo.organization_id} />
           </Suspense>
         </>
+      )}
+
+      {/* Floating Quick Actions FAB */}
+      {driverInfo && (
+        <Suspense fallback={null}>
+          <DriverQuickFAB driverId={driverInfo.id} />
+        </Suspense>
       )}
 
       {/* DiDi-style popup for incoming offers */}
