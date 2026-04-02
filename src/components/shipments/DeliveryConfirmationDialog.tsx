@@ -248,6 +248,8 @@ const DeliveryConfirmationDialog = ({
               </Badge>
             )}
           </div>
+
+          <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
               إلغاء
             </Button>
