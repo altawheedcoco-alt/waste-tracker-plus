@@ -27,7 +27,7 @@ const DisposalEnvironmentalMonitor = () => {
           .eq('recycler_id', organization!.id)
           .gte('created_at', monthAgo.toISOString()),
         supabase.from('disposal_operations')
-          .select('disposal_method, quantity, status, environmental_notes')
+          .select('disposal_method, quantity, status')
           .eq('organization_id', organization!.id)
           .gte('created_at', monthAgo.toISOString()),
       ]);
