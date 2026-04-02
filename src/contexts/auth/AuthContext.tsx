@@ -169,12 +169,15 @@ export const useAuth = () => {
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Initialize from local cache for instant PWA startup
+  const cached = useMemo(() => getCachedUserData(), []);
+  
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(cached?.profile as Profile | null);
+  const [organization, setOrganization] = useState<Organization | null>(cached?.organization as Organization | null);
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>(cached?.roles || []);
   const [loading, setLoading] = useState(true);
   const [switchingOrganization, setSwitchingOrganization] = useState(false);
 
