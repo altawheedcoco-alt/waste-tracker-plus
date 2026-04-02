@@ -45,6 +45,8 @@ import SidebarNavContent from './SidebarNavContent';
 
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
+const NetworkStatusBanner = lazy(() => import('@/components/mobile/NetworkStatusBanner'));
+const ProactiveAlertsBanner = lazy(() => import('@/components/alerts/ProactiveAlertsBanner'));
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -494,6 +496,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               </>
             )}
           </AnimatePresence>
+
+          {/* Network Status + Proactive Alerts */}
+          <Suspense fallback={null}><NetworkStatusBanner /></Suspense>
+          <Suspense fallback={null}><ProactiveAlertsBanner /></Suspense>
 
           {/* Page content */}
           <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[6rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
