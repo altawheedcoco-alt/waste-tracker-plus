@@ -190,7 +190,64 @@ const DeliveryConfirmationDialog = ({
             />
           </div>
 
-          <div className="flex gap-2 pt-2">
+          {/* Photo Capture */}
+          <div className="space-y-1.5">
+            <Label className="text-xs flex items-center gap-1"><Camera className="w-3.5 h-3.5" /> صور إثبات التسليم (اختياري)</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              className="hidden"
+              onChange={handlePhotoCapture}
+            />
+            <div className="flex gap-2 flex-wrap">
+              {photos.map((p, i) => (
+                <div key={i} className="relative w-16 h-16 rounded border overflow-hidden">
+                  <img src={p} className="w-full h-full object-cover" alt={`صورة ${i + 1}`} />
+                  <button
+                    type="button"
+                    onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute top-0 left-0 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {photos.length < 3 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-16 h-16"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* GPS Location */}
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={captureGPS}
+              disabled={gpsLoading}
+              className="text-xs"
+            >
+              <MapPin className="w-3.5 h-3.5 ml-1" />
+              {gpsLoading ? 'جاري التحديد...' : 'تحديد الموقع'}
+            </Button>
+            {gpsLocation && (
+              <Badge variant="secondary" className="text-[10px]">
+                📍 {gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}
+              </Badge>
+            )}
+          </div>
             <Button variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
               إلغاء
             </Button>
