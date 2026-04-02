@@ -52,23 +52,6 @@ interface LinkedPartner {
   shipmentsCount: number;
 }
 
-interface Shipment {
-  id: string;
-  shipment_number: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  status: string;
-  created_at: string;
-  pickup_address: string;
-  delivery_address: string;
-  generator_id: string;
-  recycler_id: string | null;
-  driver_id: string | null;
-  generator: { id: string; name: string } | null;
-  recycler: { id: string; name: string } | null;
-  driver: { profile: { full_name: string } | null } | null;
-}
 
 const TransporterShipments = () => {
   const navigate = useNavigate();
