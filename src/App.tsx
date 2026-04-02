@@ -29,7 +29,6 @@ const lazyRetry = (factory: () => Promise<any>, retries = 2): Promise<any> =>
 
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => lazyRetry(() => import("./components/offline/OfflineBanner")));
-const ScrollToTopButton = lazy(() => lazyRetry(() => import("./components/ui/ScrollToTopButton")));
 const CodeProtection = lazy(() => lazyRetry(() => import("./components/security/CodeProtection")));
 const ProductionReadiness = lazy(() => lazyRetry(() => import("./components/production/ProductionReadiness")));
 const SoundIntegrator = lazy(() => lazyRetry(() => import("./components/SoundIntegrator")));
@@ -49,7 +48,7 @@ const queryClient = createSmartQueryClient();
 // Public routes only at startup
 import { publicRoutes } from "@/routes/PublicRoutes";
 
-// Common dashboard routes (lightweight — settings, notifications, chat, etc.)
+// Common dashboard routes (lightweight — shared across all roles)
 import { commonRoutes } from "@/routes/dashboard/CommonRoutes";
 
 // Smart scroll restoration
@@ -63,59 +62,73 @@ const ScrollRestore = () => {
 };
 
 /**
- * Resolves which role-specific route module to lazy-load
+ * Resolves the import promise for role-specific routes
  * based on user roles and organization type.
+ * Returns null if no role match (common routes still work).
  */
-function useRoleRoutes() {
-  const { roles, organization } = useAuth();
-  const orgType = organization?.organization_type;
+function getRoleRoutesImport(
+  roles: string[],
+  orgType?: string
+): Promise<{ routes: React.ReactNode }> | null {
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
 
-  return useMemo(() => {
-    if (isAdmin) return lazy(() => import('@/routes/dashboard/AdminRoutes').then(m => ({ default: () => <>{m.adminRoutes}</> })));
-    if (isDriver) return lazy(() => import('@/routes/dashboard/DriverRoutes').then(m => ({ default: () => <>{m.driverRoutes}</> })));
-    switch (orgType) {
-      case 'transporter': return lazy(() => import('@/routes/dashboard/TransporterRoutes').then(m => ({ default: () => <>{m.transporterRoutes}</> })));
-      case 'generator': return lazy(() => import('@/routes/dashboard/GeneratorRoutes').then(m => ({ default: () => <>{m.generatorRoutes}</> })));
-      case 'recycler': return lazy(() => import('@/routes/dashboard/RecyclerRoutes').then(m => ({ default: () => <>{m.recyclerRoutes}</> })));
-      case 'disposal': return lazy(() => import('@/routes/dashboard/SpecializedRoutes').then(m => ({ default: () => <>{m.disposalRoutes}</> })));
-      case 'regulator': return lazy(() => import('@/routes/dashboard/SpecializedRoutes').then(m => ({ default: () => <>{m.regulatorRoutes}</> })));
-      case 'consultant':
-      case 'consulting_office': return lazy(() => import('@/routes/dashboard/SpecializedRoutes').then(m => ({ default: () => <>{m.consultantRoutes}</> })));
-      default: return null;
-    }
-  }, [isAdmin, isDriver, orgType]);
+  if (isAdmin) return import('@/routes/dashboard/AdminRoutes').then(m => ({ routes: m.adminRoutes }));
+  if (isDriver) return import('@/routes/dashboard/DriverRoutes').then(m => ({ routes: m.driverRoutes }));
+  switch (orgType) {
+    case 'transporter': return import('@/routes/dashboard/TransporterRoutes').then(m => ({ routes: m.transporterRoutes }));
+    case 'generator': return import('@/routes/dashboard/GeneratorRoutes').then(m => ({ routes: m.generatorRoutes }));
+    case 'recycler': return import('@/routes/dashboard/RecyclerRoutes').then(m => ({ routes: m.recyclerRoutes }));
+    case 'disposal': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.disposalRoutes }));
+    case 'regulator': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.regulatorRoutes }));
+    case 'consultant':
+    case 'consulting_office': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.consultantRoutes }));
+    default: return null;
+  }
 }
-
-/**
- * RoleRoutesRenderer — injects role-specific <Route> elements
- * as children inside the DashboardRouteGuard layout route.
- * Uses React.lazy to only load the relevant role's route file.
- */
-const RoleRoutesRenderer = memo(() => {
-  const RoleComponent = useRoleRoutes();
-  if (!RoleComponent) return null;
-  return (
-    <Suspense fallback={null}>
-      <RoleComponent />
-    </Suspense>
-  );
-});
-RoleRoutesRenderer.displayName = 'RoleRoutesRenderer';
 
 const AppRoutes = memo(() => {
   const location = useLocation();
+  const { roles, organization } = useAuth();
+  const orgType = organization?.organization_type;
   const isDashboard = location.pathname.startsWith('/dashboard');
 
-  if (!isDashboard) {
-    return (
-      <AccountActivationGuard>
-        <Routes>
-          {publicRoutes}
-        </Routes>
-      </AccountActivationGuard>
-    );
+  const [roleRoutes, setRoleRoutes] = useState<React.ReactNode>(null);
+  const [roleKey, setRoleKey] = useState<string>('');
+
+  // Compute a stable key for the current role
+  const currentRoleKey = useMemo(() => {
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('driver')) return 'driver';
+    return orgType || 'none';
+  }, [roles, orgType]);
+
+  // Load role-specific routes when entering dashboard and role is resolved
+  useEffect(() => {
+    if (!isDashboard || currentRoleKey === 'none' || currentRoleKey === roleKey) return;
+
+    let cancelled = false;
+    const importPromise = getRoleRoutesImport(roles, orgType);
+    if (!importPromise) {
+      setRoleKey(currentRoleKey);
+      return;
+    }
+
+    importPromise
+      .then(({ routes }) => {
+        if (!cancelled) {
+          setRoleRoutes(routes);
+          setRoleKey(currentRoleKey);
+        }
+      })
+      .catch(err => console.error('Failed to load role routes:', err));
+
+    return () => { cancelled = true; };
+  }, [isDashboard, currentRoleKey, roleKey, roles, orgType]);
+
+  // Show loader while dashboard role routes are loading
+  if (isDashboard && currentRoleKey !== 'none' && roleKey !== currentRoleKey) {
+    return <PageLoader />;
   }
 
   return (
@@ -124,10 +137,9 @@ const AppRoutes = memo(() => {
         {publicRoutes}
         <Route element={<DashboardRouteGuard />}>
           {commonRoutes}
-          {/* Role-specific routes rendered as fragment */}
+          {roleRoutes}
         </Route>
       </Routes>
-      <RoleRoutesRenderer />
     </AccountActivationGuard>
   );
 });
@@ -153,7 +165,6 @@ const Providers = memo(() => (
                 </ErrorBoundary>
                 <Suspense fallback={null}>
                   <OfflineBanner />
-                  {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
                   <ProductionReadiness />
                 </Suspense>
