@@ -19243,6 +19243,78 @@ export type Database = {
           },
         ]
       }
+      generated_reports: {
+        Row: {
+          ai_model_used: string | null
+          content: string
+          created_at: string
+          created_by: string
+          data_sources: Json | null
+          id: string
+          is_archived: boolean | null
+          metadata: Json | null
+          organization_id: string
+          report_period_end: string | null
+          report_period_start: string | null
+          report_type: string
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          content: string
+          created_at?: string
+          created_by: string
+          data_sources?: Json | null
+          id?: string
+          is_archived?: boolean | null
+          metadata?: Json | null
+          organization_id: string
+          report_period_end?: string | null
+          report_period_start?: string | null
+          report_type?: string
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string
+          data_sources?: Json | null
+          id?: string
+          is_archived?: boolean | null
+          metadata?: Json | null
+          organization_id?: string
+          report_period_end?: string | null
+          report_period_start?: string | null
+          report_type?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "generated_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_concentration_alerts: {
         Row: {
           acknowledged_at: string | null

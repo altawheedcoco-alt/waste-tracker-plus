@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import DocumentVerificationWidget from '@/components/dashboard/DocumentVerificationWidget';
+
+const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 
 
 const ISOBodyDashboard = memo(() => {
@@ -301,7 +302,9 @@ const ISOBodyDashboard = memo(() => {
           </Card>
         </TabsContent>
       </Tabs>
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      <Suspense fallback={null}>
+        <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
     </div>
   );
 });

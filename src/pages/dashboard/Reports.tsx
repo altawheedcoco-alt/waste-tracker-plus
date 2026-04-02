@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -65,6 +65,8 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import OfficialReportPrint from '@/components/reports/OfficialReportPrint';
 import RegulatoryExport from '@/components/reports/RegulatoryExport';
+
+const SmartReportGenerator = lazy(() => import('@/components/reports/SmartReportGenerator'));
 
 interface ReportData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
@@ -735,6 +737,11 @@ const Reports = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Smart AI Report Generator */}
+        <Suspense fallback={<div className="h-48 bg-muted animate-pulse rounded-xl" />}>
+          <SmartReportGenerator />
+        </Suspense>
       </motion.div>
     </DashboardLayout>
   );
