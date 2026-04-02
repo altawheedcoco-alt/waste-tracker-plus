@@ -26,7 +26,7 @@ const SidebarRecentPages = memo(({ pages, onClear }: SidebarRecentPagesProps) =>
       <div className="flex items-center gap-2 px-2 mb-1.5">
         <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
         <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
-          {t('sidebar.recentPages', 'آخر الزيارات')}
+          {t('sidebar.recentPages') || 'آخر الزيارات'}
         </span>
         <div className="flex-1 h-px bg-border/30" />
         <button
