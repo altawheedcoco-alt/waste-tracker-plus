@@ -26,6 +26,7 @@ const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 const SovereignGovernanceDashboard = () => {
   const [activeTab, setActiveTab] = useState('kpis');
   const { criticalAlerts, roles, delegations, decisions, isLoading } = useSovereignGovernance();
+  useSovereignRealtime();
 
   const tabs = [
     { value: 'kpis', label: 'المؤشرات', icon: BarChart3 },
