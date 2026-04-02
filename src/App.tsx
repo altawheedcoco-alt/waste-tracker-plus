@@ -18,7 +18,7 @@ import PushPermissionBanner from "./components/pwa/PushPermissionBanner";
 import MobileEnhancements from "./components/mobile/MobileEnhancements";
 import DashboardRouteGuard from "@/components/guards/DashboardRouteGuard";
 
-// Retry wrapper for lazy imports (handles stale cache / network glitches)
+// Retry wrapper for lazy imports
 const lazyRetry = (factory: () => Promise<any>, retries = 2): Promise<any> =>
   factory().catch((err: any) => {
     if (retries > 0) {
@@ -41,15 +41,15 @@ const PageLoader = memo(() => (
 ));
 PageLoader.displayName = 'PageLoader';
 
-// Smart QueryClient with adaptive caching per data category
+// Smart QueryClient
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
-// Public routes only at startup
+// Public routes only at startup — NO dashboard routes loaded here
 import { publicRoutes } from "@/routes/PublicRoutes";
 
-// Common dashboard routes (lightweight — shared across all roles)
-import { commonRoutes } from "@/routes/dashboard/CommonRoutes";
+// Core routes are ultra-light (Dashboard, Settings, Notifications, Chat + catch-all)
+import { coreRoutes } from "@/routes/dashboard/CoreRoutes";
 
 // Smart scroll restoration
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
@@ -62,29 +62,58 @@ const ScrollRestore = () => {
 };
 
 /**
- * Resolves the import promise for role-specific routes
- * based on user roles and organization type.
- * Returns null if no role match (common routes still work).
+ * Resolves role-specific + common + extended route imports.
+ * Returns a combined set of routes for the user's role.
  */
-function getRoleRoutesImport(
+function getDashboardRouteImports(
   roles: string[],
   orgType?: string
-): Promise<{ routes: React.ReactNode }> | null {
+): Promise<React.ReactNode>[] {
+  const imports: Promise<React.ReactNode>[] = [];
+
+  // Always load common routes (shared dashboard features)
+  imports.push(
+    import('@/routes/dashboard/CommonRoutes').then(m => m.commonRoutes)
+  );
+
+  // Load extended routes (optional features like Omaluna, Videos, etc.)
+  imports.push(
+    import('@/routes/dashboard/ExtendedRoutes').then(m => m.extendedRoutes)
+  );
+
+  // Role-specific routes
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
 
-  if (isAdmin) return import('@/routes/dashboard/AdminRoutes').then(m => ({ routes: m.adminRoutes }));
-  if (isDriver) return import('@/routes/dashboard/DriverRoutes').then(m => ({ routes: m.driverRoutes }));
-  switch (orgType) {
-    case 'transporter': return import('@/routes/dashboard/TransporterRoutes').then(m => ({ routes: m.transporterRoutes }));
-    case 'generator': return import('@/routes/dashboard/GeneratorRoutes').then(m => ({ routes: m.generatorRoutes }));
-    case 'recycler': return import('@/routes/dashboard/RecyclerRoutes').then(m => ({ routes: m.recyclerRoutes }));
-    case 'disposal': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.disposalRoutes }));
-    case 'regulator': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.regulatorRoutes }));
-    case 'consultant':
-    case 'consulting_office': return import('@/routes/dashboard/SpecializedRoutes').then(m => ({ routes: m.consultantRoutes }));
-    default: return null;
+  if (isAdmin) {
+    imports.push(import('@/routes/dashboard/AdminRoutes').then(m => m.adminRoutes));
+  } else if (isDriver) {
+    imports.push(import('@/routes/dashboard/DriverRoutes').then(m => m.driverRoutes));
+  } else {
+    switch (orgType) {
+      case 'transporter':
+        imports.push(import('@/routes/dashboard/TransporterRoutes').then(m => m.transporterRoutes));
+        break;
+      case 'generator':
+        imports.push(import('@/routes/dashboard/GeneratorRoutes').then(m => m.generatorRoutes));
+        break;
+      case 'recycler':
+        imports.push(import('@/routes/dashboard/RecyclerRoutes').then(m => m.recyclerRoutes));
+        break;
+      case 'disposal':
+        imports.push(import('@/routes/dashboard/SpecializedRoutes').then(m => m.disposalRoutes));
+        break;
+      case 'regulator':
+        imports.push(import('@/routes/dashboard/SpecializedRoutes').then(m => m.regulatorRoutes));
+        break;
+      case 'consultant':
+      case 'consulting_office':
+        imports.push(import('@/routes/dashboard/SpecializedRoutes').then(m => m.consultantRoutes));
+        break;
+    }
   }
+
+  return imports;
 }
 
 const AppRoutes = memo(() => {
@@ -93,40 +122,36 @@ const AppRoutes = memo(() => {
   const orgType = organization?.organization_type;
   const isDashboard = location.pathname.startsWith('/dashboard');
 
-  const [roleRoutes, setRoleRoutes] = useState<React.ReactNode>(null);
+  const [roleRoutes, setRoleRoutes] = useState<React.ReactNode[]>([]);
   const [roleKey, setRoleKey] = useState<string>('');
 
-  // Compute a stable key for the current role
+  // Compute stable key for current role
   const currentRoleKey = useMemo(() => {
     if (roles.includes('admin')) return 'admin';
     if (roles.includes('driver')) return 'driver';
     return orgType || 'none';
   }, [roles, orgType]);
 
-  // Load role-specific routes when entering dashboard and role is resolved
+  // Load role-specific routes only when entering dashboard
   useEffect(() => {
     if (!isDashboard || currentRoleKey === 'none' || currentRoleKey === roleKey) return;
 
     let cancelled = false;
-    const importPromise = getRoleRoutesImport(roles, orgType);
-    if (!importPromise) {
-      setRoleKey(currentRoleKey);
-      return;
-    }
+    const imports = getDashboardRouteImports(roles, orgType);
 
-    importPromise
-      .then(({ routes }) => {
+    Promise.all(imports)
+      .then((routeNodes) => {
         if (!cancelled) {
-          setRoleRoutes(routes);
+          setRoleRoutes(routeNodes);
           setRoleKey(currentRoleKey);
         }
       })
-      .catch(err => console.error('Failed to load role routes:', err));
+      .catch(err => console.error('Failed to load dashboard routes:', err));
 
     return () => { cancelled = true; };
   }, [isDashboard, currentRoleKey, roleKey, roles, orgType]);
 
-  // Show loader while dashboard role routes are loading
+  // Show loader while dashboard routes are loading
   if (isDashboard && currentRoleKey !== 'none' && roleKey !== currentRoleKey) {
     return <PageLoader />;
   }
@@ -136,8 +161,10 @@ const AppRoutes = memo(() => {
       <Routes>
         {publicRoutes}
         <Route element={<DashboardRouteGuard />}>
-          {commonRoutes}
-          {roleRoutes}
+          {coreRoutes}
+          {roleRoutes.map((routes, i) => (
+            <>{routes}</>
+          ))}
         </Route>
       </Routes>
     </AccountActivationGuard>
