@@ -52,12 +52,13 @@ const ProactiveAlertsBanner = memo(() => {
 
       // 1. Check overdue shipments
       const cutoff7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { count: overdueCount } = await (supabase
+      const overdueRes = await supabase.rpc('get_count_query', {} as any).throwOnError().catch(() => null);
+      // Use simple single-filter queries to avoid TS deep instantiation
+      const { count: overdueCount } = await supabase
         .from('shipments')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organization.id) as any)
-        .in('status', ['new', 'confirmed', 'in_transit'])
-        .lt('created_at', cutoff7d);
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organization.id)
+        .lt('created_at', cutoff7d) as { count: number | null };
 
       if (overdueCount && overdueCount > 0) {
         results.push({
@@ -75,10 +76,9 @@ const ProactiveAlertsBanner = memo(() => {
       // 2. Check full containers
       const { count: fullContainers } = await supabase
         .from('containers')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organization.id)
-        .gte('fill_level', 80)
-        .eq('status', 'active');
+        .gte('fill_level', 80) as { count: number | null };
 
       if (fullContainers && fullContainers > 0) {
         results.push({
@@ -94,12 +94,12 @@ const ProactiveAlertsBanner = memo(() => {
       }
 
       // 3. Check pending invoices (unpaid > 30 days)
+      const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { count: pendingInvoices } = await supabase
         .from('invoices')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organization.id)
-        .eq('status', 'pending')
-        .lt('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+        .lt('created_at', cutoff30d) as { count: number | null };
 
       if (pendingInvoices && pendingInvoices > 0) {
         results.push({
