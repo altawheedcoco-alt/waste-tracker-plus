@@ -19,7 +19,8 @@ import EmployeeKPICards from './employee/EmployeeKPICards';
 import EmployeeLeaveWidget from './employee/EmployeeLeaveWidget';
 import EmployeeNotificationsWidget from './employee/EmployeeNotificationsWidget';
 import EmployeeContextWidgets from './employee/EmployeeContextWidgets';
-
+import EmployeeWelcomeStrip from './employee/EmployeeWelcomeStrip';
+import EmployeeQuickFAB from './employee/EmployeeQuickFAB';
 // Lazy load heavy tab content
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
@@ -95,6 +96,11 @@ const EmployeeDashboard = () => {
     <div className="space-y-6" dir="rtl">
       <StoryCircles />
 
+      {/* Welcome Strip */}
+      <EmployeeWelcomeStrip
+        employeeName={profile?.full_name || 'موظف'}
+        permissionsCount={permissions.length}
+      />
 
       {/* Employee Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
