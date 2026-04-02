@@ -59,6 +59,10 @@ const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/Transpor
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
 const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
 const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
+const FleetHealthSummary = lazy(() => import('./transporter/FleetHealthSummary'));
+const DriverShiftTracker = lazy(() => import('./transporter/DriverShiftTracker'));
+const RevenueCostMini = lazy(() => import('./transporter/RevenueCostMini'));
+const TransporterQuickFAB = lazy(() => import('./transporter/TransporterQuickFAB'));
 
 /**
  * مكوّن يستخدم Geolocation API للحصول على إحداثيات المنظمة الفعلية
@@ -235,6 +239,25 @@ const TransporterDashboard = () => {
         <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
           <PostsHub />
         </Suspense>
+      </div>
+
+      {/* ★ صحة الأسطول + السائقون + ملخص مالي */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <ErrorBoundary fallbackTitle="خطأ في صحة الأسطول">
+          <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
+            <FleetHealthSummary />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في متابعة السائقين">
+          <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
+            <DriverShiftTracker />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
+          <Suspense fallback={<Skeleton className="h-32 w-full rounded-xl" />}>
+            <RevenueCostMini />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* 2. مركز القيادة */}
