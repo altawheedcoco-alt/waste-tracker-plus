@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useShipmentList } from '@/hooks/useShipmentList';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,30 +52,12 @@ interface LinkedPartner {
   shipmentsCount: number;
 }
 
-interface Shipment {
-  id: string;
-  shipment_number: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  status: string;
-  created_at: string;
-  pickup_address: string;
-  delivery_address: string;
-  generator_id: string;
-  recycler_id: string | null;
-  driver_id: string | null;
-  generator: { id: string; name: string } | null;
-  recycler: { id: string; name: string } | null;
-  driver: { profile: { full_name: string } | null } | null;
-}
 
 const TransporterShipments = () => {
   const navigate = useNavigate();
-  const { organization } = useAuth();
+  const { organization, user } = useAuth();
   const { t, language } = useLanguage();
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { shipments, isLoading: loading, refetch } = useShipmentList({ role: 'transporter' });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [partnerFilter, setPartnerFilter] = useState('all');
@@ -104,66 +86,7 @@ const TransporterShipments = () => {
     other: t('shipments.other'),
   };
 
-  useEffect(() => {
-    if (organization?.id) {
-      fetchShipments();
-    }
-  }, [organization?.id]);
-
-  const fetchShipments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('shipments')
-        .select(`
-          id, shipment_number, waste_type, quantity, unit, status,
-          created_at, pickup_address, delivery_address,
-          generator_id, recycler_id, driver_id
-        `)
-        .eq('transporter_id', organization?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const orgIds = [...new Set([
-        ...(data || []).map(s => s.generator_id).filter(Boolean),
-        ...(data || []).map(s => s.recycler_id).filter(Boolean),
-      ])] as string[];
-
-      const orgsMap: Record<string, { id: string; name: string }> = {};
-      if (orgIds.length > 0) {
-        const { data: orgsData } = await supabase
-          .from('organizations')
-          .select('id, name')
-          .in('id', orgIds);
-        orgsData?.forEach(o => { orgsMap[o.id] = { id: o.id, name: o.name }; });
-      }
-
-      const driverIds = [...new Set((data || []).map(s => s.driver_id).filter(Boolean))] as string[];
-      const driversMap: Record<string, { profile?: { full_name: string } }> = {};
-      if (driverIds.length > 0) {
-        const { data: driversData } = await supabase
-          .from('drivers')
-          .select('id, profile:profiles(full_name)')
-          .in('id', driverIds);
-        driversData?.forEach(d => {
-          driversMap[d.id] = { profile: Array.isArray(d.profile) ? d.profile[0] : d.profile };
-        });
-      }
-
-      const enriched = (data || []).map(s => ({
-        ...s,
-        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
-        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
-        driver: s.driver_id ? driversMap[s.driver_id] || null : null,
-      }));
-
-      setShipments(enriched as unknown as Shipment[]);
-    } catch (error) {
-      console.error('Error fetching shipments:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchShipments = () => refetch();
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
@@ -264,7 +187,7 @@ const TransporterShipments = () => {
       subtitle: `${s.generator?.name || ''} → ${s.recycler?.name || ''}`,
     }));
 
-  const { user } = useAuth();
+  
 
   return (
     <DashboardLayout>
@@ -408,7 +331,18 @@ const TransporterShipments = () => {
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-border/30 animate-pulse">
+                  <div className="w-16 h-5 bg-muted rounded" />
+                  <div className="flex-1 space-y-2">
+                    <div className="w-1/3 h-4 bg-muted rounded" />
+                    <div className="w-1/2 h-3 bg-muted rounded" />
+                  </div>
+                  <div className="w-20 h-6 bg-muted rounded-full" />
+                </div>
+              ))}
+            </div>
           ) : filteredShipments.length === 0 ? (
             <div className="text-center py-6">
               <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
@@ -434,7 +368,7 @@ const TransporterShipments = () => {
                         <div className="flex items-center gap-2">
                           {getStatusBadge(shipment.status)}
                           <QuickReceiptButton 
-                            shipment={shipment} 
+                            shipment={shipment as any} 
                             onSuccess={fetchShipments}
                             variant="ghost"
                             size="sm"
@@ -561,7 +495,7 @@ const TransporterShipments = () => {
                                 <TooltipTrigger asChild>
                                   <div>
                                     <QuickReceiptButton 
-                                      shipment={shipment} 
+                                      shipment={shipment as any} 
                                       onSuccess={fetchShipments}
                                       variant="default"
                                       size="sm"
