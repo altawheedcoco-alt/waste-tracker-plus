@@ -357,7 +357,7 @@ const TransporterShipments = () => {
                         <div className="flex items-center gap-2">
                           {getStatusBadge(shipment.status)}
                           <QuickReceiptButton 
-                            shipment={shipment} 
+                            shipment={shipment as any} 
                             onSuccess={fetchShipments}
                             variant="ghost"
                             size="sm"
