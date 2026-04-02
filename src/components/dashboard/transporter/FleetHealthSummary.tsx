@@ -28,12 +28,12 @@ const FleetHealthSummary = () => {
       // Get drivers (each driver = a vehicle in the fleet)
       const { data: drivers } = await supabase
         .from('drivers')
-        .select('id, vehicle_type, vehicle_plate, status, is_available')
+        .select('id, vehicle_type, vehicle_plate, is_available, is_verified')
         .eq('organization_id', orgId);
 
       const allDrivers = drivers || [];
       const active = allDrivers.filter(d => d.is_available === true).length;
-      const maintenance = allDrivers.filter(d => d.status === 'maintenance' || d.status === 'inactive').length;
+      const maintenance = allDrivers.filter(d => d.is_available === false && d.is_verified === false).length;
 
       // Get today's active shipments for fleet utilization
       const today = new Date();

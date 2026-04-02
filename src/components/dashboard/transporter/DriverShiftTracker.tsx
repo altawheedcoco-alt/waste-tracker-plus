@@ -29,7 +29,7 @@ const DriverShiftTracker = () => {
       // Get all drivers with profiles
       const { data: drivers } = await supabase
         .from('drivers')
-        .select('id, is_available, status, vehicle_plate, vehicle_type, profile:profiles(full_name)')
+        .select('id, is_available, vehicle_plate, vehicle_type, profile:profiles(full_name)')
         .eq('organization_id', orgId)
         .limit(50);
 
