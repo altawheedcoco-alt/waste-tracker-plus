@@ -481,7 +481,7 @@ export function useWebRTCCall() {
 
           if (!error && uploadData && callRecordIdRef.current) {
             const { data: urlData } = supabase.storage.from('call-recordings').getPublicUrl(fileName);
-            await supabase.from('call_records').update({
+            await (supabase.from('call_records').update as any)({
               recording_url: urlData.publicUrl,
             }).eq('id', callRecordIdRef.current);
           }

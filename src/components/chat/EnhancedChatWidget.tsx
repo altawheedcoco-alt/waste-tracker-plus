@@ -674,11 +674,15 @@ const EnhancedChatWidget = () => {
           callInfo={callInfo}
           localStream={localStream}
           remoteStream={remoteStream}
+          callMessages={callMessages}
           onAnswer={answerCall}
           onEnd={() => endCall()}
           onToggleMute={toggleMute}
           onToggleVideo={toggleVideo}
           onToggleSpeaker={toggleSpeaker}
+          onToggleScreenShare={toggleScreenShare}
+          onToggleRecording={toggleRecording}
+          onSendMessage={sendCallMessage}
         />
       )}
     </>
