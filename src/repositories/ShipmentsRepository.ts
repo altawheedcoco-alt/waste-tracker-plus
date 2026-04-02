@@ -161,6 +161,15 @@ export const ShipmentsRepository = {
         if (['delivered'].includes(status) && shipment.transporter_id) {
           await autoCreateReceipt(id, shipment.transporter_id, userId);
         }
+        // Auto-generate draft invoice on delivery
+        if (status === 'delivered' && shipment.transporter_id) {
+          try {
+            const { generateAutoInvoice } = await import('@/services/autoInvoiceService');
+            await generateAutoInvoice({ shipmentId: id, organizationId: shipment.transporter_id, userId });
+          } catch (invErr) {
+            console.error('Auto-invoice error (non-blocking):', invErr);
+          }
+        }
         if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(status) && shipment.recycler_id) {
           await autoCreateDisposalCertificate(id, shipment.recycler_id, userId);
         }
