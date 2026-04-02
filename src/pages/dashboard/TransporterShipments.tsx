@@ -103,66 +103,7 @@ const TransporterShipments = () => {
     other: t('shipments.other'),
   };
 
-  useEffect(() => {
-    if (organization?.id) {
-      fetchShipments();
-    }
-  }, [organization?.id]);
-
-  const fetchShipments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('shipments')
-        .select(`
-          id, shipment_number, waste_type, quantity, unit, status,
-          created_at, pickup_address, delivery_address,
-          generator_id, recycler_id, driver_id
-        `)
-        .eq('transporter_id', organization?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const orgIds = [...new Set([
-        ...(data || []).map(s => s.generator_id).filter(Boolean),
-        ...(data || []).map(s => s.recycler_id).filter(Boolean),
-      ])] as string[];
-
-      const orgsMap: Record<string, { id: string; name: string }> = {};
-      if (orgIds.length > 0) {
-        const { data: orgsData } = await supabase
-          .from('organizations')
-          .select('id, name')
-          .in('id', orgIds);
-        orgsData?.forEach(o => { orgsMap[o.id] = { id: o.id, name: o.name }; });
-      }
-
-      const driverIds = [...new Set((data || []).map(s => s.driver_id).filter(Boolean))] as string[];
-      const driversMap: Record<string, { profile?: { full_name: string } }> = {};
-      if (driverIds.length > 0) {
-        const { data: driversData } = await supabase
-          .from('drivers')
-          .select('id, profile:profiles(full_name)')
-          .in('id', driverIds);
-        driversData?.forEach(d => {
-          driversMap[d.id] = { profile: Array.isArray(d.profile) ? d.profile[0] : d.profile };
-        });
-      }
-
-      const enriched = (data || []).map(s => ({
-        ...s,
-        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
-        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
-        driver: s.driver_id ? driversMap[s.driver_id] || null : null,
-      }));
-
-      setShipments(enriched as unknown as Shipment[]);
-    } catch (error) {
-      console.error('Error fetching shipments:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchShipments = () => refetch();
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
