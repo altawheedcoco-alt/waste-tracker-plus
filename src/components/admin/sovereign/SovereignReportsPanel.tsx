@@ -55,6 +55,26 @@ const SovereignReportsPanel = () => {
   const publishedCount = reports?.filter((r: any) => r.status === 'published').length || 0;
   const draftCount = reports?.filter((r: any) => r.status === 'draft').length || 0;
 
+  const exportCSV = () => {
+    if (!reports || reports.length === 0) return;
+    const headers = ['العنوان', 'النوع', 'الحالة', 'الملخص', 'التاريخ'];
+    const rows = reports.map((r: any) => [
+      r.title,
+      REPORT_TYPES.find(rt => rt.value === r.report_type)?.label || r.report_type,
+      r.status,
+      (r.summary || '').replace(/,/g, ' '),
+      format(new Date(r.created_at), 'yyyy-MM-dd HH:mm'),
+    ]);
+    const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sovereign-reports-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4" dir="rtl">
       <div className="flex items-center justify-between">
