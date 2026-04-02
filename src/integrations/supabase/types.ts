@@ -7998,6 +7998,175 @@ export type Database = {
           },
         ]
       }
+      container_activities: {
+        Row: {
+          activity_type: string
+          actor_organization_id: string | null
+          actor_user_id: string | null
+          container_id: string
+          created_at: string
+          fill_level_after: number | null
+          fill_level_before: number | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          photo_url: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          container_id: string
+          created_at?: string
+          fill_level_after?: number | null
+          fill_level_before?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          photo_url?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          container_id?: string
+          created_at?: string
+          fill_level_after?: number | null
+          fill_level_before?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "container_activities_container_id_fkey"
+            columns: ["container_id"]
+            isOneToOne: false
+            referencedRelation: "containers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      containers: {
+        Row: {
+          assigned_to_organization_id: string | null
+          assigned_to_route: string | null
+          capacity_kg: number | null
+          capacity_liters: number | null
+          color: string | null
+          condition: string | null
+          container_code: string
+          container_type: string
+          created_at: string
+          current_fill_level: number | null
+          id: string
+          is_active: boolean | null
+          last_emptied_at: string | null
+          last_inspected_at: string | null
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
+          material: string | null
+          next_maintenance_date: string | null
+          notes: string | null
+          organization_id: string
+          qr_code: string | null
+          rfid_tag: string | null
+          status: string
+          updated_at: string
+          waste_type: string | null
+        }
+        Insert: {
+          assigned_to_organization_id?: string | null
+          assigned_to_route?: string | null
+          capacity_kg?: number | null
+          capacity_liters?: number | null
+          color?: string | null
+          condition?: string | null
+          container_code: string
+          container_type?: string
+          created_at?: string
+          current_fill_level?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_emptied_at?: string | null
+          last_inspected_at?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          material?: string | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          organization_id: string
+          qr_code?: string | null
+          rfid_tag?: string | null
+          status?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Update: {
+          assigned_to_organization_id?: string | null
+          assigned_to_route?: string | null
+          capacity_kg?: number | null
+          capacity_liters?: number | null
+          color?: string | null
+          condition?: string | null
+          container_code?: string
+          container_type?: string
+          created_at?: string
+          current_fill_level?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_emptied_at?: string | null
+          last_inspected_at?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          material?: string | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          qr_code?: string | null
+          rfid_tag?: string | null
+          status?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "containers_assigned_to_organization_id_fkey"
+            columns: ["assigned_to_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "containers_assigned_to_organization_id_fkey"
+            columns: ["assigned_to_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "containers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "containers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_custom_versions: {
         Row: {
           created_at: string
