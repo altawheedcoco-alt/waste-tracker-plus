@@ -534,8 +534,20 @@ const ShipmentManagement = () => {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="border rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-3/4" />
+                    <div className="flex gap-3">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-4 w-1/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredShipments.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
