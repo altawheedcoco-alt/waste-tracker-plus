@@ -63,12 +63,12 @@ const GeneratorPartnersHub = () => {
       if (!organization?.id) return [];
       const existingIds = new Set(partners.map(p => p.id));
 
-      const { data } = await supabase
+      const query = supabase
         .from('organizations')
         .select('id, name, organization_type, city, phone')
-        .or('organization_type.eq.transporter,organization_type.eq.recycler')
-        .eq('status', 'active')
-        .limit(20);
+        .or('organization_type.eq.transporter,organization_type.eq.recycler');
+      
+      const { data } = await (query as any).eq('status', 'active').limit(20);
 
       return (data || []).filter(o => !existingIds.has(o.id) && o.id !== organization.id).slice(0, 10);
     },
