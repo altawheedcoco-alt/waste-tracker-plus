@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, lazy, Suspense } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,8 @@ import {
   Radar,
 } from "recharts";
 import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
+
+const ESGAdvancedDashboard = lazy(() => import('@/components/esg/ESGAdvancedDashboard'));
 
 // معاملات الاستدامة البيئية
 const SUSTAINABILITY_METRICS = {
@@ -439,6 +441,11 @@ const EnvironmentalSustainability = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* ESG Advanced Dashboard */}
+        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+          <ESGAdvancedDashboard embedded />
+        </Suspense>
 
         {isLoading ? (
           <div className="flex justify-center py-12">
