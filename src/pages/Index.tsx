@@ -144,10 +144,15 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   cta: <CTA />,
 };
 
-// Fast redirect for authenticated users — check sessionStorage (tab isolation) first, then localStorage
+// Fast redirect for authenticated users — check both storages
 const AUTH_TOKEN_KEY = 'sb-dgununqfxohodimmgxuk-auth-token';
-const hasExistingSession = () => 
-  !!(sessionStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem('__tab_active_org_id'));
+const hasExistingSession = () => {
+  try {
+    if (sessionStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem('__tab_active_org_id')) return true;
+    const lsVal = localStorage.getItem(AUTH_TOKEN_KEY);
+    return !!(lsVal && lsVal.includes('access_token'));
+  } catch { return false; }
+};
 
 const Index = () => {
   // Early exit for authenticated users (PWA users opening app)
