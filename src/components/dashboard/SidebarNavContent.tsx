@@ -34,7 +34,7 @@ interface SidebarNavContentProps {
   isAdmin: boolean;
   isMobile: boolean;
   isSidebarOpen: boolean;
-  quickActionsType: string;
+  quickActionsType: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal' | 'consultant' | 'consulting_office';
   onSearchChange: (value: string) => void;
   onToggleSectionCollapse: (sectionId: string) => void;
   onSignOut: () => void;
