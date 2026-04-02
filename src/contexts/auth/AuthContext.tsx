@@ -213,7 +213,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
-      return data as Organization | null;
+      return data as unknown as Organization | null;
     } catch (error) {
       console.error('Error in fetchOrganization:', error);
       return null;
