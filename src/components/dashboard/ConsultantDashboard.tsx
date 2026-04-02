@@ -40,6 +40,9 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
+const ConsultantQuickFAB = lazy(() => import('@/components/consultant/ConsultantQuickFAB'));
+
+import ConsultantActiveProjects from '@/components/consultant/ConsultantActiveProjects';
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -403,11 +406,16 @@ const ConsultantDashboard = memo(() => {
           </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ConsultantActiveProjects
+              assignments={assignments}
+              selectedOrgId={selectedOrgId}
+              onSelectOrg={setSelectedOrgId}
+            />
             <PersonalSchedule assignments={assignments} selectedOrgId={selectedOrgId} />
-            <Suspense fallback={<LazyLoader />}>
-              <ConsultantAlertsWidget assignments={scopedAssignments} />
-            </Suspense>
           </div>
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantAlertsWidget assignments={scopedAssignments} />
+          </Suspense>
         </TabsContent>
 
         {/* ═══ العمليات الميدانية ═══ */}
@@ -583,6 +591,9 @@ const ConsultantDashboard = memo(() => {
 
       <Suspense fallback={null}>
         <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ConsultantQuickFAB onSetTab={setActiveTab} mode="individual" />
       </Suspense>
     </div>
   );

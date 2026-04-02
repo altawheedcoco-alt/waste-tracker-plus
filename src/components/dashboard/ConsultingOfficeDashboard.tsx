@@ -33,6 +33,9 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
+const ConsultantQuickFAB = lazy(() => import('@/components/consultant/ConsultantQuickFAB'));
+
+import OfficeWorkloadBalance from '@/components/consulting-office/OfficeWorkloadBalance';
 
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -365,8 +368,9 @@ const ConsultingOfficeDashboard = memo(() => {
             />
           </Suspense>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <TeamPerformance members={members} clients={clients} />
+            <OfficeWorkloadBalance members={members} clients={clients} />
             <OfficeTaskBoard members={members} />
           </div>
           <Suspense fallback={<LazyLoader />}>
@@ -449,6 +453,9 @@ const ConsultingOfficeDashboard = memo(() => {
       </Tabs>
       <Suspense fallback={null}>
         <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ConsultantQuickFAB onSetTab={setActiveTab} mode="office" />
       </Suspense>
     </div>
   );
