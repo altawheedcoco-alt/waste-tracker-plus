@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff, Video as VideoIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,6 +41,7 @@ import ChatQuickActions from './ChatQuickActions';
 import type { ActionType } from './ChatActionPanel';
 
 const EnhancedChatWidget = () => {
+  const navigate = useNavigate();
   const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
   const { isOrgOnline } = usePresence();
@@ -438,13 +440,23 @@ const EnhancedChatWidget = () => {
                   >
                     {pushPermission === 'granted' ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
                   </Button>
-                  {/* Create Group */}
+                  {/* Meetings - Group video/audio */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                    onClick={() => { navigate('/dashboard/meetings'); setIsOpen(false); }}
+                    title="اجتماعات جماعية (Meeting)"
+                  >
+                    <VideoIcon className="w-4 h-4" />
+                  </Button>
+                  {/* Create Group Chat */}
                   <Button
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
                     onClick={() => setShowCreateGroup(true)}
-                    title="إنشاء مجموعة"
+                    title="إنشاء مجموعة دردشة"
                   >
                     <Users className="w-4 h-4" />
                   </Button>
