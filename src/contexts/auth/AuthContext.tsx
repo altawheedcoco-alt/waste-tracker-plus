@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
 import { getCachedUserData, setCachedUserData, clearCachedUserData } from '@/lib/userCache';
+import { ORGANIZATION_SELECT, PROFILE_SELECT } from '@/lib/dbColumns';
 
 // Types
 export interface Profile {
@@ -203,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, email, phone, is_verified, is_active, commercial_register, environmental_license, representative_name, representative_national_id, representative_phone, logo_url, stamp_url, signature_url, can_create_shipments')
+        .select(ORGANIZATION_SELECT)
         .eq('id', orgId)
         .maybeSingle();
       
@@ -212,7 +213,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
-      return data as Organization | null;
+      return data as unknown as Organization | null;
     } catch (error) {
       console.error('Error in fetchOrganization:', error);
       return null;
@@ -225,7 +226,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const [profileResult, rolesResult] = await Promise.all([
         supabase
           .from('profiles')
-          .select('id, user_id, organization_id, active_organization_id, full_name, email, phone, avatar_url, is_active')
+          .select(PROFILE_SELECT)
           .eq('user_id', userId)
           .maybeSingle(),
         supabase
@@ -242,7 +243,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (profileData) {
-        setProfile(profileData as Profile);
+        setProfile(profileData as unknown as Profile);
 
         // Fetch organizations in background (non-blocking)
         fetchUserOrganizations(userId).then(orgs => {
@@ -252,7 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Determine which organization to load
         // Priority: tab-scoped sessionStorage > DB active_organization_id > profile organization_id
         const tabOrgId = sessionStorage.getItem('__tab_active_org_id');
-        const activeOrgId = tabOrgId || profileData.active_organization_id || profileData.organization_id;
+        const activeOrgId = tabOrgId || (profileData as any).active_organization_id || (profileData as any).organization_id;
         
         if (activeOrgId) {
           fetchOrganization(activeOrgId).then(org => {

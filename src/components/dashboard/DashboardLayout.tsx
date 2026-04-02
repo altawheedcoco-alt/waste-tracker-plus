@@ -9,6 +9,7 @@ import { useViewMode } from '@/contexts/ViewModeContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
+import { useRealtimeTable } from '@/hooks/useRealtimeSync';
 import LiveClock from './LiveClock';
 import {
   LayoutDashboard,
@@ -227,7 +228,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     };
   }, []);
 
-  // Fetch organization documents count
+  // Fetch organization documents count — realtime-invalidated
   const { data: documentsCount = 0 } = useQuery({
     queryKey: ['organization-documents-count', organization?.id],
     queryFn: async () => {
@@ -240,6 +241,12 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     },
     enabled: !!organization?.id,
     staleTime: 1000 * 60 * 5,
+  });
+
+  // Realtime: invalidate documents count on INSERT/DELETE
+  useRealtimeTable('organization_documents', ['organization-documents-count'], {
+    filter: organization?.id ? `organization_id=eq.${organization.id}` : undefined,
+    enabled: !!organization?.id,
   });
 
   // Check if legal data is complete
