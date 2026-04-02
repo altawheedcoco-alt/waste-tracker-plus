@@ -61,19 +61,18 @@ const GeneratorPartnersHub = () => {
     queryKey: ['generator-discover-partners', organization?.id, showDiscover],
     queryFn: async () => {
       if (!organization?.id) return [];
-      const existingIds = partners.map(p => p.id);
+      const existingIds = new Set(partners.map(p => p.id));
 
       const { data } = await supabase
         .from('organizations')
         .select('id, name, organization_type, city, phone')
         .in('organization_type', ['transporter', 'recycler'])
         .eq('status', 'active')
-        .not('id', 'in', `(${existingIds.length > 0 ? existingIds.join(',') : 'null'})`)
-        .limit(10);
+        .limit(20);
 
-      return data || [];
+      return (data || []).filter(o => !existingIds.has(o.id) && o.id !== organization.id).slice(0, 10);
     },
-    enabled: !!organization?.id && showDiscover && partners.length >= 0,
+    enabled: !!organization?.id && showDiscover,
     staleTime: 5 * 60 * 1000,
   });
 
