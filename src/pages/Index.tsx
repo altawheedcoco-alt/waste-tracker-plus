@@ -26,11 +26,11 @@ function lazyRetry<T extends React.ComponentType<any>>(
   });
 }
 
-// Critical above-fold: load eagerly
-import Header from "@/components/Header";
+// Critical above-fold: Header is large (600 lines) — lazy load it
+const Header = lazyRetry(() => import("@/components/Header"));
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
 
-import Hero from "@/components/Hero";
+const Hero = lazyRetry(() => import("@/components/Hero"));
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
 const LandingWrapper = lazyRetry(() => import("@/components/LandingWrapper"));
