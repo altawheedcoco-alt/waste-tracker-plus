@@ -234,11 +234,12 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       if (!organization?.id) return 0;
       const { count } = await supabase
         .from('organization_documents')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organization.id);
       return count || 0;
     },
     enabled: !!organization?.id,
+    staleTime: 1000 * 60 * 5,
   });
 
   // Check if legal data is complete
