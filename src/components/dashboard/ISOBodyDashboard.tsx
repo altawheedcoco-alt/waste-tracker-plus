@@ -158,6 +158,9 @@ const ISOBodyDashboard = memo(() => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
+          {/* Monthly Activity */}
+          <ISOMonthlyActivity audits={allAudits} />
+
           {/* Completion Rate */}
           <Card>
             <CardContent className="p-6 text-center">
