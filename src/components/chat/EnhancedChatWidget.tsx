@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff, Video as VideoIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
