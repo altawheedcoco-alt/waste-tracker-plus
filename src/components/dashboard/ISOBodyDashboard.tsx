@@ -302,7 +302,9 @@ const ISOBodyDashboard = memo(() => {
           </Card>
         </TabsContent>
       </Tabs>
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      <Suspense fallback={null}>
+        <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
     </div>
   );
 });
