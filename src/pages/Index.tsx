@@ -144,7 +144,26 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   cta: <CTA />,
 };
 
+// Fast redirect for authenticated users — avoids loading heavy homepage on PWA
+const AUTH_TOKEN_KEY = 'sb-dgununqfxohodimmgxuk-auth-token';
+const hasExistingSession = () => 
+  !!(sessionStorage.getItem('__tab_active_org_id') || localStorage.getItem(AUTH_TOKEN_KEY));
+
 const Index = () => {
+  // Early exit for authenticated users (PWA users opening app)
+  if (hasExistingSession()) {
+    window.location.replace('/dashboard');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return <HomepageContent />;
+};
+
+const HomepageContent = () => {
   useVisitorTracking();
   // Fetch homepage section config from DB
   const { data: sections } = useQuery({
