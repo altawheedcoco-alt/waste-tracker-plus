@@ -1,4 +1,5 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarPinnedItems from './SidebarPinnedItems';
+import SidebarRecentPages from './SidebarRecentPages';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
 import SidebarCustomizer from './SidebarCustomizer';
@@ -23,6 +25,7 @@ import DepositButton from '@/components/deposits/DepositButton';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import PlatformLogo from '@/components/common/PlatformLogo';
 import { AdminOrgSwitcherButton } from './AccountSwitcher';
+import { useRecentPages } from '@/hooks/useRecentPages';
 
 interface SidebarNavContentProps {
   menuItems: SidebarMenuItem[];
@@ -39,6 +42,20 @@ interface SidebarNavContentProps {
   onToggleSectionCollapse: (sectionId: string) => void;
   onSignOut: () => void;
   onCloseMobile?: () => void;
+}
+
+/** Flatten all navigable items for keyboard nav */
+function flattenItems(items: SidebarMenuItem[]): SidebarMenuItem[] {
+  const result: SidebarMenuItem[] = [];
+  for (const item of items) {
+    if (item.key.startsWith('__section__')) continue;
+    if (item.children) {
+      result.push(...item.children);
+    } else if (item.path && item.path !== '#') {
+      result.push(item);
+    }
+  }
+  return result;
 }
 
 /** Shared navigation content used by both desktop and mobile sidebars */
@@ -59,6 +76,13 @@ const SidebarNavContent = memo(({
   onCloseMobile,
 }: SidebarNavContentProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const { recentPages, clearRecent } = useRecentPages();
+
+  // Reset selection when search changes
+  useEffect(() => { setSelectedIndex(-1); }, [sidebarSearch]);
 
   // Filter menu items based on search
   const filteredMenuItems = useMemo(() => {
@@ -81,6 +105,36 @@ const SidebarNavContent = memo(({
     }, []);
   }, [menuItems, sidebarSearch]);
 
+  // Flat list for keyboard navigation
+  const flatResults = useMemo(() => {
+    if (!sidebarSearch.trim()) return [];
+    return flattenItems(filteredMenuItems);
+  }, [filteredMenuItems, sidebarSearch]);
+
+  // Keyboard navigation handler
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!sidebarSearch.trim() || flatResults.length === 0) return;
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.min(prev + 1, flatResults.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' && selectedIndex >= 0 && selectedIndex < flatResults.length) {
+      e.preventDefault();
+      const target = flatResults[selectedIndex];
+      if (target.path && target.path !== '#') {
+        navigate(target.path);
+        onSearchChange('');
+        onCloseMobile?.();
+      }
+    } else if (e.key === 'Escape') {
+      onSearchChange('');
+      searchInputRef.current?.blur();
+    }
+  }, [sidebarSearch, flatResults, selectedIndex, navigate, onSearchChange, onCloseMobile]);
+
   // Filter quick actions based on search
   const filteredQuickActions = useMemo(() => {
     if (!sidebarSearch.trim()) return quickActionItems;
@@ -91,6 +145,12 @@ const SidebarNavContent = memo(({
     );
   }, [quickActionItems, sidebarSearch]);
 
+  // Count search results
+  const searchResultCount = useMemo(() => {
+    if (!sidebarSearch.trim()) return 0;
+    return flatResults.length;
+  }, [sidebarSearch, flatResults]);
+
   return (
     <>
       {/* Search Box */}
@@ -98,8 +158,10 @@ const SidebarNavContent = memo(({
         <div className="relative">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
+            ref={searchInputRef}
             value={sidebarSearch}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder={t('sidebar.searchPlaceholder')}
             className={`pr-9 pl-8 ${isMobile ? 'h-11 text-sm rounded-xl border-border/40' : 'h-8 text-[13px] rounded-lg border-sidebar-border'} bg-muted/40`}
           />
@@ -112,8 +174,23 @@ const SidebarNavContent = memo(({
             </button>
           )}
         </div>
+        {/* Search results count */}
+        {sidebarSearch.trim() && (
+          <div className="mt-1.5 px-1">
+            <span className="text-[10px] text-muted-foreground">
+              {searchResultCount > 0
+                ? `${searchResultCount} ${t('common.results') || 'نتيجة'}`
+                : t('commandPalette.noResults')}
+            </span>
+            {searchResultCount > 0 && (
+              <span className="text-[10px] text-muted-foreground/50 mr-2">
+                — ↑↓ Enter
+              </span>
+            )}
+          </div>
+        )}
         {/* Sidebar Customizer - desktop only */}
-        {!isMobile && !isDriver && (
+        {!isMobile && !isDriver && !sidebarSearch && (
           <div className="flex items-center justify-between mt-2">
             <SidebarCustomizer
               trigger={
@@ -134,10 +211,16 @@ const SidebarNavContent = memo(({
           <SidebarPinnedItems pinnedItems={pinnedItems} isCollapsed={false} />
         )}
 
+        {/* Recent Pages — only when not searching */}
+        {!sidebarSearch && !isMobile && (
+          <SidebarRecentPages pages={recentPages} onClear={clearRecent} />
+        )}
+
         {/* Menu Items */}
         {filteredMenuItems.length > 0 ? (
           (() => {
             let isSectionHidden = false;
+            let flatIndex = -1;
 
             return filteredMenuItems.map((item: SidebarMenuItem) => {
               // Render section header
@@ -157,6 +240,19 @@ const SidebarNavContent = memo(({
               }
               // Skip groups in collapsed sections (but not when searching)
               if (isSectionHidden && !sidebarSearch) return null;
+
+              // Track keyboard selection for search results
+              if (sidebarSearch.trim() && item.children) {
+                // For groups in search, highlight selected child
+                return (
+                  <SidebarNavGroup
+                    key={item.key}
+                    item={item}
+                    isCollapsed={false}
+                  />
+                );
+              }
+
               return (
                 <SidebarNavGroup
                   key={item.key}
