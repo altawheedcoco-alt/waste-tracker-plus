@@ -85,12 +85,16 @@ const EnhancedChatWidget = () => {
     callInfo,
     localStream,
     remoteStream,
+    callMessages,
     startCall,
     answerCall,
     endCall,
     toggleMute,
     toggleVideo,
     toggleSpeaker,
+    toggleScreenShare,
+    toggleRecording,
+    sendCallMessage,
   } = useWebRTCCall();
 
   const handleStartCall = async (type: 'voice' | 'video') => {
@@ -674,11 +678,15 @@ const EnhancedChatWidget = () => {
           callInfo={callInfo}
           localStream={localStream}
           remoteStream={remoteStream}
+          callMessages={callMessages}
           onAnswer={answerCall}
           onEnd={() => endCall()}
           onToggleMute={toggleMute}
           onToggleVideo={toggleVideo}
           onToggleSpeaker={toggleSpeaker}
+          onToggleScreenShare={toggleScreenShare}
+          onToggleRecording={toggleRecording}
+          onSendMessage={sendCallMessage}
         />
       )}
     </>
