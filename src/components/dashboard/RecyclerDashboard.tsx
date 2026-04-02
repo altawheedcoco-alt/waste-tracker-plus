@@ -314,6 +314,7 @@ const RecyclerDashboard = () => {
           { value: 'esg', label: 'تقارير ESG', icon: Leaf, bindingType: RECYCLER_TAB_BINDINGS['esg']?.type },
           { value: 'wmis', label: 'WMIS', icon: AlertCircle, bindingType: RECYCLER_TAB_BINDINGS['wmis']?.type },
           { value: 'declarations', label: 'الإقرارات', icon: FileText, bindingType: RECYCLER_TAB_BINDINGS['declarations']?.type },
+          { value: 'containers', label: 'الحاويات', icon: Package, bindingType: RECYCLER_TAB_BINDINGS['containers']?.type },
         ] as TabItem[]} />
 
         <RecyclerOverviewTab
