@@ -9,6 +9,7 @@ import { useViewMode } from '@/contexts/ViewModeContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
+import { useRealtimeTable } from '@/hooks/useRealtimeSync';
 import LiveClock from './LiveClock';
 import {
   LayoutDashboard,
