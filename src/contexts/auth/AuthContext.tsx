@@ -253,7 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Determine which organization to load
         // Priority: tab-scoped sessionStorage > DB active_organization_id > profile organization_id
         const tabOrgId = sessionStorage.getItem('__tab_active_org_id');
-        const activeOrgId = tabOrgId || profileData.active_organization_id || profileData.organization_id;
+        const activeOrgId = tabOrgId || (profileData as any).active_organization_id || (profileData as any).organization_id;
         
         if (activeOrgId) {
           fetchOrganization(activeOrgId).then(org => {
