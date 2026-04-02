@@ -440,13 +440,23 @@ const EnhancedChatWidget = () => {
                   >
                     {pushPermission === 'granted' ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
                   </Button>
-                  {/* Create Group */}
+                  {/* Meetings - Group video/audio */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                    onClick={() => { navigate('/dashboard/meetings'); setIsOpen(false); }}
+                    title="اجتماعات جماعية (Meeting)"
+                  >
+                    <VideoIcon className="w-4 h-4" />
+                  </Button>
+                  {/* Create Group Chat */}
                   <Button
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
                     onClick={() => setShowCreateGroup(true)}
-                    title="إنشاء مجموعة"
+                    title="إنشاء مجموعة دردشة"
                   >
                     <Users className="w-4 h-4" />
                   </Button>
