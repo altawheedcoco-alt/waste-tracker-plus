@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ClickableImage from '@/components/ui/ClickableImage';
 import { 
   Phone, 
@@ -26,7 +27,8 @@ import {
   Receipt,
   MapPin,
   Stamp,
-  AtSign
+  AtSign,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -77,6 +79,7 @@ const ChatHeader = ({
   onShowPartnerInfo,
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [showWallpaper, setShowWallpaper] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   
