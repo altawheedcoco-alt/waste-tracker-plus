@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
-import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,73 +46,10 @@ import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
 import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { PenTool, X } from 'lucide-react';
+import { useShipmentList } from '@/hooks/useShipmentList';
+import { useQuery } from '@tanstack/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-interface Shipment {
-  id: string;
-  shipment_number: string;
-  status: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  pickup_address: string;
-  delivery_address: string;
-  pickup_date: string | null;
-  expected_delivery_date: string | null;
-  notes: string | null;
-  generator_notes: string | null;
-  recycler_notes: string | null;
-  waste_description: string | null;
-  hazard_level: string | null;
-  packaging_method: string | null;
-  disposal_method: string | null;
-  created_at: string;
-  approved_at: string | null;
-  collection_started_at: string | null;
-  in_transit_at: string | null;
-  delivered_at: string | null;
-  confirmed_at: string | null;
-  auto_approve_at: string | null;
-  manual_driver_name: string | null;
-  manual_vehicle_plate: string | null;
-  generator: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  transporter: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  recycler: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  driver: {
-    id: string;
-    license_number: string;
-    vehicle_type: string | null;
-    vehicle_plate: string | null;
-    profile: {
-      full_name: string;
-      phone: string | null;
-    };
-  } | null;
-}
 
 interface Organization {
   id: string;
@@ -126,6 +61,23 @@ const ShipmentManagement = () => {
   const { t } = useLanguage();
   const { user, organization } = useAuth();
   const { requireSubscription } = useRequireSubscription();
+
+  // ✅ Use shared hook instead of manual useEffect + useState
+  const { shipments: rawShipments, isLoading: loading, refetch } = useShipmentList({ role: 'all' });
+
+  // Fetch organizations for the create dialog
+  const { data: organizations = [] } = useQuery({
+    queryKey: ['organizations-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type')
+        .eq('is_active', true);
+      if (error) throw error;
+      return (data || []) as Organization[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   const wasteTypes = [
     { value: 'plastic', label: t('shipmentMgmt.plastic') },
@@ -162,9 +114,6 @@ const ShipmentManagement = () => {
     return disposalMethodsLabels[method] || method;
   };
 
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -182,123 +131,13 @@ const ShipmentManagement = () => {
     notes: '',
   });
   const [expandedShipments, setExpandedShipments] = useState<Set<string>>(new Set());
-  const [mapShipment, setMapShipment] = useState<Shipment | null>(null);
-  const [printShipment, setPrintShipment] = useState<Shipment | null>(null);
+  const [mapShipment, setMapShipment] = useState<any>(null);
+  const [printShipment, setPrintShipment] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchSignOpen, setBatchSignOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-    setupRealtimeSubscription();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch shipments with simplified relations to avoid FK issues
-      const { data: shipmentsData, error: shipmentsError } = await supabase
-        .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          status,
-          waste_type,
-          quantity,
-          unit,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          created_at,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          auto_approve_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          generator_id,
-          recycler_id,
-          transporter_id,
-          driver_id
-        `)
-        .order('created_at', { ascending: false });
-
-      if (shipmentsError) {
-        console.error('Shipments fetch error:', shipmentsError);
-        throw shipmentsError;
-      }
-
-      // Fetch organizations separately for better performance
-      const { data: orgsData, error: orgsError } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, email, phone, address, city, representative_name')
-        .eq('is_active', true);
-
-      if (orgsError) {
-        console.error('Organizations fetch error:', orgsError);
-        throw orgsError;
-      }
-
-      // Fetch drivers separately
-      const { data: driversData } = await supabase
-        .from('drivers')
-        .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)');
-
-      // Map organizations and drivers to shipments
-      const orgsMap = new Map(orgsData?.map(o => [o.id, o]) || []);
-      const driversMap = new Map(driversData?.map(d => [d.id, {
-        ...d,
-        profile: Array.isArray(d.profile) ? d.profile[0] : d.profile
-      }]) || []);
-
-      const enrichedShipments = (shipmentsData || []).map(shipment => ({
-        ...shipment,
-        generator: shipment.generator_id ? orgsMap.get(shipment.generator_id) || null : null,
-        transporter: shipment.transporter_id ? orgsMap.get(shipment.transporter_id) || null : null,
-        recycler: shipment.recycler_id ? orgsMap.get(shipment.recycler_id) || null : null,
-        driver: shipment.driver_id ? driversMap.get(shipment.driver_id) || null : null,
-      }));
-
-      setShipments(enrichedShipments as any);
-      setOrganizations(orgsData || []);
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: t('shipmentMgmt.errorLoading'),
-        description: error?.message || t('shipmentMgmt.unexpectedError'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel(getTabChannelName('shipments-changes'))
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'shipments' },
-        () => {
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
+  // Cast shipments for compatibility
+  const shipments = rawShipments as any[];
 
   const handleCreateShipment = async () => {
     // === SUBSCRIPTION CHECK ===
@@ -611,7 +450,7 @@ const ShipmentManagement = () => {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={() => fetchData()}
+              onClick={() => refetch()}
               disabled={loading}
               title={t('shipmentMgmt.refreshPage')}
               className="shrink-0"
@@ -695,8 +534,20 @@ const ShipmentManagement = () => {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="border rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-3/4" />
+                    <div className="flex gap-3">
+                      <Skeleton className="h-4 w-1/3" />
+                      <Skeleton className="h-4 w-1/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredShipments.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
@@ -736,7 +587,7 @@ const ShipmentManagement = () => {
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <ShipmentCard
                         shipment={shipment}
-                        onStatusChange={fetchData}
+                        onStatusChange={refetch}
                       />
                     </div>
                   </div>
@@ -802,7 +653,7 @@ const ShipmentManagement = () => {
         userId={user?.id || ''}
         onComplete={() => {
           setSelectedIds(new Set());
-          fetchData();
+          refetch();
         }}
       />
     </DashboardLayout>
