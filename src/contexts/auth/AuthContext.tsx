@@ -243,7 +243,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (profileData) {
-        setProfile(profileData as Profile);
+        setProfile(profileData as unknown as Profile);
 
         // Fetch organizations in background (non-blocking)
         fetchUserOrganizations(userId).then(orgs => {
