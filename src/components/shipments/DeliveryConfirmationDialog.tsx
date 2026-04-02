@@ -33,6 +33,10 @@ const DeliveryConfirmationDialog = ({
   const { organization, user } = useAuth();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [gpsLocation, setGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     receiverName: '',
     receiverNationalId: '',
@@ -40,6 +44,35 @@ const DeliveryConfirmationDialog = ({
     conditionNotes: '',
     notes: '',
   });
+
+  const captureGPS = () => {
+    if (!navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGpsLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGpsLoading(false);
+        toast.success('تم تحديد الموقع');
+      },
+      () => {
+        setGpsLoading(false);
+        toast.error('تعذر تحديد الموقع');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || photos.length >= 3) return;
+    for (const file of Array.from(files).slice(0, 3 - photos.length)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) setPhotos(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!organization?.id || !shipment?.id) return;
