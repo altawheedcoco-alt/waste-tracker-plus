@@ -273,6 +273,19 @@ const DriverDashboard = () => {
         </div>
       </div>
 
+      {/* Performance Strip */}
+      {driverInfo && (
+        <DriverPerformanceStrip
+          rating={driverInfo.rating}
+          totalTrips={driverInfo.total_trips}
+          acceptanceRate={driverInfo.acceptance_rate}
+          isVerified={driverInfo.is_verified}
+        />
+      )}
+
+      {/* Today Progress */}
+      <DriverTodayProgress shipments={shipments} />
+
       <DriverAssignmentAlert />
 
       <DriverDailySummary
