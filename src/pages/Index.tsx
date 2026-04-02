@@ -144,12 +144,14 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   cta: <CTA />,
 };
 
-// Fast redirect component for authenticated users (avoids loading heavy homepage)
-const AuthRedirect = memo(() => {
-  const hasSession = sessionStorage.getItem('__tab_active_org_id') || 
-    localStorage.getItem('sb-dgununqfxohodimmgxuk-auth-token');
-  
-  if (hasSession) {
+// Fast redirect for authenticated users — avoids loading heavy homepage on PWA
+const AUTH_TOKEN_KEY = 'sb-dgununqfxohodimmgxuk-auth-token';
+const hasExistingSession = () => 
+  !!(sessionStorage.getItem('__tab_active_org_id') || localStorage.getItem(AUTH_TOKEN_KEY));
+
+const Index = () => {
+  // Early exit for authenticated users (PWA users opening app)
+  if (hasExistingSession()) {
     window.location.replace('/dashboard');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -157,20 +159,11 @@ const AuthRedirect = memo(() => {
       </div>
     );
   }
-  return null;
-});
-AuthRedirect.displayName = 'AuthRedirect';
 
-const Index = () => {
-  // Check for authenticated session before loading heavy homepage
-  const hasSession = sessionStorage.getItem('__tab_active_org_id') || 
-    localStorage.getItem('sb-dgununqfxohodimmgxuk-auth-token');
-  
-  // Skip all homepage logic for authenticated users
-  if (hasSession) {
-    return <AuthRedirect />;
-  }
+  return <HomepageContent />;
+};
 
+const HomepageContent = () => {
   useVisitorTracking();
   // Fetch homepage section config from DB
   const { data: sections } = useQuery({
