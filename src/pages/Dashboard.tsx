@@ -43,8 +43,27 @@ const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizat
 const FloatingHealthButton = lazy(() => import('@/components/health/FloatingHealthButton'));
 
 const DashboardLoader = () => (
-  <div className="flex items-center justify-center py-20">
-    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  <div className="space-y-4 p-4 sm:p-6 animate-pulse">
+    {/* Skeleton header */}
+    <div className="flex items-center gap-3">
+      <div className="w-12 h-12 rounded-full bg-muted" />
+      <div className="space-y-2 flex-1">
+        <div className="h-4 w-1/3 bg-muted rounded" />
+        <div className="h-3 w-1/5 bg-muted rounded" />
+      </div>
+    </div>
+    {/* Skeleton stats cards */}
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {[1,2,3,4].map(i => (
+        <div key={i} className="h-24 rounded-xl bg-muted" />
+      ))}
+    </div>
+    {/* Skeleton content area */}
+    <div className="h-48 rounded-xl bg-muted" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="h-32 rounded-xl bg-muted" />
+      <div className="h-32 rounded-xl bg-muted" />
+    </div>
   </div>
 );
 
