@@ -499,6 +499,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserOrganizations([]);
       setRoles([]);
       sessionStorage.removeItem('__tab_active_org_id');
+      clearCachedUserData();
     }
   }, [user?.id]);
 
