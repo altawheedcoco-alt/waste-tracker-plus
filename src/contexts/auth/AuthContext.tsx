@@ -203,7 +203,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('organizations')
-        .select('*')
+        .select('id, name, organization_type, email, phone, is_verified, is_active, commercial_register, environmental_license, representative_name, representative_national_id, representative_phone, logo_url, stamp_url, signature_url, can_create_shipments')
         .eq('id', orgId)
         .maybeSingle();
       
