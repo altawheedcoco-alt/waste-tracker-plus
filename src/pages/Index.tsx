@@ -144,10 +144,10 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   cta: <CTA />,
 };
 
-// Fast redirect for authenticated users — avoids loading heavy homepage on PWA
+// Fast redirect for authenticated users — check sessionStorage (tab isolation) first, then localStorage
 const AUTH_TOKEN_KEY = 'sb-dgununqfxohodimmgxuk-auth-token';
 const hasExistingSession = () => 
-  !!(sessionStorage.getItem('__tab_active_org_id') || localStorage.getItem(AUTH_TOKEN_KEY));
+  !!(sessionStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem('__tab_active_org_id'));
 
 const Index = () => {
   // Early exit for authenticated users (PWA users opening app)
