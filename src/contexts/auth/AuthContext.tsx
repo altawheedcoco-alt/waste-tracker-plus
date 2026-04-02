@@ -258,8 +258,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           fetchOrganization(activeOrgId).then(org => {
             if (org) {
               setOrganization(org);
-              // Persist to this tab's session so it stays isolated
               sessionStorage.setItem('__tab_active_org_id', activeOrgId);
+              // Cache for instant PWA startup
+              setCachedUserData(profileData as any, org as any, rolesData?.map((r: UserRole) => r.role) || []);
             }
           });
         }
