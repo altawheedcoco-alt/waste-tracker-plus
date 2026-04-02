@@ -43,6 +43,7 @@ const Reports = lazyRetry(() => import('@/pages/dashboard/Reports'));
 const RecyclingCertificates = lazyRetry(() => import('@/pages/dashboard/RecyclingCertificates'));
 const OrgStructure = lazyRetry(() => import('@/pages/dashboard/OrgStructure'));
 const EmployeeTaskBoard = lazyRetry(() => import('@/pages/dashboard/EmployeeTaskBoard'));
+const Partners = lazyRetry(() => import('@/pages/dashboard/Partners'));
 const AdvancedAnalytics = lazyRetry(() => import('@/pages/dashboard/AdvancedAnalytics'));
 
 export const disposalRoutes = (

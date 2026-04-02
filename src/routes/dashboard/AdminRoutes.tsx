@@ -1,6 +1,8 @@
 import { Route, Navigate } from 'react-router-dom';
 import { lazyRetry } from './lazyRetry';
 
+const SupportCenter = lazyRetry(() => import('@/pages/dashboard/SupportCenter'));
+
 const AdminSystemOverview = lazyRetry(() => import('@/pages/dashboard/AdminSystemOverview'));
 const AdminRevenueManagement = lazyRetry(() => import('@/pages/dashboard/AdminRevenueManagement'));
 const NewsManager = lazyRetry(() => import('@/pages/dashboard/NewsManager'));
