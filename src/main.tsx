@@ -35,10 +35,11 @@ const bootstrapApp = async () => {
   const rootElement = document.getElementById("root");
   if (!rootElement) return;
 
+  // Remove loading indicators
   const initialLoader = document.getElementById('initial-loader');
-  if (initialLoader) {
-    initialLoader.remove();
-  }
+  if (initialLoader) initialLoader.remove();
+  const pwaSplash = document.getElementById('pwa-splash');
+  if (pwaSplash) pwaSplash.remove();
 
   if (!hasBackendEnv) {
     console.warn('Missing backend environment variables at startup; app will render with graceful fallbacks.');
