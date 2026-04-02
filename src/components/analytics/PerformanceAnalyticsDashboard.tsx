@@ -144,15 +144,15 @@ const PerformanceAnalyticsDashboard = () => {
   }
 
   const TrendIcon = ({ value }: { value: number }) => {
-    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-green-500" />;
-    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-red-500" />;
+    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />;
+    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-destructive" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
   const TrendBadge = ({ value, label }: { value: number; label: string }) => (
     <div className="flex items-center gap-1">
       <TrendIcon value={value} />
-      <span className={`text-xs font-medium ${value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+      <span className={`text-xs font-medium ${value > 0 ? 'text-emerald-600 dark:text-emerald-400' : value < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
         {value > 0 ? '+' : ''}{value}%
       </span>
       <span className="text-xs text-muted-foreground">{label}</span>
