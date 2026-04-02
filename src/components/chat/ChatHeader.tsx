@@ -144,10 +144,12 @@ const ChatHeader = ({
 
         {/* Left Side - Actions */}
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVideoCall}>
+          {/* 1-to-1 Video Call */}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVideoCall} title="مكالمة فيديو (1-to-1)">
             <Video className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVoiceCall}>
+          {/* 1-to-1 Voice Call */}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVoiceCall} title="مكالمة صوتية (1-to-1)">
             <Phone className="w-4 h-4" />
           </Button>
 
@@ -192,6 +194,10 @@ const ChatHeader = ({
                 )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/dashboard/meetings')} className="text-emerald-600">
+                <Users className="w-4 h-4 ml-2" />
+                اجتماع جماعي (Meeting)
+              </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 <Trash2 className="w-4 h-4 ml-2" />
                 {t('chat.deleteChat')}
