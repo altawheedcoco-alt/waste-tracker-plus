@@ -51,72 +51,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
-interface Shipment {
-  id: string;
-  shipment_number: string;
-  status: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  pickup_address: string;
-  delivery_address: string;
-  pickup_date: string | null;
-  expected_delivery_date: string | null;
-  notes: string | null;
-  generator_notes: string | null;
-  recycler_notes: string | null;
-  waste_description: string | null;
-  hazard_level: string | null;
-  packaging_method: string | null;
-  disposal_method: string | null;
-  created_at: string;
-  approved_at: string | null;
-  collection_started_at: string | null;
-  in_transit_at: string | null;
-  delivered_at: string | null;
-  confirmed_at: string | null;
-  auto_approve_at: string | null;
-  manual_driver_name: string | null;
-  manual_vehicle_plate: string | null;
-  generator: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  transporter: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  recycler: { 
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-  } | null;
-  driver: {
-    id: string;
-    license_number: string;
-    vehicle_type: string | null;
-    vehicle_plate: string | null;
-    profile: {
-      full_name: string;
-      phone: string | null;
-    };
-  } | null;
-}
-
 interface Organization {
   id: string;
   name: string;
@@ -127,6 +61,23 @@ const ShipmentManagement = () => {
   const { t } = useLanguage();
   const { user, organization } = useAuth();
   const { requireSubscription } = useRequireSubscription();
+
+  // ✅ Use shared hook instead of manual useEffect + useState
+  const { shipments: rawShipments, isLoading: loading, refetch } = useShipmentList({ role: 'all' });
+
+  // Fetch organizations for the create dialog
+  const { data: organizations = [] } = useQuery({
+    queryKey: ['organizations-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type')
+        .eq('is_active', true);
+      if (error) throw error;
+      return (data || []) as Organization[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   const wasteTypes = [
     { value: 'plastic', label: t('shipmentMgmt.plastic') },
@@ -163,143 +114,8 @@ const ShipmentManagement = () => {
     return disposalMethodsLabels[method] || method;
   };
 
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
-  const { toast } = useToast();
-
-  const [newShipment, setNewShipment] = useState({
-    generator_id: '',
-    transporter_id: '',
-    recycler_id: '',
-    waste_type: '',
-    quantity: '',
-    pickup_address: '',
-    delivery_address: '',
-    notes: '',
-  });
-  const [expandedShipments, setExpandedShipments] = useState<Set<string>>(new Set());
-  const [mapShipment, setMapShipment] = useState<Shipment | null>(null);
-  const [printShipment, setPrintShipment] = useState<Shipment | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [batchSignOpen, setBatchSignOpen] = useState(false);
-
-  useEffect(() => {
-    fetchData();
-    setupRealtimeSubscription();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch shipments with simplified relations to avoid FK issues
-      const { data: shipmentsData, error: shipmentsError } = await supabase
-        .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          status,
-          waste_type,
-          quantity,
-          unit,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          created_at,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          auto_approve_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          generator_id,
-          recycler_id,
-          transporter_id,
-          driver_id
-        `)
-        .order('created_at', { ascending: false });
-
-      if (shipmentsError) {
-        console.error('Shipments fetch error:', shipmentsError);
-        throw shipmentsError;
-      }
-
-      // Fetch organizations separately for better performance
-      const { data: orgsData, error: orgsError } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, email, phone, address, city, representative_name')
-        .eq('is_active', true);
-
-      if (orgsError) {
-        console.error('Organizations fetch error:', orgsError);
-        throw orgsError;
-      }
-
-      // Fetch drivers separately
-      const { data: driversData } = await supabase
-        .from('drivers')
-        .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)');
-
-      // Map organizations and drivers to shipments
-      const orgsMap = new Map(orgsData?.map(o => [o.id, o]) || []);
-      const driversMap = new Map(driversData?.map(d => [d.id, {
-        ...d,
-        profile: Array.isArray(d.profile) ? d.profile[0] : d.profile
-      }]) || []);
-
-      const enrichedShipments = (shipmentsData || []).map(shipment => ({
-        ...shipment,
-        generator: shipment.generator_id ? orgsMap.get(shipment.generator_id) || null : null,
-        transporter: shipment.transporter_id ? orgsMap.get(shipment.transporter_id) || null : null,
-        recycler: shipment.recycler_id ? orgsMap.get(shipment.recycler_id) || null : null,
-        driver: shipment.driver_id ? driversMap.get(shipment.driver_id) || null : null,
-      }));
-
-      setShipments(enrichedShipments as any);
-      setOrganizations(orgsData || []);
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: t('shipmentMgmt.errorLoading'),
-        description: error?.message || t('shipmentMgmt.unexpectedError'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel(getTabChannelName('shipments-changes'))
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'shipments' },
-        () => {
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
 
   const handleCreateShipment = async () => {
     // === SUBSCRIPTION CHECK ===
