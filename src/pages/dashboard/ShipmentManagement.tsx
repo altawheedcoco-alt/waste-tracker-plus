@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
-import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +46,9 @@ import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
 import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { PenTool, X } from 'lucide-react';
+import { useShipmentList } from '@/hooks/useShipmentList';
+import { useQuery } from '@tanstack/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 interface Shipment {
