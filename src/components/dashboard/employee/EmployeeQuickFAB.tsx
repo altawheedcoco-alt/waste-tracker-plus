@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Package, FileText, DollarSign, Users, ClipboardList, CalendarDays } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { useMyPermissions, type EmployeePermission } from '@/hooks/useMyPermissions';
 
 const EmployeeQuickFAB = () => {
   const [isOpen, setIsOpen] = useState(false);
