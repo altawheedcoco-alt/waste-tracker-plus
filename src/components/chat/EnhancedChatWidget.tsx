@@ -41,6 +41,7 @@ import ChatQuickActions from './ChatQuickActions';
 import type { ActionType } from './ChatActionPanel';
 
 const EnhancedChatWidget = () => {
+  const navigate = useNavigate();
   const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
   const { isOrgOnline } = usePresence();
