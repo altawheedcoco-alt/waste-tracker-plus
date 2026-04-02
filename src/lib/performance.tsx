@@ -48,7 +48,7 @@ LazyImage.displayName = 'LazyImage';
  */
 export const prefetchRoute = (path: string) => {
   const routeChunks: Record<string, () => Promise<unknown>> = {
-    '/dashboard': () => import('@/routes/DashboardRoutes'),
+    '/dashboard': () => import('@/routes/dashboard/CommonRoutes'),
     '/blog': () => import('@/pages/Blog'),
     '/about': () => import('@/pages/About'),
   };
