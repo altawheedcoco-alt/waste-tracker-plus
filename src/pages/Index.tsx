@@ -241,16 +241,16 @@ const HomepageContent = () => {
             </ErrorBoundary>
           )}
 
-          {/* v5.2 — How It Works (highest conversion impact) */}
+          {/* v5.2 — How It Works (highest conversion impact — priority load) */}
           <div id="how-it-works">
-            <LazySection minH={350}>
+            <LazySection minH={350} priority>
               <HowItWorksSection />
             </LazySection>
           </div>
 
-          {/* Live Platform Stats (social proof — early) */}
+          {/* Live Platform Stats (social proof — priority load) */}
           <div id="live-stats">
-            <LazySection minH={300}>
+            <LazySection minH={300} priority>
               <LivePlatformStats />
             </LazySection>
           </div>
