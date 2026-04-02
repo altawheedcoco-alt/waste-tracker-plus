@@ -1,13 +1,10 @@
 /**
  * ProactiveAlertsBanner - تنبيهات استباقية ذكية
- * يعرض تنبيهات بناءً على أنماط البيانات (شحنات متأخرة، حاويات ممتلئة، مستندات منتهية...)
+ * يعرض تنبيهات بناءً على أنماط البيانات
  */
 import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AlertTriangle, X, Clock, FileWarning, 
-  Truck, Trash2, ChevronLeft
-} from 'lucide-react';
+import { AlertTriangle, X, Clock, FileWarning, Truck, Trash2, ChevronLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,21 +13,19 @@ import { cn } from '@/lib/utils';
 
 interface ProactiveAlert {
   id: string;
-  type: 'overdue_shipment' | 'expiring_document' | 'full_container' | 'pending_invoice' | 'low_activity';
+  type: string;
   title: string;
   message: string;
   severity: 'warning' | 'critical' | 'info';
   actionPath?: string;
   actionLabel?: string;
-  count?: number;
 }
 
 const ALERT_ICONS: Record<string, typeof AlertTriangle> = {
   overdue_shipment: Truck,
-  expiring_document: FileWarning,
   full_container: Trash2,
   pending_invoice: Clock,
-  low_activity: AlertTriangle,
+  expiring_document: FileWarning,
 };
 
 const SEVERITY_STYLES: Record<string, string> = {
@@ -39,8 +34,19 @@ const SEVERITY_STYLES: Record<string, string> = {
   info: 'bg-primary/10 border-primary/30 text-primary',
 };
 
+async function countRows(table: string, orgId: string, extra?: Record<string, any>): Promise<number> {
+  let query = (supabase as any).from(table).select('id', { count: 'exact', head: true }).eq('organization_id', orgId);
+  if (extra) {
+    for (const [method, args] of Object.entries(extra)) {
+      query = query[method](...(Array.isArray(args) ? args : [args]));
+    }
+  }
+  const { count } = await query;
+  return count ?? 0;
+}
+
 const ProactiveAlertsBanner = memo(() => {
-  const { user, organization } = useAuth();
+  const { organization } = useAuth();
   const navigate = useNavigate();
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
@@ -48,86 +54,70 @@ const ProactiveAlertsBanner = memo(() => {
     queryKey: ['proactive-alerts', organization?.id],
     queryFn: async (): Promise<ProactiveAlert[]> => {
       if (!organization?.id) return [];
+      const orgId = organization.id;
       const results: ProactiveAlert[] = [];
 
-      // 1. Check overdue shipments
+      // 1. Overdue shipments (>7 days old, not delivered/cancelled)
       const cutoff7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const overdueRes = await supabase.rpc('get_count_query', {} as any).throwOnError().catch(() => null);
-      // Use simple single-filter queries to avoid TS deep instantiation
-      const { count: overdueCount } = await supabase
-        .from('shipments')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', organization.id)
-        .lt('created_at', cutoff7d) as { count: number | null };
-
-      if (overdueCount && overdueCount > 0) {
+      const overdueCount = await countRows('shipments', orgId, {
+        lt: ['created_at', cutoff7d],
+        neq: ['status', 'delivered'],
+      });
+      if (overdueCount > 0) {
         results.push({
           id: 'overdue-shipments',
           type: 'overdue_shipment',
           title: 'شحنات متأخرة',
-          message: `${overdueCount} شحنة مر عليها أكثر من 7 أيام بدون تحديث`,
+          message: `${overdueCount} شحنة مر عليها أكثر من 7 أيام`,
           severity: overdueCount > 5 ? 'critical' : 'warning',
           actionPath: '/dashboard/shipments',
           actionLabel: 'عرض الشحنات',
-          count: overdueCount,
         });
       }
 
-      // 2. Check full containers
-      const { count: fullContainers } = await supabase
-        .from('containers')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', organization.id)
-        .gte('fill_level', 80) as { count: number | null };
-
-      if (fullContainers && fullContainers > 0) {
+      // 2. Full containers (>=80%)
+      const fullCount = await countRows('containers', orgId, {
+        gte: ['fill_level', 80],
+      });
+      if (fullCount > 0) {
         results.push({
           id: 'full-containers',
           type: 'full_container',
           title: 'حاويات ممتلئة',
-          message: `${fullContainers} حاوية وصلت نسبة امتلائها إلى 80% أو أكثر`,
+          message: `${fullCount} حاوية وصلت 80%+ امتلاء`,
           severity: 'warning',
           actionPath: '/dashboard/containers',
           actionLabel: 'إدارة الحاويات',
-          count: fullContainers,
         });
       }
 
-      // 3. Check pending invoices (unpaid > 30 days)
+      // 3. Old pending invoices (>30 days)
       const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { count: pendingInvoices } = await supabase
-        .from('invoices')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', organization.id)
-        .lt('created_at', cutoff30d) as { count: number | null };
-
-      if (pendingInvoices && pendingInvoices > 0) {
+      const invoiceCount = await countRows('invoices', orgId, {
+        lt: ['created_at', cutoff30d],
+        eq: ['status', 'pending'],
+      });
+      if (invoiceCount > 0) {
         results.push({
           id: 'pending-invoices',
           type: 'pending_invoice',
           title: 'فواتير معلقة',
-          message: `${pendingInvoices} فاتورة معلقة لأكثر من 30 يوم`,
-          severity: pendingInvoices > 3 ? 'critical' : 'warning',
+          message: `${invoiceCount} فاتورة معلقة لأكثر من 30 يوم`,
+          severity: invoiceCount > 3 ? 'critical' : 'warning',
           actionPath: '/dashboard/accounting',
           actionLabel: 'عرض الفواتير',
-          count: pendingInvoices,
         });
       }
 
       return results;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 10 * 60 * 1000,
     enabled: !!organization?.id,
   });
 
   const visibleAlerts = alerts.filter(a => !dismissedIds.has(a.id));
-
   if (visibleAlerts.length === 0) return null;
-
-  const dismiss = (id: string) => {
-    setDismissedIds(prev => new Set(prev).add(id));
-  };
 
   return (
     <div className="space-y-1 px-2 sm:px-4 py-1" dir="rtl">
@@ -153,15 +143,15 @@ const ProactiveAlertsBanner = memo(() => {
               {alert.actionPath && (
                 <button
                   onClick={() => navigate(alert.actionPath!)}
-                  className="shrink-0 flex items-center gap-1 text-xs font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
+                  className="shrink-0 flex items-center gap-1 text-xs font-medium underline underline-offset-2 hover:opacity-80"
                 >
                   {alert.actionLabel}
                   <ChevronLeft className="w-3 h-3" />
                 </button>
               )}
               <button
-                onClick={() => dismiss(alert.id)}
-                className="shrink-0 p-1 rounded-full hover:bg-foreground/10 transition-colors"
+                onClick={() => setDismissedIds(prev => new Set(prev).add(alert.id))}
+                className="shrink-0 p-1 rounded-full hover:bg-foreground/10"
                 aria-label="إخفاء"
               >
                 <X className="w-3.5 h-3.5" />
