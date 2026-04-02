@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSovereignGovernance } from '@/hooks/useSovereignGovernance';
+import { useSovereignRealtime } from '@/hooks/useSovereignRealtime';
 import SovereignOverviewCard from './SovereignOverviewCard';
 
 const SovereignRolesPanel = lazy(() => import('./SovereignRolesPanel'));
@@ -25,6 +26,7 @@ const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 const SovereignGovernanceDashboard = () => {
   const [activeTab, setActiveTab] = useState('kpis');
   const { criticalAlerts, roles, delegations, decisions, isLoading } = useSovereignGovernance();
+  useSovereignRealtime();
 
   const tabs = [
     { value: 'kpis', label: 'المؤشرات', icon: BarChart3 },

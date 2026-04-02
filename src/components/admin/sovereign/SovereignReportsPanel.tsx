@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Sparkles, Download, Clock, CheckCircle2, Eye } from 'lucide-react';
+import { FileText, Sparkles, Download, CheckCircle2, Eye } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,6 +55,26 @@ const SovereignReportsPanel = () => {
   const publishedCount = reports?.filter((r: any) => r.status === 'published').length || 0;
   const draftCount = reports?.filter((r: any) => r.status === 'draft').length || 0;
 
+  const exportCSV = () => {
+    if (!reports || reports.length === 0) return;
+    const headers = ['العنوان', 'النوع', 'الحالة', 'الملخص', 'التاريخ'];
+    const rows = reports.map((r: any) => [
+      r.title,
+      REPORT_TYPES.find(rt => rt.value === r.report_type)?.label || r.report_type,
+      r.status,
+      (r.summary || '').replace(/,/g, ' '),
+      format(new Date(r.created_at), 'yyyy-MM-dd HH:mm'),
+    ]);
+    const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sovereign-reports-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4" dir="rtl">
       <div className="flex items-center justify-between">
@@ -72,6 +92,9 @@ const SovereignReportsPanel = () => {
           <Button size="sm" onClick={handleGenerate} disabled={generating} className="bg-gradient-to-l from-purple-600 to-blue-600">
             <Sparkles className="w-4 h-4 ml-1" />
             {generating ? 'جاري التوليد...' : 'توليد تقرير'}
+          </Button>
+          <Button size="sm" variant="outline" onClick={exportCSV} disabled={!reports || reports.length === 0}>
+            <Download className="w-4 h-4 ml-1" />تصدير
           </Button>
         </div>
       </div>

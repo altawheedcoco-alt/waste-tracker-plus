@@ -107,6 +107,28 @@ const SovereignOverviewCard = () => {
             <p className="text-[9px] text-muted-foreground">بانتظار</p>
           </div>
         </div>
+
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/30 overflow-x-auto scrollbar-hide">
+          {[
+            { label: 'تقرير سريع', icon: '📊', tab: 'reports' },
+            { label: 'فحص أمني', icon: '🔒', tab: 'security' },
+            { label: 'التنبيهات', icon: '⚡', tab: 'early-warning' },
+            { label: 'الأزمات', icon: '🚨', tab: 'crisis' },
+          ].map(action => (
+            <button
+              key={action.tab}
+              onClick={() => {
+                const tabEl = document.querySelector(`[data-state][value="${action.tab}"]`) as HTMLElement;
+                tabEl?.click();
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted/50 hover:bg-muted text-[10px] font-medium whitespace-nowrap transition-colors"
+            >
+              <span>{action.icon}</span>
+              <span>{action.label}</span>
+            </button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
