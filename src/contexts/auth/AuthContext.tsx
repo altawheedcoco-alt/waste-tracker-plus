@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
+import { getCachedUserData, setCachedUserData, clearCachedUserData } from '@/lib/userCache';
 
 // Types
 export interface Profile {
@@ -168,12 +169,15 @@ export const useAuth = () => {
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Initialize from local cache for instant PWA startup
+  const cached = useMemo(() => getCachedUserData(), []);
+  
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(cached?.profile as Profile | null);
+  const [organization, setOrganization] = useState<Organization | null>(cached?.organization as Organization | null);
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>(cached?.roles || []);
   const [loading, setLoading] = useState(true);
   const [switchingOrganization, setSwitchingOrganization] = useState(false);
 
@@ -254,8 +258,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           fetchOrganization(activeOrgId).then(org => {
             if (org) {
               setOrganization(org);
-              // Persist to this tab's session so it stays isolated
               sessionStorage.setItem('__tab_active_org_id', activeOrgId);
+              // Cache for instant PWA startup
+              setCachedUserData(profileData as any, org as any, rolesData?.map((r: UserRole) => r.role) || []);
             }
           });
         }
@@ -494,6 +499,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserOrganizations([]);
       setRoles([]);
       sessionStorage.removeItem('__tab_active_org_id');
+      clearCachedUserData();
     }
   }, [user?.id]);
 

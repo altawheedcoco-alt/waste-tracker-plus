@@ -101,7 +101,7 @@ export function useFirebaseMessaging() {
       const messaging = await getFirebaseMessaging();
       if (!messaging) return;
 
-      unsubscribe = onMessage(messaging, (payload) => {
+      unsubscribe = await onMessage(messaging, (payload) => {
         console.log('[FCM] Foreground message:', payload);
         const title = payload.notification?.title || 'iRecycle';
         const body = payload.notification?.body || '';

@@ -12,7 +12,7 @@ const Hero = memo(() => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
 
-  // Real stats from DB
+  // Real stats from DB — deferred to avoid blocking initial paint
   const { data: liveStats } = useQuery({
     queryKey: ['hero-live-stats'],
     queryFn: async () => {
@@ -27,7 +27,8 @@ const Hero = memo(() => {
         users: users.count ?? 0,
       };
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30, // Cache 30 min (was 10)
+    gcTime: 1000 * 60 * 60,
   });
 
   // Animated counters based on real data
