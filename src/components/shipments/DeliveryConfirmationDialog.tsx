@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, Upload, Pen } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Upload, Camera, MapPin, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -32,6 +33,10 @@ const DeliveryConfirmationDialog = ({
   const { organization, user } = useAuth();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [gpsLocation, setGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     receiverName: '',
     receiverNationalId: '',
@@ -39,6 +44,35 @@ const DeliveryConfirmationDialog = ({
     conditionNotes: '',
     notes: '',
   });
+
+  const captureGPS = () => {
+    if (!navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGpsLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGpsLoading(false);
+        toast.success('تم تحديد الموقع');
+      },
+      () => {
+        setGpsLoading(false);
+        toast.error('تعذر تحديد الموقع');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || photos.length >= 3) return;
+    for (const file of Array.from(files).slice(0, 3 - photos.length)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) setPhotos(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!organization?.id || !shipment?.id) return;
@@ -154,6 +188,65 @@ const DeliveryConfirmationDialog = ({
               rows={2}
               className="text-sm"
             />
+          </div>
+
+          {/* Photo Capture */}
+          <div className="space-y-1.5">
+            <Label className="text-xs flex items-center gap-1"><Camera className="w-3.5 h-3.5" /> صور إثبات التسليم (اختياري)</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              className="hidden"
+              onChange={handlePhotoCapture}
+            />
+            <div className="flex gap-2 flex-wrap">
+              {photos.map((p, i) => (
+                <div key={i} className="relative w-16 h-16 rounded border overflow-hidden">
+                  <img src={p} className="w-full h-full object-cover" alt={`صورة ${i + 1}`} />
+                  <button
+                    type="button"
+                    onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute top-0 left-0 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {photos.length < 3 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-16 h-16"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* GPS Location */}
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={captureGPS}
+              disabled={gpsLoading}
+              className="text-xs"
+            >
+              <MapPin className="w-3.5 h-3.5 ml-1" />
+              {gpsLoading ? 'جاري التحديد...' : 'تحديد الموقع'}
+            </Button>
+            {gpsLocation && (
+              <Badge variant="secondary" className="text-[10px]">
+                📍 {gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}
+              </Badge>
+            )}
           </div>
 
           <div className="flex gap-2 pt-2">

@@ -42943,6 +42943,88 @@ export type Database = {
           },
         ]
       }
+      vehicle_inspections: {
+        Row: {
+          created_at: string
+          defects_found: Json | null
+          driver_id: string | null
+          fuel_level: string | null
+          gps_location: Json | null
+          id: string
+          inspection_items: Json
+          inspection_type: string
+          inspector_user_id: string | null
+          next_inspection_date: string | null
+          notes: string | null
+          odometer_reading: number | null
+          organization_id: string
+          photos: Json | null
+          status: string
+          updated_at: string
+          vehicle_plate: string
+        }
+        Insert: {
+          created_at?: string
+          defects_found?: Json | null
+          driver_id?: string | null
+          fuel_level?: string | null
+          gps_location?: Json | null
+          id?: string
+          inspection_items?: Json
+          inspection_type?: string
+          inspector_user_id?: string | null
+          next_inspection_date?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          organization_id: string
+          photos?: Json | null
+          status?: string
+          updated_at?: string
+          vehicle_plate: string
+        }
+        Update: {
+          created_at?: string
+          defects_found?: Json | null
+          driver_id?: string | null
+          fuel_level?: string | null
+          gps_location?: Json | null
+          id?: string
+          inspection_items?: Json
+          inspection_type?: string
+          inspector_user_id?: string | null
+          next_inspection_date?: string | null
+          notes?: string | null
+          odometer_reading?: number | null
+          organization_id?: string
+          photos?: Json | null
+          status?: string
+          updated_at?: string
+          vehicle_plate?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_inspections_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_maintenance: {
         Row: {
           cost: number | null

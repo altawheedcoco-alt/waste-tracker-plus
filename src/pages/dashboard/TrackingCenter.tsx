@@ -162,10 +162,9 @@ const TrackingCenter = () => {
     const ot = orgType as string;
     if (ot !== 'transporter' && ot !== 'transport_office' && !isAdmin) return;
 
-    let query = supabase.from('drivers').select(`
-      id, license_number, vehicle_type, vehicle_plate, is_available,
-      profile:user_id(full_name, phone)
-    `);
+    let query = (supabase.from('drivers') as any).select(
+      'id, license_number, vehicle_type, vehicle_plate, is_available, profile:user_id(full_name, phone)'
+    );
     if (!isAdmin && orgId) query = query.eq('organization_id', orgId);
 
     const { data } = await query.limit(50);
