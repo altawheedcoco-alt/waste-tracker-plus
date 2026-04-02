@@ -36,6 +36,9 @@ import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
+const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQuality'));
+const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
+const RecyclerQuickFAB = lazy(() => import('./recycler/RecyclerQuickFAB'));
 
 interface RecentShipment {
   id: string;
@@ -277,6 +280,20 @@ const RecyclerDashboard = () => {
       {/* 2. مركز القيادة */}
       <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
+      {/* ★ جودة الواردات + مخرجات التدوير */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <ErrorBoundary fallbackTitle="خطأ في فحص الجودة">
+          <Suspense fallback={<div className="h-48 bg-muted/30 rounded-xl animate-pulse" />}>
+            <RecyclerIncomingQuality />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في مخرجات التدوير">
+          <Suspense fallback={<div className="h-48 bg-muted/30 rounded-xl animate-pulse" />}>
+            <RecyclerProductionOutput />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
       {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid
         actions={quickActions}
@@ -342,6 +359,11 @@ const RecyclerDashboard = () => {
         />
       )}
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
+
+      {/* FAB — زر عائم للمدوّر */}
+      <Suspense fallback={null}>
+        <RecyclerQuickFAB />
+      </Suspense>
     </div>
   );
 };
