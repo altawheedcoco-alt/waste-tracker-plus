@@ -12,17 +12,18 @@
 - [x] توجيه مبكر للمستخدمين المسجلين (قبل React)
 - [x] تحميل ديناميكي للمسارات حسب الدور في App.tsx
 
-## المرحلة 2: تحسين DashboardLayout وتجربة Dashboard
-- [ ] تقسيم DashboardLayout.tsx (1196 سطر → مكونات أصغر)
-- [ ] تحسين تحميل الويدجات العائمة
-- [ ] تقليل عدد الأيقونات المستوردة (80+ أيقونة في ملف واحد)
-- [ ] تحسين القائمة الجانبية (Sidebar)
+## المرحلة 2: تحسين DashboardLayout وتجربة Dashboard ✅ مكتملة
+- [x] تقسيم DashboardLayout.tsx (1196 سطر → 533 سطر + 3 مكونات مستخرجة)
+- [x] استخراج DashboardHeader.tsx (101 سطر)
+- [x] استخراج SidebarNavContent.tsx (262 سطر)
+- [x] استخراج DashboardUserMenu.tsx (218 سطر)
+- [x] تحسين تحميل الويدجات العائمة (lazy loading)
+- [x] تقليل عدد الأيقونات المستوردة
 
-## المرحلة 3: تحسين الصفحة الرئيسية
-- [ ] تقليل أقسام Homepage (35 قسم lazy-loaded)
-- [ ] تحسين ترتيب المحتوى للتحويل (Conversion)
-- [ ] تقليل استعلامات قاعدة البيانات عند التحميل
-- [ ] تحسين SEO
+## المرحلة 3: تحسين الصفحة الرئيسية ✅ مكتملة
+- [x] إضافة priority loading للأقسام الأولى (HowItWorks, LiveStats)
+- [x] تحسين LazySection بـ rootMargin أكبر (400px) وتأثير بصري أفضل
+- [x] تحسين Suspense fallback بتأثير animate-pulse
 
 ## المرحلة 4: مراجعة لوحات التحكم
 - [ ] السائق (DriverDashboard)
