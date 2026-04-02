@@ -450,7 +450,7 @@ const ShipmentManagement = () => {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={() => fetchData()}
+              onClick={() => refetch()}
               disabled={loading}
               title={t('shipmentMgmt.refreshPage')}
               className="shrink-0"
@@ -575,7 +575,7 @@ const ShipmentManagement = () => {
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <ShipmentCard
                         shipment={shipment}
-                        onStatusChange={fetchData}
+                        onStatusChange={refetch}
                       />
                     </div>
                   </div>
@@ -641,7 +641,7 @@ const ShipmentManagement = () => {
         userId={user?.id || ''}
         onComplete={() => {
           setSelectedIds(new Set());
-          fetchData();
+          refetch();
         }}
       />
     </DashboardLayout>
