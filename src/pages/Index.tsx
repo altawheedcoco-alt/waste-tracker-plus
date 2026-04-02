@@ -26,11 +26,10 @@ function lazyRetry<T extends React.ComponentType<any>>(
   });
 }
 
-// Critical above-fold: Header is large (600 lines) — lazy load it
+// Critical above-fold: Header + Hero load together for fast first paint
 const Header = lazyRetry(() => import("@/components/Header"));
-import EnableNotificationsButton from "@/components/EnableNotificationsButton";
-
 const Hero = lazyRetry(() => import("@/components/Hero"));
+import EnableNotificationsButton from "@/components/EnableNotificationsButton";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
 const LandingWrapper = lazyRetry(() => import("@/components/LandingWrapper"));
@@ -81,26 +80,26 @@ const FAQSection = lazyRetry(() => import("@/components/landing/FAQSection"));
 const BlogPreviewSection = lazyRetry(() => import("@/components/landing/BlogPreviewSection"));
 
 /** Renders children when the container scrolls into view — with proper placeholder height */
-const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
+const LazySection = memo(({ children, minH = 200, priority = false }: { children: React.ReactNode; minH?: number; priority?: boolean }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(priority); // priority sections render immediately
 
   useEffect(() => {
+    if (priority) return;
     const el = ref.current;
     if (!el) return;
-    // Use requestIdleCallback to observe after paint
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '300px' }
+      { rootMargin: '400px' } // Increased from 300px for smoother scroll
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [priority]);
 
   return (
     <div ref={ref} style={{ minHeight: visible ? undefined : `${minH}px` }}>
       {visible ? (
-        <Suspense fallback={<div style={{ minHeight: `${minH}px` }} />}>
+        <Suspense fallback={<div style={{ minHeight: `${minH}px` }} className="animate-pulse bg-muted/20 rounded-xl" />}>
           {children}
         </Suspense>
       ) : null}
@@ -242,16 +241,16 @@ const HomepageContent = () => {
             </ErrorBoundary>
           )}
 
-          {/* v5.2 — How It Works (highest conversion impact) */}
+          {/* v5.2 — How It Works (highest conversion impact — priority load) */}
           <div id="how-it-works">
-            <LazySection minH={350}>
+            <LazySection minH={350} priority>
               <HowItWorksSection />
             </LazySection>
           </div>
 
-          {/* Live Platform Stats (social proof — early) */}
+          {/* Live Platform Stats (social proof — priority load) */}
           <div id="live-stats">
-            <LazySection minH={300}>
+            <LazySection minH={300} priority>
               <LivePlatformStats />
             </LazySection>
           </div>
