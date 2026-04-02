@@ -52,13 +52,13 @@ const PerformanceAnalyticsDashboard = () => {
 
         const { data: shipments, count } = await supabase
           .from('shipments')
-          .select('id, total_price, actual_weight, status, created_at', { count: 'exact' })
-          .eq('organization_id', orgId!)
+          .select('id, total_value, actual_weight, status, created_at', { count: 'exact' })
+          .eq('transporter_id', orgId!)
           .gte('created_at', start)
           .lte('created_at', end)
           .limit(500);
 
-        const totalRevenue = shipments?.reduce((s, sh) => s + (Number(sh.total_price) || 0), 0) || 0;
+        const totalRevenue = shipments?.reduce((s, sh) => s + (Number(sh.total_value) || 0), 0) || 0;
         const totalWeight = shipments?.reduce((s, sh) => s + (Number(sh.actual_weight) || 0), 0) || 0;
         const delivered = shipments?.filter(s => s.status === 'delivered').length || 0;
         const total = count || 0;
@@ -253,7 +253,7 @@ const PerformanceAnalyticsDashboard = () => {
                 stroke="hsl(var(--primary))"
                 fill="hsl(var(--primary) / 0.2)"
                 strokeWidth={2}
-                strokeDasharray={(d: any) => d?.isForecast ? '5 5' : '0'}
+                strokeDasharray="0"
               />
               <Area
                 type="monotone"
