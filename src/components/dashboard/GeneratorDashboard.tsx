@@ -322,12 +322,22 @@ const GeneratorDashboard = () => {
       {/* 2. مركز القيادة */}
       <GeneratorCommandCenter />
 
+      {/* 2.5 مسار الشحنات البصري */}
+      <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-xl" />}>
+        <ShipmentStatusPipeline />
+      </Suspense>
+
       {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid
         actions={quickActions}
         title={t('dashboard.quickActions')}
         subtitle={t('dashboard.quickActionsSubtitle')}
       />
+
+      {/* 3.5 تسجيل مخلفات سريع */}
+      <Suspense fallback={null}>
+        <QuickWasteLogEntry />
+      </Suspense>
 
       {/* 4. ملخص العمليات اليومية */}
       <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
