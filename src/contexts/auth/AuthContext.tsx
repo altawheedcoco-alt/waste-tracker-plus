@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
 import { getCachedUserData, setCachedUserData, clearCachedUserData } from '@/lib/userCache';
+import { ORGANIZATION_SELECT, PROFILE_SELECT } from '@/lib/dbColumns';
 
 // Types
 export interface Profile {
