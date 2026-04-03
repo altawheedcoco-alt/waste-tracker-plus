@@ -1,11 +1,13 @@
 import { lazy, Suspense } from "react";
 import BackButton from '@/components/ui/back-button';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel")
 );
 
 export default function C2BManagement() {
   return (
+    <DashboardLayout>
     <div className="space-y-6">
         <BackButton />
       <div>
@@ -16,5 +18,6 @@ export default function C2BManagement() {
         <AdminC2BPanel />
       </Suspense>
     </div>
-  );
+  )</DashboardLayout>
+  ));
 }
