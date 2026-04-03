@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CURRENT_TERMS_VERSION, OrganizationType } from '@/data/organizationTermsContent';
+import { useTermsContent } from '@/hooks/useTermsContent';
 
 interface TermsAcceptance {
   id: string;
@@ -16,12 +17,19 @@ interface TermsAcceptance {
 
 export const useTermsAcceptance = () => {
   const { user, organization } = useAuth();
+  const { data: termsContent, isLoading: termsContentLoading } = useTermsContent(organization?.organization_type || '');
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [acceptance, setAcceptance] = useState<TermsAcceptance | null>(null);
+  const currentTermsVersion = termsContent?.version || CURRENT_TERMS_VERSION;
 
   useEffect(() => {
     const checkTerms = async () => {
+      if (termsContentLoading) {
+        setLoading(true);
+        return;
+      }
+
       if (!user || !organization) {
         setHasAcceptedTerms(null);
         setLoading(false);
@@ -34,7 +42,7 @@ export const useTermsAcceptance = () => {
           .select('*')
           .eq('user_id', user.id)
           .eq('organization_id', organization.id)
-          .eq('terms_version', CURRENT_TERMS_VERSION)
+          .eq('terms_version', currentTermsVersion)
           .maybeSingle();
 
         if (error) {
@@ -56,7 +64,7 @@ export const useTermsAcceptance = () => {
     };
 
     checkTerms();
-  }, [user, organization]);
+  }, [user, organization, currentTermsVersion, termsContentLoading]);
 
   const markAsAccepted = () => {
     setHasAcceptedTerms(true);
@@ -66,7 +74,7 @@ export const useTermsAcceptance = () => {
 
   return {
     hasAcceptedTerms,
-    loading,
+    loading: loading || termsContentLoading,
     acceptance,
     markAsAccepted,
     organizationType,
