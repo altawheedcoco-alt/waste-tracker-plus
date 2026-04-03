@@ -51,18 +51,16 @@ export default function ComplianceTracker() {
     queryFn: async (): Promise<ComplianceItem[]> => {
       if (!orgId) return [];
 
-      // Use organization metadata to simulate compliance tracking
-      // Since there's no dedicated licenses table, we derive from org data
       const { data: org } = await supabase
         .from('organizations')
-        .select('license_number, license_expiry, created_at')
+        .select('commercial_register, environmental_license, eeaa_license_expiry_date, env_approval_expiry, ida_license, ida_license_expiry_date, hazardous_certified, tax_card_number')
         .eq('id', orgId)
         .single();
 
       const now = new Date();
 
-      const buildItem = (key: string, name: string, hasLicense: boolean, expiryDate?: string | null): ComplianceItem => {
-        if (!hasLicense) return { id: key, name, status: 'missing' };
+      const buildItem = (key: string, name: string, hasIt: boolean, expiryDate?: string | null): ComplianceItem => {
+        if (!hasIt) return { id: key, name, status: 'missing' };
         if (!expiryDate) return { id: key, name, status: 'valid' };
         const expiry = new Date(expiryDate);
         const daysRemaining = Math.ceil((expiry.getTime() - now.getTime()) / 86400000);
@@ -72,16 +70,13 @@ export default function ComplianceTracker() {
         return { id: key, name, status, expiryDate, daysRemaining };
       };
 
-      const hasLicense = !!org?.license_number;
-      const expiry = org?.license_expiry || null;
-
       return [
-        buildItem('environmental_license', 'الترخيص البيئي', hasLicense, expiry),
-        buildItem('waste_transport_license', 'ترخيص نقل المخلفات', hasLicense, expiry),
-        buildItem('commercial_register', 'السجل التجاري', true), // assumed present
-        buildItem('tax_card', 'البطاقة الضريبية', true),
-        buildItem('industrial_license', 'الترخيص الصناعي', hasLicense, expiry),
-        buildItem('safety_certificate', 'شهادة السلامة', false),
+        buildItem('environmental_license', 'الترخيص البيئي', !!org?.environmental_license, org?.eeaa_license_expiry_date),
+        buildItem('env_approval', 'الموافقة البيئية', !!org?.environmental_license, org?.env_approval_expiry),
+        buildItem('commercial_register', 'السجل التجاري', !!org?.commercial_register),
+        buildItem('tax_card', 'البطاقة الضريبية', !!org?.tax_card_number),
+        buildItem('ida_license', 'ترخيص هيئة التنمية الصناعية', !!org?.ida_license, org?.ida_license_expiry_date),
+        buildItem('hazardous_cert', 'شهادة المخلفات الخطرة', !!org?.hazardous_certified),
         buildItem('quality_certificate', 'شهادة الجودة ISO', false),
       ];
     },
