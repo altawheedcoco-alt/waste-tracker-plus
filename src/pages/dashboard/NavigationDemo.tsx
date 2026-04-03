@@ -587,6 +587,7 @@ const NavigationDemo = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className={`min-h-screen bg-gradient-to-br from-background to-muted ${showFullscreen ? 'fixed inset-0 z-50' : ''}`} dir="rtl">
       {/* Header */}
       {!showFullscreen && (
