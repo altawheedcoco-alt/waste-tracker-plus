@@ -171,6 +171,9 @@ const DriverDashboard = () => {
   const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<DriverShipment | null>(null);
   const [activeFieldTool, setActiveFieldTool] = useState<string>('checklist');
 
+  const hasActiveShipment = activeShipments.length > 0;
+  const smartLocation = useDriverSmartLocation(driverInfo?.id, hasActiveShipment);
+
   const { pendingOffer, acceptOffer, rejectOffer, counterOffer } = useDriverOffers();
 
   const quickActions = useQuickActions({
