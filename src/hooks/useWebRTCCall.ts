@@ -274,6 +274,26 @@ export function useWebRTCCall() {
       const callId = record?.id || crypto.randomUUID();
       callRecordIdRef.current = callId;
 
+      // Send push notification to receiver (background support)
+      const pushTargetUserId = receiverUserId;
+      if (pushTargetUserId) {
+        supabase.functions.invoke('send-push', {
+          body: {
+            user_id: pushTargetUserId,
+            title: type === 'video' ? '📹 مكالمة فيديو واردة' : '📞 مكالمة صوتية واردة',
+            body: `${insertData.caller_name} يتصل بك`,
+            tag: `call-${callId}`,
+            data: {
+              url: '/dashboard/chat',
+              type: 'incoming_call',
+              call_id: callId,
+              call_type: type,
+              caller_name: insertData.caller_name,
+            },
+          },
+        }).catch(() => {/* non-blocking */});
+      }
+
       setCallInfo({
         callId,
         callType: type,
