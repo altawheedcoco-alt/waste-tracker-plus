@@ -40,6 +40,8 @@ const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQu
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
 const MaterialRecoveryRate = lazy(() => import('./recycler/MaterialRecoveryRate'));
 const QualityControlPanel = lazy(() => import('./recycler/QualityControlPanel'));
+const InventoryLevelsWidget = lazy(() => import('./recycler/InventoryLevelsWidget'));
+const ProfitabilityAnalysis = lazy(() => import('./recycler/ProfitabilityAnalysis'));
 
 interface RecentShipment {
   id: string;
