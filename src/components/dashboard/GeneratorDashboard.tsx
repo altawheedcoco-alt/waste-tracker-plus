@@ -82,6 +82,7 @@ const ShipmentStatusPipeline = lazy(() => import('./generator/ShipmentStatusPipe
 const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
 const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
 const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
+const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
 
 
 interface RecentShipment {
