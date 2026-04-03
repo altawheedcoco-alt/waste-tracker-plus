@@ -22,6 +22,9 @@ const ComplianceTracker = lazy(() => import('@/components/analytics/ComplianceTr
 const DailyPulseWidget = lazy(() => import('@/components/dashboard/shared/DailyPulseWidget'));
 const OrganizationTimeline = lazy(() => import('@/components/analytics/OrganizationTimeline'));
 const BenchmarkIndicator = lazy(() => import('@/components/analytics/BenchmarkIndicator'));
+const RevenueForecast = lazy(() => import('@/components/analytics/RevenueForecast'));
+const WorkPatternAnalysis = lazy(() => import('@/components/analytics/WorkPatternAnalysis'));
+const QuickKPIStrip = lazy(() => import('@/components/dashboard/shared/QuickKPIStrip'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -30,6 +33,11 @@ const AdvancedAnalytics = () => {
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
         <BackButton />
+
+        {/* Quick KPI Strip */}
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
+          <QuickKPIStrip />
+        </Suspense>
 
         {/* Daily Pulse */}
         <Suspense fallback={<CardSkeleton />}>
