@@ -33,6 +33,7 @@ const ApiManagement = () => {
   const apiBaseUrl = `${window.location.origin.replace('id-preview--', '')}/functions/v1/public-api`;
 
   return (
+    <DashboardLayout>
           <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
