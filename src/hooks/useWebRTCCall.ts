@@ -238,19 +238,27 @@ export function useWebRTCCall() {
   }, [callInfo?.callId, callInfo?.state, user?.id]);
 
   // Start outgoing call
-  const startCall = useCallback(async (partnerOrgId: string, type: CallType, partnerName: string, partnerLogo?: string | null) => {
+  const startCall = useCallback(async (partnerOrgId: string, type: CallType, partnerName: string, partnerLogo?: string | null, receiverUserId?: string) => {
     if (!user || !organization || callInfo) return;
 
     try {
       const stream = await getMediaStream(type);
       
-      const { data: record } = await supabase.from('call_records').insert({
+      const callerProfile = await getCachedProfile(user.id);
+      const insertData: any = {
         caller_id: user.id,
         caller_org_id: organization.id,
         receiver_org_id: partnerOrgId,
         call_type: type,
         status: 'ringing',
-      }).select('id').single();
+        caller_name: callerProfile?.full_name || 'مستخدم',
+        caller_avatar_url: callerProfile?.avatar_url,
+        receiver_name: partnerName,
+        receiver_avatar_url: partnerLogo,
+      };
+      if (receiverUserId) insertData.receiver_user_id = receiverUserId;
+      
+      const { data: record } = await supabase.from('call_records').insert(insertData).select('id').single();
 
       const callId = record?.id || crypto.randomUUID();
       callRecordIdRef.current = callId;
