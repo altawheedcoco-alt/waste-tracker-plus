@@ -186,6 +186,36 @@ const AdvancedAnalytics = () => {
             <ShipmentVelocityTracker />
           </Suspense>
         </div>
+
+        {/* AI: Anomaly Detection + Live Alerts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <AnomalyDetectionWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <LiveAlertsDashboard />
+          </Suspense>
+        </div>
+
+        {/* Fleet + Predictive Maintenance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <FleetUtilizationWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PredictiveMaintenanceWidget />
+          </Suspense>
+        </div>
+
+        {/* Inventory Turnover + Export Center */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <InventoryTurnoverWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ExportCenterWidget />
+          </Suspense>
+        </div>
       </div>
     </DashboardLayout>
   );
