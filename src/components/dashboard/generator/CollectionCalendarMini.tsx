@@ -23,7 +23,7 @@ const CollectionCalendarMini = () => {
         .select('id, pickup_date, waste_type, status, transporter_id')
         .eq('generator_id', organization.id)
         .in('status', ['new', 'approved', 'collecting'])
-        .order('scheduled_date', { ascending: true })
+        .order('pickup_date', { ascending: true })
         .limit(5);
       return data || [];
     },
