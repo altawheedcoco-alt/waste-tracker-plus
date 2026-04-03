@@ -37,12 +37,14 @@ export const useTermsAcceptance = () => {
       }
 
       try {
+        // Check for ANY accepted version (not just current) to avoid repeated prompts
         const { data, error } = await supabase
           .from('terms_acceptances')
           .select('*')
           .eq('user_id', user.id)
           .eq('organization_id', organization.id)
-          .eq('terms_version', currentTermsVersion)
+          .order('accepted_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         if (error) {
