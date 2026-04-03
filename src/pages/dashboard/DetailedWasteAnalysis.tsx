@@ -579,6 +579,7 @@ const DetailedWasteAnalysis = () => {
         )}
       </AnimatePresence>
     </div>
+    </DashboardLayout>
   );
 };
 
