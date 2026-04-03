@@ -94,8 +94,21 @@ const CallHistory = () => {
 
   const getPartnerInfo = (call: CallRecord) => {
     const dir = getCallDirection(call);
-    if (dir === 'outgoing') return { name: call.receiver_name || 'مستخدم', avatar: call.receiver_avatar_url, orgId: call.receiver_org_id };
-    return { name: call.caller_name || 'مستخدم', avatar: call.caller_avatar_url, orgId: call.caller_org_id };
+    if (dir === 'outgoing') {
+      return {
+        name: call.receiver_name || 'مستخدم',
+        avatar: call.receiver_avatar_url,
+        orgId: call.receiver_org_id,
+        userId: call.receiver_user_id || undefined,
+      };
+    }
+
+    return {
+      name: call.caller_name || 'مستخدم',
+      avatar: call.caller_avatar_url,
+      orgId: call.caller_org_id,
+      userId: call.caller_id || undefined,
+    };
   };
 
   const getStatusText = (call: CallRecord) => {
@@ -111,7 +124,7 @@ const CallHistory = () => {
   const handleCallback = async (call: CallRecord) => {
     const partner = getPartnerInfo(call);
     try {
-      await startCall(partner.orgId, call.call_type as any, partner.name, partner.avatar);
+      await startCall(partner.orgId, call.call_type as any, partner.name, partner.avatar, partner.userId);
     } catch (err: any) {
       toast.error(err.message || 'فشل بدء المكالمة');
     }
