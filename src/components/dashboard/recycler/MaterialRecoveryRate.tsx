@@ -19,7 +19,7 @@ const MaterialRecoveryRate = () => {
       if (!organization?.id) return null;
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('actual_weight, estimated_weight, waste_type, status')
+        .select('actual_weight, quantity, waste_type, status')
         .eq('recycler_id', organization.id)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
