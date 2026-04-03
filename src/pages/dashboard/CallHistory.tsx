@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Phone, PhoneIncoming, PhoneOutgoing, PhoneMissed, Video, Clock, PhoneCall, ArrowLeft, RotateCcw } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Phone, PhoneIncoming, PhoneOutgoing, PhoneMissed, Video, PhoneCall } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useGlobalCall } from '@/providers/GlobalCallProvider';
@@ -47,11 +46,7 @@ const CallHistory = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'outgoing' | 'incoming' | 'missed'>('all');
 
-  useEffect(() => {
-    fetchCalls();
-  }, [organization?.id]);
-
-  const fetchCalls = async () => {
+  const fetchCalls = useCallback(async () => {
     if (!organization?.id) return;
     setLoading(true);
 
@@ -64,7 +59,34 @@ const CallHistory = () => {
 
     setCalls((data as CallRecord[]) || []);
     setLoading(false);
-  };
+  }, [organization?.id]);
+
+  useEffect(() => {
+    fetchCalls();
+  }, [fetchCalls]);
+
+  // Realtime updates
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    const channel = supabase
+      .channel('call-history-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'call_records',
+        filter: `caller_org_id=eq.${organization.id}`,
+      }, () => fetchCalls())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'call_records',
+        filter: `receiver_org_id=eq.${organization.id}`,
+      }, () => fetchCalls())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [organization?.id, fetchCalls]);
 
   const getCallDirection = (call: CallRecord) => {
     return (call.caller_id === user?.id || call.caller_org_id === organization?.id) ? 'outgoing' : 'incoming';
@@ -102,7 +124,6 @@ const CallHistory = () => {
         userId: call.receiver_user_id || undefined,
       };
     }
-
     return {
       name: call.caller_name || 'مستخدم',
       avatar: call.caller_avatar_url,
@@ -141,7 +162,6 @@ const CallHistory = () => {
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
         <BackButton />
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <PhoneCall className="w-5 h-5 text-primary" />
@@ -152,7 +172,6 @@ const CallHistory = () => {
           </div>
         </div>
 
-        {/* Stats cards */}
         <div className="grid grid-cols-4 gap-2">
           {filters.map(f => (
             <button
@@ -172,7 +191,6 @@ const CallHistory = () => {
           ))}
         </div>
 
-        {/* Call list */}
         <Card>
           <CardContent className="p-0">
             {loading ? (

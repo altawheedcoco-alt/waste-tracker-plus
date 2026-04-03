@@ -323,9 +323,19 @@ export function useWebRTCCall() {
 
       setTimeout(createAndSendOffer, 1500);
 
-      setTimeout(() => {
+      // Auto-timeout after 45 seconds if no answer
+      const timeoutId = setTimeout(() => {
         setCallInfo(prev => {
           if (prev?.state === 'calling' || prev?.state === 'ringing') {
+            // Update DB status to missed before cleanup
+            if (callRecordIdRef.current) {
+              supabase.from('call_records').update({
+                status: 'missed',
+                ended_at: new Date().toISOString(),
+                end_reason: 'no_answer',
+                duration_seconds: 0,
+              }).eq('id', callRecordIdRef.current).then(() => {});
+            }
             endCall('no_answer');
             return null;
           }
