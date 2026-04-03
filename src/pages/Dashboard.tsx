@@ -211,6 +211,7 @@ const Dashboard = () => {
           </>
         </PinVerificationGate>
     </SubscriptionGuard>
+    </GlobalCallProvider>
     </>
   );
 };
