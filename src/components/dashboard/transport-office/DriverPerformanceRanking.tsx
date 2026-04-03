@@ -46,36 +46,17 @@ const DriverPerformanceRanking = () => {
         .select('id, full_name')
         .in('id', driverIds);
 
-      if (!links?.length) return [];
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.full_name]));
 
-      // حساب أداء كل سائق
-      const rankings = await Promise.all(
-        links.map(async (link: any) => {
-          const { count: totalTrips } = await supabase
-            .from('shipments')
-            .select('*', { count: 'exact', head: true })
-            .eq('driver_id', link.driver_id)
-            .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-          const { count: completedTrips } = await supabase
-            .from('shipments')
-            .select('*', { count: 'exact', head: true })
-            .eq('driver_id', link.driver_id)
-            .in('status', ['delivered', 'confirmed'])
-            .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-          const rate = (totalTrips || 0) > 0 ? Math.round(((completedTrips || 0) / (totalTrips || 1)) * 100) : 0;
-
-          return {
-            id: link.driver_id,
-            name: (link.profiles as any)?.full_name || 'سائق',
-            trips: totalTrips || 0,
-            completionRate: rate,
-          };
-        })
-      );
-
-      return rankings.sort((a, b) => b.completionRate - a.completionRate || b.trips - a.trips).slice(0, 5);
+      return Array.from(driverMap.entries())
+        .map(([id, stats]) => ({
+          id,
+          name: profileMap.get(id) || 'سائق',
+          trips: stats.total,
+          completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
+        }))
+        .sort((a, b) => b.completionRate - a.completionRate || b.trips - a.trips)
+        .slice(0, 5);
     },
     enabled: !!organization?.id,
     staleTime: 1000 * 60 * 10,
