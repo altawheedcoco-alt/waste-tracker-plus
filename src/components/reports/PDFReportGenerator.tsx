@@ -104,7 +104,7 @@ export default function PDFReportGenerator() {
       totalShipments, completed, completionRate: totalShipments > 0 ? Math.round((completed / totalShipments) * 100) : 0,
       totalTons: Math.round(totalTons * 100) / 100,
       income: Math.round(income), expense: Math.round(expense), net: Math.round(income - expense),
-      activePartners: partners.filter(p => p.status === 'active').length,
+      activePartners: partners.filter(p => p.is_active).length,
       totalPartners: partners.length,
       wasteBreakdown,
       co2Saved: Math.round(totalTons * 0.8 * 100) / 100,
