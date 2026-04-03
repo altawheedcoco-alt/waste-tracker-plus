@@ -52,6 +52,7 @@ export function useTermsContent(organizationType: string) {
 
       return null;
     },
+    enabled: !!organizationType,
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
   });
 }

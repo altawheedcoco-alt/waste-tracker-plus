@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
+import { useTermsContent } from '@/hooks/useTermsContent';
 import { supabase } from '@/integrations/supabase/client';
 import { CURRENT_TERMS_VERSION } from '@/data/organizationTermsContent';
 import { Button } from '@/components/ui/button';
@@ -26,10 +27,12 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
   const navigate = useNavigate();
   const { user, organization } = useAuth();
   const { hasAcceptedTerms, loading } = useTermsAcceptance();
+  const { data: termsContent } = useTermsContent(organization?.organization_type || '');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const currentTermsVersion = termsContent?.version || CURRENT_TERMS_VERSION;
 
   const allAccepted = acceptedTerms && acceptedPolicies && acceptedDisclaimer;
 
@@ -44,7 +47,7 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
         organization_type: organization.organization_type,
         organization_name: organization.name,
         full_name: user.user_metadata?.full_name || user.email || '',
-        terms_version: CURRENT_TERMS_VERSION,
+        terms_version: currentTermsVersion,
         accepted_at: new Date().toISOString(),
         ip_address: null,
       });
@@ -52,7 +55,7 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
       if (error) throw error;
 
       toast.success('تم قبول اتفاقية الاستخدام بنجاح', {
-        description: `الإصدار ${CURRENT_TERMS_VERSION} — تم التسجيل في سجل المراجعة`,
+        description: `الإصدار ${currentTermsVersion} — تم التسجيل في سجل المراجعة`,
       });
 
       setTimeout(() => navigate('/dashboard'), 1500);
@@ -75,7 +78,7 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
           </div>
           <div>
             <h2 className="text-xl font-black text-foreground">اتفاقية الاستخدام</h2>
-            <p className="text-xs text-muted-foreground">Usage Agreement — الإصدار {CURRENT_TERMS_VERSION}</p>
+            <p className="text-xs text-muted-foreground">Usage Agreement — الإصدار {currentTermsVersion}</p>
           </div>
         </div>
       </div>
@@ -231,7 +234,7 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
               ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5" />
-                  قبول اتفاقية الاستخدام — الإصدار {CURRENT_TERMS_VERSION}
+                  قبول اتفاقية الاستخدام — الإصدار {currentTermsVersion}
                 </>
               )}
             </Button>
@@ -249,7 +252,7 @@ const UsageAgreementAcceptance = ({ currentPage, className }: UsageAgreementAcce
             <CheckCircle2 className="w-6 h-6 text-primary shrink-0" />
             <div>
               <p className="text-sm font-bold text-foreground">تم قبول اتفاقية الاستخدام</p>
-              <p className="text-xs text-muted-foreground">الإصدار {CURRENT_TERMS_VERSION} — مسجل في سجل المراجعة</p>
+              <p className="text-xs text-muted-foreground">الإصدار {currentTermsVersion} — مسجل في سجل المراجعة</p>
             </div>
           </div>
         )}
