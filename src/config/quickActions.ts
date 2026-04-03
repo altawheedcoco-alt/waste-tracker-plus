@@ -281,7 +281,54 @@ export const driverQuickActions: QuickActionConfig[] = [
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات حسابك', icon: Settings, onClick: 'openSettings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
 ];
 
+// ============= CONSULTANT QUICK ACTIONS =============
+// المستشار: التركيز على التدقيق والتقييم والتقارير الاستشارية
+export const consultantQuickActions: QuickActionConfig[] = [
+  // 1️⃣ حرج يومي - التدقيق والتقييم
+  { id: 'audit-sessions', title: 'جلسات التدقيق', subtitle: 'إدارة جلسات التدقيق والمراجعة', icon: CheckCircle2, path: '/dashboard/audit-sessions', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  { id: 'consultant-reports', title: 'التقارير الاستشارية', subtitle: 'إنشاء وإدارة التقارير', icon: FileText, path: '/dashboard/consultant-reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'primary' },
+  { id: 'compliance-assessment', title: 'تقييم الامتثال', subtitle: 'تقييم امتثال الجهات للمعايير', icon: Shield, path: '/dashboard/compliance-assessment', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'consultant-clients', title: 'العملاء', subtitle: 'إدارة ملفات العملاء', icon: Building2, path: '/dashboard/consultant-clients', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'primary' },
+  { id: 'consultant-certifications', title: 'الشهادات', subtitle: 'إصدار وإدارة الشهادات', icon: FolderCheck, path: '/dashboard/consultant-certifications', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح والتحقق من المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+
+  // 2️⃣ مهم أسبوعي
+  { id: 'safety', title: 'السلامة المهنية', subtitle: 'تقييم معايير السلامة', icon: HardHat, path: '/dashboard/safety', iconBgClass: 'bg-gradient-to-br from-red-500 to-rose-600', category: 'secondary' },
+  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
+  { id: 'partners', title: 'الشركاء', subtitle: 'الجهات المرتبطة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
+  { id: 'contracts', title: 'العقود', subtitle: 'عقود الاستشارات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
+
+  // 3️⃣ أدوات وإدارة
+  { id: 'consultant-portal', title: 'بوابة الاستشاري', subtitle: 'إدارة حسابك الاستشاري', icon: User, path: '/dashboard/consultant-portal', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
+  { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
+];
+
+// ============= CONSULTING OFFICE QUICK ACTIONS =============
+// مكتب الاستشارات: التركيز على إدارة الفريق والمهام والعملاء
+export const consultingOfficeQuickActions: QuickActionConfig[] = [
+  // 1️⃣ حرج يومي - الفريق والمهام
+  { id: 'office-tasks', title: 'المهام', subtitle: 'إدارة مهام الفريق', icon: ClipboardList, path: '/dashboard/office-tasks', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  { id: 'office-consultants', title: 'الفريق', subtitle: 'إدارة فريق الاستشاريين', icon: Users, path: '/dashboard/office-consultants', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'primary' },
+  { id: 'audit-sessions', title: 'جلسات التدقيق', subtitle: 'إدارة جلسات التدقيق', icon: CheckCircle2, path: '/dashboard/audit-sessions', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'office-reports', title: 'التقارير', subtitle: 'إنشاء وإدارة التقارير', icon: FileText, path: '/dashboard/consultant-reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'primary' },
+  { id: 'office-clients', title: 'العملاء', subtitle: 'إدارة ملفات العملاء', icon: Building2, path: '/dashboard/consultant-clients', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
+  { id: 'office-certifications', title: 'الشهادات', subtitle: 'إصدار الشهادات', icon: FolderCheck, path: '/dashboard/consultant-certifications', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+
+  // 2️⃣ مهم أسبوعي
+  { id: 'office-performance', title: 'أداء الفريق', subtitle: 'تقييم أداء الاستشاريين', icon: BarChart3, path: '/dashboard/office-performance', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'secondary' },
+  { id: 'compliance-assessment', title: 'تقييم الامتثال', subtitle: 'تقييم امتثال الجهات', icon: Shield, path: '/dashboard/compliance-assessment', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
+  { id: 'contracts', title: 'العقود', subtitle: 'عقود المكتب', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
+  { id: 'partners', title: 'الشركاء', subtitle: 'الجهات المرتبطة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
+
+  // 3️⃣ أدوات وإدارة
+  { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
+  { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
+];
+
 // ============= HELPER FUNCTIONS =============
+
 
 /**
  * Get quick actions by user type
