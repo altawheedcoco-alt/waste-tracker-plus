@@ -30,6 +30,7 @@ function lazyRetry<T extends React.ComponentType<any>>(
 const Header = lazyRetry(() => import("@/components/Header"));
 const Hero = lazyRetry(() => import("@/components/Hero"));
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
+import NativePushTestButton from "@/components/pwa/NativePushTestButton";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
 const LandingWrapper = lazyRetry(() => import("@/components/LandingWrapper"));
