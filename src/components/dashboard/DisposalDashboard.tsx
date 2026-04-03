@@ -327,6 +327,8 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Suspense fallback={null}><LandfillCapacityMonitor /></Suspense>
         <Suspense fallback={null}><SafetyComplianceWidget /></Suspense>
+        <Suspense fallback={null}><EnvironmentalImpactWidget /></Suspense>
+        <Suspense fallback={null}><MaintenanceScheduleWidget /></Suspense>
       </div>
 
       {/* 3. الإجراءات السريعة */}

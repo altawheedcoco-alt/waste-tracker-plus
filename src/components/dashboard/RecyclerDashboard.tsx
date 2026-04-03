@@ -301,6 +301,8 @@ const RecyclerDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Suspense fallback={null}><MaterialRecoveryRate /></Suspense>
         <Suspense fallback={null}><QualityControlPanel /></Suspense>
+        <Suspense fallback={null}><InventoryLevelsWidget /></Suspense>
+        <Suspense fallback={null}><ProfitabilityAnalysis /></Suspense>
       </div>
 
       {/* 3. الإجراءات السريعة */}

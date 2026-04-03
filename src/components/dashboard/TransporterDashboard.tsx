@@ -348,6 +348,7 @@ const TransporterDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Suspense fallback={null}><FuelEfficiencyTracker /></Suspense>
         <Suspense fallback={null}><DriverAvailabilityBoard /></Suspense>
+        <Suspense fallback={null}><RoutePerformanceWidget /></Suspense>
       </div>
 
       {/* 7. التواصل */}
