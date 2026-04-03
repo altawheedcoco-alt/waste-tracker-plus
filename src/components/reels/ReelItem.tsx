@@ -375,7 +375,12 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
 
       {/* Mute toggle */}
       <button
-        onClick={() => setIsMuted(!isMuted)}
+        onClick={() => {
+          if (!userInteracted) setUserInteracted(true);
+          const next = !isMuted;
+          setIsMuted(next);
+          if (videoRef.current) videoRef.current.muted = next;
+        }}
         className="absolute top-14 right-4 z-20 w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform"
       >
         {isMuted ? <VolumeX className="w-4 h-4 text-white/80" /> : <Volume2 className="w-4 h-4 text-white/80" />}
