@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -13,29 +14,21 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Package,
-  Truck,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  ExternalLink,
-  Sparkles,
-  Clock,
-  FileText,
-  Building2,
-  User,
-  ArrowLeftRight,
-  Download,
-  Printer,
-  Eye,
-  Scale,
-  Tag,
+  Package, Truck, CheckCircle, AlertCircle, Info, ExternalLink, Sparkles,
+  Clock, FileText, Building2, User, ArrowLeftRight, Download, Printer,
+  Eye, Scale, Tag, MessageCircle, Send, Phone, Car, PenTool, Wallet,
+  Handshake, BarChart3, Shield, ClipboardCheck, Key, Leaf, Wrench,
+  Recycle, MapPin, Globe,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeShipment, normalizeRelation } from '@/lib/supabaseHelpers';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBranding } from '@/hooks/useBranding';
 import DocumentVerificationPanel from './DocumentVerificationPanel';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 interface Notification {
   id: string;
@@ -57,9 +50,11 @@ interface SenderReceiverInfo {
   senderName: string | null;
   senderType: string | null;
   senderLogo: string | null;
+  senderSubtitle: string | null;
   receiverName: string | null;
   receiverType: string | null;
   receiverLogo: string | null;
+  receiverSubtitle: string | null;
 }
 
 interface NotificationDetailDialogProps {
@@ -73,86 +68,36 @@ interface NotificationDetailDialogProps {
 }
 
 const getNotificationIcon = (type: string | null) => {
-  switch (type) {
-    case 'shipment_created':
-    case 'shipment':
-      return Package;
-    case 'shipment_status':
-    case 'status_update':
-    case 'shipment_assigned':
-      return Truck;
-    case 'driver_assignment':
-      return Truck;
-    case 'shipment_approved':
-    case 'shipment_delivered':
-      return CheckCircle;
-    case 'recycling_report':
-    case 'report':
-    case 'certificate':
-      return CheckCircle;
-    case 'document_uploaded':
-    case 'document_issued':
-    case 'signing_request':
-      return FileText;
-    case 'warning':
-    case 'signal_lost':
-      return AlertCircle;
-    case 'mention':
-      return User;
-    case 'partner_post':
-    case 'partner_linked':
-      return Building2;
-    case 'partner_note':
-      return FileText;
-    case 'partner_message':
-      return User;
-    default:
-      return Info;
-  }
+  const map: Record<string, any> = {
+    shipment_created: Package, shipment: Package, new_shipment: Package,
+    shipment_status: Truck, status_update: Truck, shipment_assigned: Truck,
+    driver_assignment: Car, shipment_approved: CheckCircle, shipment_delivered: CheckCircle,
+    recycling_report: BarChart3, report: BarChart3, certificate: BarChart3,
+    document_uploaded: FileText, document_issued: FileText, signing_request: PenTool,
+    document_signed: PenTool, warning: AlertCircle, signal_lost: AlertCircle,
+    mention: User, partner_post: Building2, partner_linked: Handshake,
+    partner_note: FileText, partner_message: MessageCircle, chat_message: MessageCircle,
+    message: MessageCircle, invoice: Wallet, payment: Wallet, deposit: Wallet,
+    financial: Wallet, approval_request: ClipboardCheck, license_expiry: Key,
+    compliance_alert: Shield, carbon_report: Leaf, environmental: Leaf,
+    work_order: ClipboardCheck, fleet_alert: Car, maintenance: Wrench,
+  };
+  return map[type || ''] || Info;
 };
 
 const getNotificationColor = (type: string | null) => {
-  switch (type) {
-    case 'shipment_created':
-    case 'shipment':
-      return 'bg-blue-500/10 text-blue-500';
-    case 'shipment_status':
-    case 'status_update':
-      return 'bg-amber-500/10 text-amber-500';
-    case 'shipment_approved':
-    case 'shipment_delivered':
-      return 'bg-green-500/10 text-green-500';
-    case 'shipment_assigned':
-    case 'driver_assignment':
-      return 'bg-purple-500/10 text-purple-500';
-    case 'recycling_report':
-    case 'report':
-    case 'certificate':
-      return 'bg-emerald-500/10 text-emerald-500';
-    case 'document_uploaded':
-    case 'document_issued':
-    case 'signing_request':
-      return 'bg-indigo-500/10 text-indigo-500';
-    case 'warning':
-    case 'signal_lost':
-      return 'bg-red-500/10 text-red-500';
-    case 'mention':
-      return 'bg-teal-500/10 text-teal-500';
-    case 'partner_post':
-    case 'partner_linked':
-      return 'bg-purple-500/10 text-purple-500';
-    case 'partner_note':
-      return 'bg-orange-500/10 text-orange-500';
-    case 'partner_message':
-      return 'bg-pink-500/10 text-pink-500';
-    case 'invoice':
-    case 'payment':
-    case 'deposit':
-    case 'financial':
-      return 'bg-emerald-500/10 text-emerald-500';
-    default:
-      return 'bg-muted text-muted-foreground';
-  }
+  const map: Record<string, string> = {
+    shipment_created: 'bg-blue-500/10 text-blue-500', shipment: 'bg-blue-500/10 text-blue-500',
+    shipment_status: 'bg-amber-500/10 text-amber-500', status_update: 'bg-amber-500/10 text-amber-500',
+    shipment_approved: 'bg-green-500/10 text-green-500', shipment_delivered: 'bg-green-500/10 text-green-500',
+    shipment_assigned: 'bg-purple-500/10 text-purple-500', driver_assignment: 'bg-purple-500/10 text-purple-500',
+    recycling_report: 'bg-emerald-500/10 text-emerald-500', certificate: 'bg-emerald-500/10 text-emerald-500',
+    document_uploaded: 'bg-indigo-500/10 text-indigo-500', signing_request: 'bg-indigo-500/10 text-indigo-500',
+    warning: 'bg-red-500/10 text-red-500', signal_lost: 'bg-red-500/10 text-red-500',
+    partner_message: 'bg-pink-500/10 text-pink-500', chat_message: 'bg-pink-500/10 text-pink-500',
+    invoice: 'bg-emerald-500/10 text-emerald-500', payment: 'bg-emerald-500/10 text-emerald-500',
+  };
+  return map[type || ''] || 'bg-muted text-muted-foreground';
 };
 
 const getNotificationBadge = (type: string | null) => {
@@ -164,47 +109,31 @@ const getNotificationBadge = (type: string | null) => {
     shipment_delivered: { label: 'تم التسليم', variant: 'default' },
     shipment_assigned: { label: 'إسناد شحنة', variant: 'secondary' },
     driver_assignment: { label: 'تعيين سائق', variant: 'secondary' },
-    shipment: { label: 'شحنة', variant: 'default' },
     recycling_report: { label: 'تقرير تدوير', variant: 'default' },
-    report: { label: 'تقرير', variant: 'secondary' },
-    certificate: { label: 'شهادة', variant: 'default' },
     document_uploaded: { label: 'وثيقة جديدة', variant: 'secondary' },
-    document_issued: { label: 'مستند صادر', variant: 'default' },
     signing_request: { label: 'طلب توقيع', variant: 'default' },
     document_signed: { label: 'تم التوقيع', variant: 'default' },
-    stamp_applied: { label: 'تم الختم', variant: 'default' },
     warning: { label: 'تحذير', variant: 'destructive' },
     signal_lost: { label: 'انقطاع إشارة', variant: 'destructive' },
-    approval_request: { label: 'طلب موافقة', variant: 'secondary' },
-    partner_post: { label: 'منشور شريك', variant: 'secondary' },
-    partner_note: { label: 'ملاحظة شريك', variant: 'secondary' },
-    partner_message: { label: 'رسالة شريك', variant: 'secondary' },
-    partner_linked: { label: 'ربط شريك', variant: 'default' },
+    partner_message: { label: 'رسالة', variant: 'secondary' },
+    chat_message: { label: 'رسالة', variant: 'secondary' },
+    message: { label: 'رسالة', variant: 'secondary' },
     invoice: { label: 'فاتورة', variant: 'default' },
     payment: { label: 'دفعة مالية', variant: 'default' },
     deposit: { label: 'إيداع', variant: 'default' },
-    financial: { label: 'مالية', variant: 'secondary' },
-    mention: { label: 'إشارة', variant: 'default' },
-    chat_message: { label: 'رسالة', variant: 'secondary' },
-    message: { label: 'رسالة', variant: 'secondary' },
-    broadcast: { label: 'بث جماعي', variant: 'secondary' },
+    approval_request: { label: 'طلب موافقة', variant: 'secondary' },
+    partner_linked: { label: 'ربط شريك', variant: 'default' },
   };
   return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
 };
 
 const getOrgTypeLabel = (type: string | null) => {
-  switch (type) {
-    case 'generator':
-      return 'جهة مولدة';
-    case 'transporter':
-      return 'جهة ناقلة';
-    case 'recycler':
-      return 'جهة معالجة';
-    case 'driver':
-      return 'سائق';
-    default:
-      return 'مؤسسة';
-  }
+  const map: Record<string, string> = {
+    generator: 'جهة مولدة', transporter: 'جهة ناقلة', recycler: 'جهة معالجة',
+    disposal: 'جهة تخلص نهائي', driver: 'سائق', consultant: 'مكتب استشاري',
+    regulator: 'جهة رقابية', admin: 'مدير النظام',
+  };
+  return map[type || ''] || 'مؤسسة';
 };
 
 const getMetadataLabel = (key: string): string => {
@@ -216,10 +145,8 @@ const getMetadataLabel = (key: string): string => {
     driver_name: 'اسم السائق', partner_name: 'اسم الشريك', organization_name: 'اسم المنظمة',
     plate_number: 'رقم لوحة المركبة', vehicle_type: 'نوع المركبة', vehicle_plate: 'لوحة المركبة',
     amount: 'المبلغ', total_amount: 'المبلغ الإجمالي', invoice_number: 'رقم الفاتورة',
-    invoice_id: 'معرّف الفاتورة', payment_method: 'طريقة الدفع',
-    document_type: 'نوع المستند', document_name: 'اسم المستند', document_id: 'معرّف المستند',
-    file_name: 'اسم الملف', camera_event_id: 'حدث الكاميرا', photo_url: 'رابط الصورة',
-    confidence_score: 'نسبة الثقة', arrival_verified: 'تأكيد الوصول',
+    payment_method: 'طريقة الدفع', document_type: 'نوع المستند', document_name: 'اسم المستند',
+    file_name: 'اسم الملف', confidence_score: 'نسبة الثقة', arrival_verified: 'تأكيد الوصول',
     report_id: 'معرّف التقرير', certificate_id: 'معرّف الشهادة', recycling_rate: 'معدل التدوير',
     pickup_date: 'تاريخ الاستلام', delivery_date: 'تاريخ التسليم', due_date: 'تاريخ الاستحقاق',
     pickup_location: 'موقع الاستلام', delivery_location: 'موقع التسليم',
@@ -229,9 +156,67 @@ const getMetadataLabel = (key: string): string => {
     count: 'العدد', total: 'الإجمالي', percentage: 'النسبة', description: 'الوصف',
     reference: 'المرجع', reference_number: 'الرقم المرجعي',
     approval_status: 'حالة الموافقة', request_type: 'نوع الطلب',
-    matched: 'تطابق', verified: 'تم التحقق', sender_name: 'المرسِل', receiver_name: 'المستلِم',
+    sender_name: 'المرسِل', receiver_name: 'المستلِم',
+    call_type: 'نوع المكالمة', duration: 'المدة', media_type: 'نوع الوسائط',
   };
   return labels[key] || key;
+};
+
+// Get all navigation actions for the notification
+const getNavigationActions = (notification: Notification, navigate: ReturnType<typeof useNavigate>) => {
+  const actions: { label: string; icon: any; action: () => void; variant?: 'default' | 'outline' | 'secondary' }[] = [];
+  const type = notification.type;
+
+  if (notification.shipment_id) {
+    actions.push({ label: 'عرض الشحنة', icon: Package, action: () => navigate(`/dashboard/shipments/${notification.shipment_id}`), variant: 'default' });
+  }
+  if (type === 'approval_request' && notification.request_id) {
+    actions.push({ label: 'عرض الطلب', icon: FileText, action: () => navigate(`/dashboard/my-requests?highlight=${notification.request_id}`), variant: 'default' });
+  }
+  if (type === 'signing_request' || type === 'signature_request') {
+    actions.push({ label: 'صندوق التوقيعات', icon: PenTool, action: () => navigate('/dashboard/signing-inbox'), variant: 'default' });
+  }
+  if (['partner_message', 'chat_message', 'message'].includes(type || '')) {
+    const convId = notification.metadata?.conversation_id;
+    actions.push({ label: 'فتح المحادثة', icon: MessageCircle, action: () => navigate(convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat'), variant: 'default' });
+  }
+  if (type === 'partner_linked' || type === 'partnership_request') {
+    actions.push({ label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners'), variant: 'outline' });
+  }
+  if (['invoice', 'payment', 'deposit', 'financial'].includes(type || '')) {
+    actions.push({ label: 'المحاسبة', icon: Wallet, action: () => navigate('/dashboard/accounting'), variant: 'outline' });
+  }
+  if (type === 'work_order' || type === 'work_order_update') {
+    actions.push({ label: 'أوامر العمل', icon: ClipboardCheck, action: () => navigate('/dashboard/work-orders'), variant: 'outline' });
+  }
+  if (type === 'fleet_alert' || type === 'maintenance') {
+    actions.push({ label: 'إدارة الأسطول', icon: Car, action: () => navigate('/dashboard/fleet'), variant: 'outline' });
+  }
+  if (type === 'carbon_report' || type === 'environmental') {
+    actions.push({ label: 'البصمة الكربونية', icon: Leaf, action: () => navigate('/dashboard/carbon-footprint'), variant: 'outline' });
+  }
+  if (type === 'license_expiry' || type === 'license_warning') {
+    actions.push({ label: 'التراخيص', icon: Key, action: () => navigate('/dashboard/organization-profile'), variant: 'outline' });
+  }
+  if (['compliance_alert', 'violation', 'inspection'].includes(type || '')) {
+    actions.push({ label: 'الامتثال', icon: Shield, action: () => navigate('/dashboard/compliance'), variant: 'outline' });
+  }
+  if (type === 'recycling_report' || type === 'certificate') {
+    actions.push({ label: 'التقارير', icon: BarChart3, action: () => navigate('/dashboard/reports'), variant: 'outline' });
+  }
+  if (type === 'partner_note') {
+    actions.push({ label: 'مركز الملاحظات', icon: FileText, action: () => navigate('/dashboard/notes'), variant: 'outline' });
+  }
+
+  // Fallback: try smart route
+  if (actions.length === 0) {
+    const route = getNotificationRoute(notification as any);
+    if (route) {
+      actions.push({ label: 'الانتقال للتفاصيل', icon: ExternalLink, action: () => navigate(route), variant: 'default' });
+    }
+  }
+
+  return actions;
 };
 
 const NotificationDetailDialog = ({
@@ -244,9 +229,12 @@ const NotificationDetailDialog = ({
   onNavigateToSigningInbox,
 }: NotificationDetailDialogProps) => {
   const { profile } = useAuth();
+  const navigate = useNavigate();
+  const { data: branding } = useBranding();
   const [senderReceiverInfo, setSenderReceiverInfo] = useState<SenderReceiverInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [documentOrgId, setDocumentOrgId] = useState<string | null>(null);
+  const [quickReply, setQuickReply] = useState('');
 
   useEffect(() => {
     const fetchSenderReceiverInfo = async () => {
@@ -255,12 +243,14 @@ const NotificationDetailDialog = ({
       setLoading(true);
       try {
         let info: SenderReceiverInfo = {
-          senderName: 'النظام',
+          senderName: branding?.system_name || 'منصة iRecycle',
           senderType: null,
-          senderLogo: null,
+          senderLogo: branding?.logo_url || branding?.notification_logo_url || null,
+          senderSubtitle: 'النظام',
           receiverName: profile?.full_name || 'المستخدم',
           receiverType: null,
           receiverLogo: profile?.avatar_url || null,
+          receiverSubtitle: null,
         };
 
         // Get receiver's organization info
@@ -275,6 +265,7 @@ const NotificationDetailDialog = ({
             info.receiverName = receiverOrg.name;
             info.receiverType = receiverOrg.organization_type;
             info.receiverLogo = receiverOrg.logo_url;
+            info.receiverSubtitle = profile?.full_name || null;
           }
         }
 
@@ -292,99 +283,52 @@ const NotificationDetailDialog = ({
             .single();
 
           if (shipment) {
-            // Normalize shipment relations
             const normalizedShipment = normalizeShipment(shipment as any);
             
-            // Check if notification is from a driver (shipment_assigned type)
             if (notification.type === 'shipment_assigned' && normalizedShipment.driver_id) {
-              // Get driver info
               const { data: driver } = await supabase
                 .from('drivers')
-                .select(`
-                  profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
-                `)
+                .select('profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)')
                 .eq('id', normalizedShipment.driver_id)
                 .single();
-
               if (driver?.profile) {
-                const profile = normalizeRelation(driver.profile);
-                info.senderName = profile?.full_name || 'سائق';
+                const p = normalizeRelation(driver.profile);
+                info.senderName = p?.full_name || 'سائق';
                 info.senderType = 'driver';
-                info.senderLogo = profile?.avatar_url || null;
+                info.senderLogo = p?.avatar_url || null;
+                info.senderSubtitle = 'سائق مُسند';
               }
-            } else if (notification.type === 'shipment_created' || notification.type === 'shipment_status') {
-              // Check if created by a driver
-              if (normalizedShipment.driver_id) {
-                const { data: driver } = await supabase
-                  .from('drivers')
-                  .select(`
-                    profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
-                  `)
-                  .eq('id', normalizedShipment.driver_id)
-                  .single();
-
-                if (driver?.profile) {
-                  const profile = normalizeRelation(driver.profile);
-                  info.senderName = profile?.full_name || 'سائق';
-                  info.senderType = 'driver';
-                  info.senderLogo = profile?.avatar_url || null;
-                } else {
-                  info.senderName = normalizedShipment.transporter?.name || 'جهة ناقلة';
-                  info.senderType = 'transporter';
-                  info.senderLogo = normalizedShipment.transporter?.logo_url || null;
-                }
-              } else {
-                info.senderName = normalizedShipment.transporter?.name || 'جهة ناقلة';
+            } else if (['shipment_created', 'shipment_status', 'status_update'].includes(notification.type || '')) {
+              if (normalizedShipment.transporter) {
+                info.senderName = normalizedShipment.transporter.name || 'جهة ناقلة';
                 info.senderType = 'transporter';
-                info.senderLogo = normalizedShipment.transporter?.logo_url || null;
+                info.senderLogo = normalizedShipment.transporter.logo_url || null;
+                info.senderSubtitle = getOrgTypeLabel('transporter');
               }
             } else if (notification.type === 'recycling_report') {
               info.senderName = normalizedShipment.recycler?.name || 'جهة معالجة';
               info.senderType = 'recycler';
               info.senderLogo = normalizedShipment.recycler?.logo_url || null;
+              info.senderSubtitle = getOrgTypeLabel('recycler');
             }
           }
         }
 
-        // For document uploaded notifications, get organization ID
+        // For document uploaded notifications
         if (notification.type === 'document_uploaded') {
-          // Try to extract organization_id from notification data
           if (notification.organization_id) {
             setDocumentOrgId(notification.organization_id);
           } else if (notification.request_id) {
-            // Get from approval request
             const { data: request } = await supabase
               .from('approval_requests')
               .select('requester_organization_id')
               .eq('id', notification.request_id)
               .single();
-            
-            if (request?.requester_organization_id) {
-              setDocumentOrgId(request.requester_organization_id);
-              info.senderType = 'organization';
-            }
-          } else {
-            // Try to find recent documents from message parsing
-            const orgNameMatch = notification.message.match(/من جهة (.+)/);
-            if (orgNameMatch) {
-              const { data: org } = await supabase
-                .from('organizations')
-                .select('id, name, organization_type, logo_url')
-                .ilike('name', `%${orgNameMatch[1]}%`)
-                .limit(1)
-                .single();
-              
-              if (org) {
-                setDocumentOrgId(org.id);
-                info.senderName = org.name;
-                info.senderType = org.organization_type;
-                info.senderLogo = org.logo_url;
-              }
-            }
+            if (request?.requester_organization_id) setDocumentOrgId(request.requester_organization_id);
           }
         }
 
-        // For approval requests, get the requester organization
+        // For approval requests
         if (notification.request_id) {
           const { data: request } = await supabase
             .from('approval_requests')
@@ -399,12 +343,17 @@ const NotificationDetailDialog = ({
             info.senderName = request.requester_organization.name;
             info.senderType = request.requester_organization.organization_type;
             info.senderLogo = request.requester_organization.logo_url;
-            
-            // For document-related approval requests
+            info.senderSubtitle = getOrgTypeLabel(request.requester_organization.organization_type);
             if (notification.type === 'document_uploaded' && request.requester_organization_id) {
               setDocumentOrgId(request.requester_organization_id);
             }
           }
+        }
+
+        // Extract sender from metadata if available
+        if (notification.metadata?.sender_name && !info.senderType) {
+          info.senderName = notification.metadata.sender_name;
+          info.senderSubtitle = notification.metadata.sender_type ? getOrgTypeLabel(notification.metadata.sender_type) : null;
         }
 
         setSenderReceiverInfo(info);
@@ -416,313 +365,319 @@ const NotificationDetailDialog = ({
     };
 
     fetchSenderReceiverInfo();
-  }, [notification, open, profile]);
+  }, [notification, open, profile, branding]);
 
   if (!notification) return null;
 
   const Icon = getNotificationIcon(notification.type);
   const iconColorClass = getNotificationColor(notification.type);
   const badge = getNotificationBadge(notification.type);
+  const isChatType = ['partner_message', 'chat_message', 'message', 'group_message'].includes(notification.type || '');
+  const navigationActions = getNavigationActions(notification, navigate);
+
+  const handleQuickReply = () => {
+    if (!quickReply.trim()) return;
+    const convId = notification.metadata?.conversation_id;
+    navigate(convId ? `/dashboard/chat?conv=${convId}&reply=${encodeURIComponent(quickReply)}` : '/dashboard/chat');
+    onOpenChange(false);
+    setQuickReply('');
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${iconColorClass}`}>
-              <Icon className="w-5 h-5" />
-            </div>
-            <span>تفاصيل الإشعار</span>
-          </DialogTitle>
-        </DialogHeader>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-4"
-        >
-          {/* Header with badge and status */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={badge.variant}>{badge.label}</Badge>
-            {!notification.is_read && (
-              <Badge variant="outline" className="gap-1 border-primary text-primary">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                غير مقروء
-              </Badge>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] p-0 overflow-hidden" dir="rtl">
+        {/* System Branding Header */}
+        <div className="bg-gradient-to-l from-primary/5 via-primary/10 to-primary/5 px-5 pt-5 pb-3 border-b">
+          <div className="flex items-center gap-3 mb-3">
+            {branding?.logo_url || branding?.notification_logo_url ? (
+              <Avatar className="h-10 w-10 rounded-lg border border-primary/20">
+                <AvatarImage src={branding.notification_logo_url || branding.logo_url} className="object-contain p-0.5" />
+                <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
+                  <Recycle className="h-5 w-5" />
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                <Recycle className="h-5 w-5 text-primary" />
+              </div>
             )}
-          </div>
-
-          {/* Sender and Receiver Info */}
-          {loading ? (
-            <div className="p-4 rounded-lg bg-muted/30 space-y-3">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-4 w-24 mx-auto" />
-              <Skeleton className="h-12 w-full" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground truncate">
+                {branding?.system_name || 'منصة iRecycle'}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {branding?.tagline || 'نحو مستقبل أنظف'}
+              </p>
             </div>
-          ) : senderReceiverInfo && (
-            <div className="p-4 rounded-lg bg-muted/30 space-y-3">
-              {/* Sender */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={senderReceiverInfo.senderLogo || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    <Building2 className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{senderReceiverInfo.senderName}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>المُرسِل</span>
-                    {senderReceiverInfo.senderType && (
-                      <>
-                        <span>•</span>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${iconColorClass}`}>
+              <Icon className="w-4 h-4" />
+            </div>
+          </div>
+          <DialogHeader className="p-0">
+            <DialogTitle className="flex items-center gap-2 text-base">
+              تفاصيل الإشعار
+              <Badge variant={badge.variant} className="text-[10px]">{badge.label}</Badge>
+              {!notification.is_read && (
+                <Badge variant="outline" className="gap-1 border-primary text-primary text-[10px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  جديد
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+
+        <ScrollArea className="max-h-[calc(90vh-180px)]">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4 px-5 py-4"
+          >
+            {/* Sender and Receiver */}
+            {loading ? (
+              <div className="p-4 rounded-lg bg-muted/30 space-y-3">
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-4 w-24 mx-auto" />
+                <Skeleton className="h-14 w-full" />
+              </div>
+            ) : senderReceiverInfo && (
+              <div className="p-3 rounded-xl bg-muted/30 space-y-2.5">
+                {/* Sender */}
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                  <Avatar className="h-11 w-11 border border-border">
+                    <AvatarImage src={senderReceiverInfo.senderLogo || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {senderReceiverInfo.senderType === 'driver' ? <Car className="h-5 w-5" /> : <Building2 className="h-5 w-5" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{senderReceiverInfo.senderName}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">المُرسِل</Badge>
+                      {senderReceiverInfo.senderType && (
                         <span>{getOrgTypeLabel(senderReceiverInfo.senderType)}</span>
-                      </>
-                    )}
+                      )}
+                      {senderReceiverInfo.senderSubtitle && !senderReceiverInfo.senderType && (
+                        <span>{senderReceiverInfo.senderSubtitle}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Arrow */}
-              <div className="flex justify-center">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <ArrowLeftRight className="w-4 h-4 text-primary rotate-90" />
+                {/* Arrow */}
+                <div className="flex justify-center">
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <ArrowLeftRight className="w-3.5 h-3.5 text-primary rotate-90" />
+                  </div>
                 </div>
-              </div>
 
-              {/* Receiver */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={senderReceiverInfo.receiverLogo || undefined} />
-                  <AvatarFallback className="bg-green-500/10 text-green-600">
-                    <User className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{senderReceiverInfo.receiverName}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>المُستلِم</span>
-                    {senderReceiverInfo.receiverType && (
-                      <>
-                        <span>•</span>
+                {/* Receiver */}
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                  <Avatar className="h-11 w-11 border border-border">
+                    <AvatarImage src={senderReceiverInfo.receiverLogo || undefined} />
+                    <AvatarFallback className="bg-green-500/10 text-green-600">
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{senderReceiverInfo.receiverName}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">المُستلِم</Badge>
+                      {senderReceiverInfo.receiverType && (
                         <span>{getOrgTypeLabel(senderReceiverInfo.receiverType)}</span>
-                      </>
-                    )}
+                      )}
+                      {senderReceiverInfo.receiverSubtitle && (
+                        <span className="text-muted-foreground/70">({senderReceiverInfo.receiverSubtitle})</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Title */}
+            <div>
+              <h3 className="text-base font-bold">{notification.title}</h3>
             </div>
-          )}
 
-          {/* Title */}
-          <div>
-            <h3 className="text-lg font-semibold">{notification.title}</h3>
-          </div>
-
-          {/* Message */}
-          <div className="p-4 rounded-lg bg-muted/50">
-            <p className="text-sm leading-relaxed">{notification.message}</p>
-          </div>
-
-          {/* Priority */}
-          {notification.priority && notification.priority !== 'normal' && (
-            <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">الأولوية:</span>
-              <Badge variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'}>
-                {notification.priority === 'high' ? 'عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'منخفضة' : notification.priority}
-              </Badge>
+            {/* Message */}
+            <div className="p-3.5 rounded-lg bg-muted/50 border border-border/30">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{notification.message}</p>
             </div>
-          )}
 
-          {/* Metadata Analysis */}
-          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
-            <div className="p-4 rounded-lg bg-muted/30 border space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span>تحليل البيانات التفصيلية</span>
+            {/* Priority */}
+            {notification.priority && notification.priority !== 'normal' && (
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">الأولوية:</span>
+                <Badge variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'}>
+                  {notification.priority === 'high' ? 'عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'منخفضة' : notification.priority}
+                </Badge>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            )}
+
+            {/* Metadata Analysis */}
+            {notification.metadata && Object.keys(notification.metadata).filter(k => {
+              const v = notification.metadata![k];
+              return v !== null && v !== undefined && v !== '' && !['conversation_id'].includes(k);
+            }).length > 0 && (
+              <div className="p-3.5 rounded-lg bg-muted/30 border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span>تحليل البيانات التفصيلية</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {Object.entries(notification.metadata).map(([key, value]) => {
+                    if (value === null || value === undefined || value === '') return null;
+                    if (typeof value === 'object' && !Array.isArray(value)) return null;
+                    if (['conversation_id'].includes(key)) return null;
+                    const label = getMetadataLabel(key);
+                    const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
+                    return (
+                      <div key={key} className="flex flex-col gap-0.5 p-2 rounded-lg bg-background border border-border/50">
+                        <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
+                        <span className="text-sm font-semibold truncate" title={displayValue}>{displayValue}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Nested objects */}
                 {Object.entries(notification.metadata).map(([key, value]) => {
-                  if (value === null || value === undefined || value === '') return null;
-                  if (typeof value === 'object' && !Array.isArray(value)) return null;
+                  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
                   const label = getMetadataLabel(key);
-                  const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
                   return (
-                    <div key={key} className="flex flex-col gap-0.5 p-2 rounded bg-background border border-border/50">
-                      <span className="text-[10px] text-muted-foreground">{label}</span>
-                      <span className="text-sm font-medium truncate" title={displayValue}>{displayValue}</span>
+                    <div key={key} className="pt-2 border-t space-y-1.5">
+                      <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {Object.entries(value as Record<string, any>).map(([sk, sv]) => {
+                          if (sv === null || sv === undefined || sv === '') return null;
+                          return (
+                            <div key={sk} className="flex flex-col gap-0.5 p-2 rounded-lg bg-background border border-border/50">
+                              <span className="text-[10px] text-muted-foreground">{getMetadataLabel(sk)}</span>
+                              <span className="text-sm font-semibold truncate">{String(sv)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 })}
               </div>
-              {/* Nested objects */}
-              {Object.entries(notification.metadata).map(([key, value]) => {
-                if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
-                const label = getMetadataLabel(key);
-                return (
-                  <div key={key} className="pt-2 border-t space-y-1.5">
-                    <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {Object.entries(value as Record<string, any>).map(([sk, sv]) => {
-                        if (sv === null || sv === undefined || sv === '') return null;
-                        return (
-                          <div key={sk} className="flex flex-col gap-0.5 p-2 rounded bg-background border border-border/50">
-                            <span className="text-[10px] text-muted-foreground">{getMetadataLabel(sk)}</span>
-                            <span className="text-sm font-medium truncate">{String(sv)}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+            )}
 
-          {/* PDF Attachment Section */}
-          {notification.pdf_url && (
-            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-emerald-600" />
+            {/* PDF Attachment */}
+            {notification.pdf_url && (
+              <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-emerald-800 dark:text-emerald-300">مرفق PDF</p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400">ملف مرفق بالإشعار</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-emerald-800 dark:text-emerald-300">شهادة إعادة التدوير</p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">ملف PDF مرفق</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                  onClick={() => window.open(notification.pdf_url!, '_blank')}
-                >
-                  <Eye className="w-4 h-4" />
-                  عرض الملف
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                  onClick={() => {
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100" onClick={() => window.open(notification.pdf_url!, '_blank')}>
+                    <Eye className="w-4 h-4" /> عرض
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100" onClick={() => {
                     const link = document.createElement('a');
                     link.href = notification.pdf_url!;
-                    link.download = `شهادة-تدوير-${notification.shipment_id || 'report'}.pdf`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
-                >
-                  <Download className="w-4 h-4" />
-                  تنزيل
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                  onClick={() => {
-                    import('@/services/documentService').then(({ PrintService }) => {
-                      const printWindow = window.open(notification.pdf_url!, '_blank');
-                      if (printWindow) {
-                        printWindow.addEventListener('load', () => { printWindow.print(); });
-                      }
-                    });
-                  }}
-                >
-                  <Printer className="w-4 h-4" />
-                  طباعة
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Document Verification Panel for Admin */}
-          {notification.type === 'document_uploaded' && documentOrgId && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Scale className="w-4 h-4 text-primary" />
-                  <span>التحقق القانوني من المستندات</span>
+                    link.download = `مرفق-${notification.id}.pdf`;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                  }}>
+                    <Download className="w-4 h-4" /> تنزيل
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100" onClick={() => {
+                    const w = window.open(notification.pdf_url!, '_blank');
+                    if (w) w.addEventListener('load', () => w.print());
+                  }}>
+                    <Printer className="w-4 h-4" /> طباعة
+                  </Button>
                 </div>
-                <DocumentVerificationPanel
-                  organizationId={documentOrgId}
-                  documentId={notification.document_id || undefined}
-                  onVerificationComplete={() => {
-                    // Optionally refresh or show success
-                  }}
-                />
               </div>
-            </>
-          )}
-
-          {/* Timestamp */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>
-              {format(new Date(notification.created_at), 'EEEE، d MMMM yyyy - h:mm a', {
-                locale: ar,
-              })}
-            </span>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 pt-4 border-t">
-            {notification.shipment_id && (
-              <Button
-                variant="default"
-                className="gap-2"
-                onClick={() => {
-                  onOpenChange(false);
-                  onNavigateToShipment(notification.shipment_id!);
-                }}
-              >
-                <Package className="w-4 h-4" />
-                عرض تفاصيل الشحنة
-                <ExternalLink className="w-3 h-3" />
-              </Button>
             )}
 
-            {notification.type === 'approval_request' && (
-              <Button
-                variant="default"
-                className="gap-2"
-                onClick={() => {
-                  onOpenChange(false);
-                  onNavigateToRequest(notification.request_id || undefined);
-                }}
-              >
-                <FileText className="w-4 h-4" />
-                عرض تفاصيل الطلب
-                <ExternalLink className="w-3 h-3" />
-              </Button>
+            {/* Document Verification */}
+            {notification.type === 'document_uploaded' && documentOrgId && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Scale className="w-4 h-4 text-primary" />
+                    <span>التحقق القانوني من المستندات</span>
+                  </div>
+                  <DocumentVerificationPanel
+                    organizationId={documentOrgId}
+                    documentId={notification.document_id || undefined}
+                    onVerificationComplete={() => {}}
+                  />
+                </div>
+              </>
             )}
 
-            {notification.type === 'signing_request' && onNavigateToSigningInbox && (
-              <Button
-                variant="default"
-                className="gap-2"
-                onClick={() => {
-                  onOpenChange(false);
-                  onNavigateToSigningInbox();
-                }}
-              >
-                <FileText className="w-4 h-4" />
-                فتح صندوق التوقيعات
-                <ExternalLink className="w-3 h-3" />
-              </Button>
-            )}
+            {/* Timestamp */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-2.5 rounded-lg">
+              <Clock className="w-4 h-4 shrink-0" />
+              <span>
+                {format(new Date(notification.created_at), 'EEEE، d MMMM yyyy - h:mm a', { locale: ar })}
+              </span>
+            </div>
 
-            <Button
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-            >
+            {/* Quick Reply for Chat Notifications */}
+            {isChatType && (
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                <p className="text-xs font-medium text-primary flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  رد سريع
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    value={quickReply}
+                    onChange={e => setQuickReply(e.target.value)}
+                    placeholder="اكتب ردك هنا..."
+                    className="h-9 text-sm"
+                    onKeyDown={e => e.key === 'Enter' && handleQuickReply()}
+                  />
+                  <Button size="sm" className="h-9 gap-1.5 shrink-0" onClick={handleQuickReply} disabled={!quickReply.trim()}>
+                    <Send className="w-3.5 h-3.5" />
+                    إرسال
+                  </Button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </ScrollArea>
+
+        {/* Navigation Actions Footer */}
+        <div className="border-t bg-muted/20 px-5 py-3">
+          <p className="text-[10px] text-muted-foreground mb-2 font-medium">التوجيه السريع</p>
+          <div className="flex flex-wrap gap-2">
+            {navigationActions.map((action, i) => {
+              const ActionIcon = action.icon;
+              return (
+                <Button
+                  key={i}
+                  variant={action.variant || 'outline'}
+                  size="sm"
+                  className="gap-1.5 text-xs h-8"
+                  onClick={() => {
+                    onOpenChange(false);
+                    action.action();
+                  }}
+                >
+                  <ActionIcon className="w-3.5 h-3.5" />
+                  {action.label}
+                  <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                </Button>
+              );
+            })}
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => onOpenChange(false)}>
               إغلاق
             </Button>
           </div>
-        </motion.div>
+        </div>
       </DialogContent>
     </Dialog>
   );
