@@ -50,17 +50,22 @@ const SupportCenter = () => {
     return (
       <DashboardLayout>
         <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <BackButton />
-        <AdminSupportCenter />
-      </motion.div>
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          <BackButton />
+          <AdminSupportCenter />
+        </motion.div>
+      </DashboardLayout>
     );
   }
 
-  return <UserSupportPage />;
+  return (
+    <DashboardLayout>
+      <UserSupportPage />
+    </DashboardLayout>
+  );
 };
 
 const UserSupportPage = () => {
