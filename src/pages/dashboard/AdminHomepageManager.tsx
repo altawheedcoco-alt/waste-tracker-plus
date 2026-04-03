@@ -324,6 +324,7 @@ const AdminHomepageManager = () => {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </DashboardLayout>
   );
 };
 
