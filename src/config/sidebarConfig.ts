@@ -766,6 +766,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health-main', bindingType: 'internal' as const },
       { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'ohs-safety', bindingType: 'hybrid' as const },
       { icon: Activity, labelAr: 'البرنامج الطبي', labelEn: 'Medical Program', path: '/dashboard/medical-program', key: 'medical-program', bindingType: 'internal' as const },
+      { icon: AlertTriangle, labelAr: 'الاستجابة للطوارئ', labelEn: 'Emergency Response', path: '/dashboard/emergency-response', key: 'emergency-response', bindingType: 'internal' as const },
     ],
   },
 
