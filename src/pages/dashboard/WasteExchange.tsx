@@ -356,6 +356,7 @@ const WasteExchange = () => {
         />
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

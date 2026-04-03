@@ -247,7 +247,8 @@ const PartnerReviews = () => {
         </DialogContent>
       </Dialog>
     </div>
-        );
+    </DashboardLayout>
+  );
 };
 
 export default PartnerReviews;
