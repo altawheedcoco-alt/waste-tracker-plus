@@ -246,7 +246,11 @@ const HomepageContent = () => {
             </ErrorBoundary>
           )}
 
-          {/* v5.2 — How It Works (highest conversion impact — priority load) */}
+          {/* صندوق اختبار الإشعارات الأصلية — مؤقت للتجربة */}
+          <div className="max-w-md mx-auto px-4 py-4">
+            <NativePushTestButton />
+          </div>
+
           <div id="how-it-works">
             <LazySection minH={350} priority>
               <HowItWorksSection />
