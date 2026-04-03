@@ -45,6 +45,18 @@ const TopClientsWidget = lazy(() => import('@/components/analytics/TopClientsWid
 const PaymentStatusWidget = lazy(() => import('@/components/analytics/PaymentStatusWidget'));
 const PeakHoursWidget = lazy(() => import('@/components/analytics/PeakHoursWidget'));
 const SLAComplianceWidget = lazy(() => import('@/components/analytics/SLAComplianceWidget'));
+const CashFlowWaterfallWidget = lazy(() => import('@/components/analytics/CashFlowWaterfallWidget'));
+const ContractExpiryRadar = lazy(() => import('@/components/analytics/ContractExpiryRadar'));
+const OperationalEfficiencyScore = lazy(() => import('@/components/analytics/OperationalEfficiencyScore'));
+const WeightAccuracyWidget = lazy(() => import('@/components/analytics/WeightAccuracyWidget'));
+const RegionalPerformanceMap = lazy(() => import('@/components/analytics/RegionalPerformanceMap'));
+const DisputeResolutionWidget = lazy(() => import('@/components/analytics/DisputeResolutionWidget'));
+const SeasonalTrendsWidget = lazy(() => import('@/components/analytics/SeasonalTrendsWidget'));
+const PartnerDiversityIndex = lazy(() => import('@/components/analytics/PartnerDiversityIndex'));
+const DemandForecastWidget = lazy(() => import('@/components/analytics/DemandForecastWidget'));
+const ProfitabilityHeatmap = lazy(() => import('@/components/analytics/ProfitabilityHeatmap'));
+const CustomerChurnRisk = lazy(() => import('@/components/analytics/CustomerChurnRisk'));
+const ResourceUtilizationWidget = lazy(() => import('@/components/analytics/ResourceUtilizationWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -250,6 +262,66 @@ const AdvancedAnalytics = () => {
           </Suspense>
           <Suspense fallback={<ChartSkeleton />}>
             <ExportCenterWidget />
+          </Suspense>
+        </div>
+
+        {/* Operational Efficiency + Resource Utilization */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <OperationalEfficiencyScore />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ResourceUtilizationWidget />
+          </Suspense>
+        </div>
+
+        {/* Cash Flow + Profitability */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <CashFlowWaterfallWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ProfitabilityHeatmap />
+          </Suspense>
+        </div>
+
+        {/* Demand Forecast + Seasonal Trends */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <DemandForecastWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <SeasonalTrendsWidget />
+          </Suspense>
+        </div>
+
+        {/* Weight Accuracy + Regional Performance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <WeightAccuracyWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <RegionalPerformanceMap />
+          </Suspense>
+        </div>
+
+        {/* Contract Expiry + Partner Diversity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <ContractExpiryRadar />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PartnerDiversityIndex />
+          </Suspense>
+        </div>
+
+        {/* Customer Churn + Dispute Resolution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <CustomerChurnRisk />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <DisputeResolutionWidget />
           </Suspense>
         </div>
       </div>
