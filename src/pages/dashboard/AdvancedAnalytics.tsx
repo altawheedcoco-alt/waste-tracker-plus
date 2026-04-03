@@ -25,6 +25,9 @@ const BenchmarkIndicator = lazy(() => import('@/components/analytics/BenchmarkIn
 const RevenueForecast = lazy(() => import('@/components/analytics/RevenueForecast'));
 const WorkPatternAnalysis = lazy(() => import('@/components/analytics/WorkPatternAnalysis'));
 const QuickKPIStrip = lazy(() => import('@/components/dashboard/shared/QuickKPIStrip'));
+const CustomerRetentionAnalysis = lazy(() => import('@/components/analytics/CustomerRetentionAnalysis'));
+const WasteCompositionChart = lazy(() => import('@/components/analytics/WasteCompositionChart'));
+const GeographicDistribution = lazy(() => import('@/components/analytics/GeographicDistribution'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
