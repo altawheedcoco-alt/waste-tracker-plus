@@ -68,198 +68,22 @@ const getMetadataFieldLabel = (key: string): { label: string } => {
 };
 
 // ═══════════════════════════════════════════════════════
-// Icon & Color Mapping
+// Icon, Color, Badge & Category — from centralized registry
 // ═══════════════════════════════════════════════════════
-const getNotificationIcon = (type: string | null) => {
-  switch (type) {
-    case 'shipment_created': return Package;
-    case 'shipment_status': case 'status_update': case 'shipment_assigned': return Truck;
-    case 'driver_assignment': return Car;
-    case 'shipment_approved': case 'shipment_delivered': return CheckCircle;
-    case 'document_uploaded': case 'signing_request': return FileText;
-    case 'document_issued': return Send;
-    case 'signature_request': case 'document_signed': return PenTool;
-    case 'stamp_applied': return Stamp;
-    case 'recycling_report': case 'report': case 'certificate': return BarChart3;
-    case 'partner_post': case 'partner_linked': return Handshake;
-    case 'partner_note': return FileText;
-    case 'partner_message': return MessageCircle;
-    case 'approval_request': return Inbox;
-    case 'invoice': case 'payment': case 'deposit': case 'financial': return Wallet;
-    case 'warning': case 'signal_lost': return AlertCircle;
-    case 'chat_message': case 'message': case 'broadcast': return MessageSquare;
-    case 'mention': return User;
-    case 'shipment': return Package;
-    case 'license_expiry': case 'license_warning': return Key;
-    case 'compliance_alert': case 'compliance_update': return Shield;
-    case 'fleet_alert': case 'maintenance': return Wrench;
-    case 'work_order': case 'work_order_update': return ClipboardCheck;
-    case 'ai_alert': case 'ai_insight': return Sparkles;
-    case 'environmental': case 'carbon_report': return Leaf;
-    case 'inspection': case 'violation': return Gavel;
-    case 'announcement': return Megaphone;
-    case 'geofence_alert': case 'gps_alert': return Radar;
-    case 'identity_verified': case 'kyc_update': return UserCheck;
-    default: return Info;
-  }
-};
+import {
+  getNotificationIcon as _getIcon,
+  getNotificationIconColor as _getIconColor,
+  categorizeNotification as _categorize,
+  getNotificationBadgeInfo as _getBadge,
+  NOTIFICATION_TAB_CATEGORIES,
+} from '@/lib/notificationVisuals';
 
-const getNotificationColor = (type: string | null) => {
-  switch (type) {
-    case 'shipment_created': case 'shipment': case 'shipment_assigned': return 'bg-blue-500/10 text-blue-500';
-    case 'shipment_status': case 'status_update': return 'bg-amber-500/10 text-amber-500';
-    case 'shipment_approved': case 'shipment_delivered': return 'bg-green-500/10 text-green-500';
-    case 'driver_assignment': return 'bg-orange-500/10 text-orange-500';
-    case 'document_uploaded': case 'signing_request': case 'signature_request':
-    case 'document_signed': case 'document_issued': case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
-    case 'recycling_report': case 'report': case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
-    case 'partner_post': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
-    case 'partner_note': return 'bg-orange-500/10 text-orange-500';
-    case 'partner_message': return 'bg-pink-500/10 text-pink-500';
-    case 'approval_request': return 'bg-amber-500/10 text-amber-500';
-    case 'invoice': case 'payment': case 'deposit': case 'financial': return 'bg-emerald-500/10 text-emerald-500';
-    case 'warning': case 'signal_lost': case 'violation': return 'bg-red-500/10 text-red-500';
-    case 'chat_message': case 'message': case 'broadcast': return 'bg-pink-500/10 text-pink-500';
-    case 'mention': return 'bg-teal-500/10 text-teal-500';
-    case 'license_expiry': case 'license_warning': return 'bg-orange-500/10 text-orange-500';
-    case 'compliance_alert': case 'compliance_update': return 'bg-violet-500/10 text-violet-500';
-    case 'fleet_alert': case 'maintenance': return 'bg-slate-500/10 text-slate-500';
-    case 'work_order': case 'work_order_update': return 'bg-sky-500/10 text-sky-500';
-    case 'ai_alert': case 'ai_insight': return 'bg-fuchsia-500/10 text-fuchsia-500';
-    case 'environmental': case 'carbon_report': return 'bg-lime-500/10 text-lime-600';
-    case 'inspection': return 'bg-amber-500/10 text-amber-600';
-    case 'announcement': return 'bg-blue-500/10 text-blue-600';
-    case 'geofence_alert': case 'gps_alert': return 'bg-rose-500/10 text-rose-500';
-    case 'identity_verified': case 'kyc_update': return 'bg-teal-500/10 text-teal-600';
-    default: return 'bg-muted text-muted-foreground';
-  }
-};
+const getNotificationIcon = _getIcon;
+const getNotificationColor = _getIconColor;
+const categorizeNotification = _categorize;
 
-const getNotificationBadge = (type: string | null) => {
-  const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-    shipment_created: { label: 'شحنة جديدة', variant: 'default' },
-    shipment_status: { label: 'تحديث حالة', variant: 'secondary' },
-    status_update: { label: 'تحديث حالة', variant: 'secondary' },
-    shipment_approved: { label: 'موافقة', variant: 'default' },
-    shipment_delivered: { label: 'تم التسليم', variant: 'default' },
-    shipment_assigned: { label: 'تعيين شحنة', variant: 'secondary' },
-    driver_assignment: { label: 'تعيين سائق', variant: 'secondary' },
-    shipment: { label: 'شحنة', variant: 'default' },
-    document_uploaded: { label: 'مستند جديد', variant: 'secondary' },
-    document_issued: { label: 'مستند صادر', variant: 'default' },
-    signing_request: { label: 'طلب توقيع', variant: 'default' },
-    signature_request: { label: 'طلب توقيع', variant: 'default' },
-    document_signed: { label: 'تم التوقيع', variant: 'default' },
-    stamp_applied: { label: 'تم الختم', variant: 'default' },
-    recycling_report: { label: 'تقرير تدوير', variant: 'default' },
-    report: { label: 'تقرير', variant: 'secondary' },
-    certificate: { label: 'شهادة', variant: 'default' },
-    approval_request: { label: 'طلب موافقة', variant: 'secondary' },
-    partner_post: { label: 'منشور شريك', variant: 'secondary' },
-    partner_note: { label: 'ملاحظة شريك', variant: 'secondary' },
-    partner_message: { label: 'رسالة شريك', variant: 'secondary' },
-    partner_linked: { label: 'ربط شريك', variant: 'default' },
-    invoice: { label: 'فاتورة', variant: 'default' },
-    payment: { label: 'دفعة مالية', variant: 'default' },
-    deposit: { label: 'إيداع', variant: 'default' },
-    financial: { label: 'مالية', variant: 'secondary' },
-    warning: { label: 'تحذير', variant: 'destructive' },
-    signal_lost: { label: 'انقطاع إشارة', variant: 'destructive' },
-    chat_message: { label: 'رسالة', variant: 'secondary' },
-    message: { label: 'رسالة', variant: 'secondary' },
-    broadcast: { label: 'بث جماعي', variant: 'secondary' },
-    mention: { label: 'إشارة', variant: 'default' },
-    license_expiry: { label: 'انتهاء ترخيص', variant: 'destructive' },
-    license_warning: { label: 'تنبيه ترخيص', variant: 'secondary' },
-    compliance_alert: { label: 'تنبيه امتثال', variant: 'destructive' },
-    compliance_update: { label: 'تحديث امتثال', variant: 'secondary' },
-    fleet_alert: { label: 'تنبيه أسطول', variant: 'secondary' },
-    maintenance: { label: 'صيانة', variant: 'secondary' },
-    work_order: { label: 'أمر شغل', variant: 'default' },
-    work_order_update: { label: 'تحديث أمر شغل', variant: 'secondary' },
-    ai_alert: { label: 'تنبيه ذكي', variant: 'default' },
-    ai_insight: { label: 'رؤية ذكية', variant: 'secondary' },
-    environmental: { label: 'بيئي', variant: 'default' },
-    carbon_report: { label: 'تقرير كربوني', variant: 'secondary' },
-    inspection: { label: 'تفتيش', variant: 'secondary' },
-    violation: { label: 'مخالفة', variant: 'destructive' },
-    announcement: { label: 'إعلان', variant: 'default' },
-    geofence_alert: { label: 'تنبيه جغرافي', variant: 'destructive' },
-    gps_alert: { label: 'تنبيه GPS', variant: 'destructive' },
-    identity_verified: { label: 'تحقق هوية', variant: 'default' },
-    kyc_update: { label: 'تحديث KYC', variant: 'secondary' },
-  };
-  return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
-};
-
-// ═══════════════════════════════════════════════════════
-// ENHANCED Category System with Sub-categories
-// ═══════════════════════════════════════════════════════
-
-const categorizeNotification = (type: string | null): string => {
-  switch (type) {
-    case 'shipment_created': case 'shipment_status': case 'status_update':
-    case 'shipment_assigned': case 'shipment_delivered': case 'shipment_approved':
-    case 'shipment': case 'driver_assignment':
-      return 'shipments';
-    case 'document_uploaded': case 'document_issued': case 'signature_request':
-    case 'document_signed': case 'stamp_applied': case 'signing_request':
-      return 'documents';
-    case 'invoice': case 'payment': case 'deposit': case 'financial':
-      return 'finance';
-    case 'partner_post': case 'partner_request': case 'partner_linked':
-      return 'partners';
-    case 'partner_note':
-      return 'notes';
-    case 'partner_message':
-      return 'messages';
-    case 'approval_request': case 'approval_granted': case 'approval_rejected':
-      return 'approvals';
-    case 'recycling_report': case 'report': case 'certificate': case 'compliance':
-      return 'reports';
-    case 'chat_message': case 'message': case 'broadcast': case 'mention':
-      return 'messages';
-    case 'license_expiry': case 'license_warning': case 'compliance_alert':
-    case 'compliance_update': case 'inspection': case 'violation':
-      return 'compliance';
-    case 'fleet_alert': case 'maintenance': case 'geofence_alert': case 'gps_alert':
-      return 'fleet';
-    case 'work_order': case 'work_order_update':
-      return 'operations';
-    case 'ai_alert': case 'ai_insight':
-      return 'smart';
-    case 'environmental': case 'carbon_report':
-      return 'environmental';
-    case 'identity_verified': case 'kyc_update':
-      return 'identity';
-    case 'announcement':
-      return 'announcements';
-    case 'warning': case 'system': case 'security': case 'info': case 'signal_lost':
-      return 'system';
-    default:
-      return 'other';
-  }
-};
-
-// Get sub-category for more granular filtering within a category
-const getSubCategory = (type: string | null): string => {
-  switch (type) {
-    case 'shipment_created': return 'created';
-    case 'shipment_status': case 'status_update': return 'status';
-    case 'shipment_assigned': case 'driver_assignment': return 'assignment';
-    case 'shipment_delivered': case 'shipment_approved': return 'completed';
-    case 'document_uploaded': return 'upload';
-    case 'document_issued': case 'document_signed': case 'stamp_applied': return 'signed';
-    case 'signing_request': case 'signature_request': return 'request';
-    case 'invoice': return 'invoice';
-    case 'payment': case 'deposit': return 'payment';
-    case 'license_expiry': return 'expiry';
-    case 'license_warning': return 'warning';
-    case 'compliance_alert': case 'violation': return 'alert';
-    case 'inspection': case 'compliance_update': return 'update';
-    default: return 'all';
-  }
-};
+// Priority detection — uses registry when available
+import { getNotificationTypeMeta } from '@/lib/notificationTypes';
 
 // Get priority level from notification
 const getPriorityLevel = (notification: Notification): 'urgent' | 'high' | 'normal' | 'low' => {
@@ -316,70 +140,9 @@ interface CategoryConfig {
   icon: React.ElementType;
   color: string;
   bgColor: string;
-  subCategories?: { id: string; label: string }[];
 }
 
-const getCategories = (): CategoryConfig[] => [
-  { id: 'all', label: 'الكل', icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
-  {
-    id: 'shipments', label: 'الشحنات', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'created', label: 'جديدة' },
-      { id: 'status', label: 'تحديث حالة' },
-      { id: 'assignment', label: 'تعيينات' },
-      { id: 'completed', label: 'مكتملة' },
-    ],
-  },
-  {
-    id: 'documents', label: 'المستندات', icon: FileText, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'upload', label: 'مستندات جديدة' },
-      { id: 'request', label: 'طلبات توقيع' },
-      { id: 'signed', label: 'مُوقعة' },
-    ],
-  },
-  {
-    id: 'approvals', label: 'الموافقات', icon: CheckCircle, color: 'text-amber-500', bgColor: 'bg-amber-500/10',
-  },
-  {
-    id: 'finance', label: 'المالية', icon: Wallet, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'invoice', label: 'فواتير' },
-      { id: 'payment', label: 'مدفوعات' },
-    ],
-  },
-  {
-    id: 'compliance', label: 'الامتثال والتراخيص', icon: Shield, color: 'text-violet-500', bgColor: 'bg-violet-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'expiry', label: 'انتهاء صلاحية' },
-      { id: 'warning', label: 'تحذيرات' },
-      { id: 'alert', label: 'مخالفات' },
-      { id: 'update', label: 'تحديثات' },
-    ],
-  },
-  {
-    id: 'fleet', label: 'الأسطول والتتبع', icon: Car, color: 'text-slate-500', bgColor: 'bg-slate-500/10',
-  },
-  {
-    id: 'operations', label: 'أوامر الشغل', icon: ClipboardCheck, color: 'text-sky-500', bgColor: 'bg-sky-500/10',
-  },
-  { id: 'messages', label: 'الرسائل', icon: MessageCircle, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
-  { id: 'notes', label: 'الملاحظات', icon: FileText, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-  { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-  { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
-  { id: 'environmental', label: 'البيئة والكربون', icon: Leaf, color: 'text-lime-600', bgColor: 'bg-lime-500/10' },
-  {
-    id: 'smart', label: 'التنبيهات الذكية', icon: Sparkles, color: 'text-fuchsia-500', bgColor: 'bg-fuchsia-500/10',
-  },
-  { id: 'announcements', label: 'الإعلانات', icon: Megaphone, color: 'text-blue-600', bgColor: 'bg-blue-500/10' },
-  { id: 'identity', label: 'التحقق والهوية', icon: UserCheck, color: 'text-teal-600', bgColor: 'bg-teal-500/10' },
-  { id: 'system', label: 'النظام', icon: Settings, color: 'text-red-500', bgColor: 'bg-red-500/10' },
-  { id: 'other', label: 'أخرى', icon: Info, color: 'text-muted-foreground', bgColor: 'bg-muted' },
-];
+const getCategories = (): CategoryConfig[] => NOTIFICATION_TAB_CATEGORIES;
 
 const getStatusLabel = (status: string | null, t: (key: string) => string) => {
   const statusMap: Record<string, { label: string; color: string }> = {
@@ -494,7 +257,7 @@ const Notifications = () => {
   const filteredNotifications = useMemo(() => {
     return notifications.filter((n) => {
       const matchesCat = activeCategory === 'all' || categorizeNotification(n.type) === activeCategory;
-      const matchesSub = activeSubCategory === 'all' || getSubCategory(n.type) === activeSubCategory;
+      const matchesSub = true; // Sub-categories removed — flat category filtering
       const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !n.is_read : n.is_read);
       const matchesSearch = !searchQuery ||
         n.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -679,23 +442,7 @@ const Notifications = () => {
             </div>
           </div>
 
-          {/* ═══ Sub-categories ═══ */}
-          {activeCatConfig?.subCategories && activeCatConfig.subCategories.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              {activeCatConfig.subCategories.map(sub => (
-                <Button
-                  key={sub.id}
-                  size="sm"
-                  variant={activeSubCategory === sub.id ? 'default' : 'outline'}
-                  onClick={() => setActiveSubCategory(sub.id)}
-                  className="h-7 text-[10px] px-2.5 shrink-0"
-                >
-                  {sub.label}
-                </Button>
-              ))}
-            </div>
-          )}
+          {/* Sub-categories removed — now using registry categories directly */}
 
           {/* ═══ Search, Filter & View Toggle ═══ */}
           <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
@@ -845,7 +592,7 @@ const NotificationCard = ({
 }: NotificationCardProps) => {
   const Icon = getNotificationIcon(notification.type);
   const iconColorClass = getNotificationColor(notification.type);
-  const badge = getNotificationBadge(notification.type);
+  const badge = _getBadge(notification.type);
   const priority = getPriorityLevel(notification);
   const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
   const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
