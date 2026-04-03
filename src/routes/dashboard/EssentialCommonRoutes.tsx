@@ -15,6 +15,7 @@ const OfflineMode = lazyRetry(() => import('@/pages/dashboard/OfflineMode'));
 const SystemStatus = lazyRetry(() => import('@/pages/dashboard/SystemStatus'));
 const PlatformTermsAndPolicies = lazyRetry(() => import('@/pages/dashboard/PlatformTermsAndPolicies'));
 const DigitalWallet = lazyRetry(() => import('@/pages/dashboard/DigitalWallet'));
+const GamificationPage = lazyRetry(() => import('@/pages/GamificationPage'));
 
 export const essentialCommonRoutes = (
   <>
@@ -29,5 +30,6 @@ export const essentialCommonRoutes = (
     <Route path="/dashboard/system-status" element={<SystemStatus />} />
     <Route path="/dashboard/platform-terms" element={<PlatformTermsAndPolicies />} />
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
+    <Route path="/dashboard/gamification" element={<GamificationPage />} />
   </>
 );

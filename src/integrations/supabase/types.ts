@@ -344,6 +344,60 @@ export type Database = {
           },
         ]
       }
+      achievement_definitions: {
+        Row: {
+          category: string
+          condition_type: string
+          condition_value: number
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          points_reward: number
+          sort_order: number
+          tier: string
+          title_ar: string
+          title_en: string | null
+        }
+        Insert: {
+          category?: string
+          condition_type?: string
+          condition_value?: number
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          points_reward?: number
+          sort_order?: number
+          tier?: string
+          title_ar: string
+          title_en?: string | null
+        }
+        Update: {
+          category?: string
+          condition_type?: string
+          condition_value?: number
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          points_reward?: number
+          sort_order?: number
+          tier?: string
+          title_ar?: string
+          title_en?: string | null
+        }
+        Relationships: []
+      }
       action_execution_log: {
         Row: {
           action_type: string
@@ -42689,6 +42743,38 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          seen: boolean
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          seen?: boolean
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          seen?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -42717,6 +42803,75 @@ export type Database = {
             columns: ["badge_id"]
             isOneToOne: false
             referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_gamification: {
+        Row: {
+          created_at: string
+          current_level: number
+          id: string
+          last_activity_at: string | null
+          level_name: string
+          longest_streak: number
+          organization_id: string | null
+          streak_days: number
+          total_points: number
+          total_shipments: number
+          total_tons: number
+          updated_at: string
+          user_id: string
+          xp_current: number
+          xp_next_level: number
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          last_activity_at?: string | null
+          level_name?: string
+          longest_streak?: number
+          organization_id?: string | null
+          streak_days?: number
+          total_points?: number
+          total_shipments?: number
+          total_tons?: number
+          updated_at?: string
+          user_id: string
+          xp_current?: number
+          xp_next_level?: number
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          last_activity_at?: string | null
+          level_name?: string
+          longest_streak?: number
+          organization_id?: string | null
+          streak_days?: number
+          total_points?: number
+          total_shipments?: number
+          total_tons?: number
+          updated_at?: string
+          user_id?: string
+          xp_current?: number
+          xp_next_level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gamification_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "user_gamification_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
