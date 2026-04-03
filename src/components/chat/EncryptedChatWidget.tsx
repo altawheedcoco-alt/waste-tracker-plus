@@ -24,8 +24,8 @@ import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 import ChatMentionRenderer from './ChatMentionRenderer';
 
-const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
-  <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
+const ChatVideoCallButtonMini = ({ partnerName, partnerUserId, partnerOrgId, partnerLogo }: { partnerName: string; partnerUserId?: string; partnerOrgId?: string; partnerLogo?: string | null }) => (
+  <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} partnerOrgId={partnerOrgId} partnerLogo={partnerLogo} />
 );
 
 const ORG_TYPE_LABELS: Record<string, string> = {
