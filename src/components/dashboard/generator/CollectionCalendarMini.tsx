@@ -75,7 +75,7 @@ const CollectionCalendarMini = () => {
                 <div className="flex flex-col items-center min-w-[50px]">
                   <Clock className="h-3.5 w-3.5 text-muted-foreground mb-0.5" />
                   <span className="text-[10px] font-bold">
-                    {getDateLabel(item.scheduled_date)}
+                    {getDateLabel((item as any).pickup_date)}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
