@@ -13,6 +13,7 @@ import { formatNumber, formatCurrency } from '@/lib/numberFormat';
 import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 interface ImageItem {
   file: File;
@@ -211,6 +212,7 @@ const DetailedWasteAnalysis = () => {
   };
 
   return (
+    <DashboardLayout>
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto" dir="rtl">
       <BackButton />
       <div className="text-center space-y-2">
