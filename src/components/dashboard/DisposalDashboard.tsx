@@ -34,6 +34,9 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';

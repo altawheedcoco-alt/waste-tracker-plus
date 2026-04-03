@@ -59,6 +59,9 @@ const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/Transpor
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
 const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
 const FuelEfficiencyTracker = lazy(() => import('./transporter/FuelEfficiencyTracker'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 const DriverAvailabilityBoard = lazy(() => import('./transporter/DriverAvailabilityBoard'));
 const RoutePerformanceWidget = lazy(() => import('./transporter/RoutePerformanceWidget'));
 const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));

@@ -35,6 +35,9 @@ import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
 const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQuality'));
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
