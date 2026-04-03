@@ -263,15 +263,20 @@ export function useWebRTCCall() {
       })
       .on('broadcast', { event: 'hangup' }, ({ payload }) => {
         const reason = payload?.reason || 'partner_ended';
-        resetCallState();
-        if (callRecordIdRef.current) {
+        const recordId = callRecordIdRef.current;
+        const duration = callInfo?.duration || 0;
+        const wasConnected = callInfo?.state === 'connected';
+
+        if (recordId) {
           supabase.from('call_records').update({
-            status: reason === 'busy' ? 'busy' : callInfo?.state === 'connected' ? 'ended' : 'missed',
+            status: reason === 'busy' ? 'busy' : wasConnected ? 'ended' : 'missed',
             ended_at: new Date().toISOString(),
             end_reason: reason,
-            duration_seconds: callInfo?.duration || 0,
-          }).eq('id', callRecordIdRef.current).then(() => {});
+            duration_seconds: duration,
+          }).eq('id', recordId).then(() => {});
         }
+
+        resetCallState();
       })
       .on('broadcast', { event: 'ready' }, async () => {
         // Receiver joined - re-send offer if we're the caller
