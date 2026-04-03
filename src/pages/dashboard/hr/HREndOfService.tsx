@@ -92,6 +92,7 @@ export default function HREndOfService() {
   });
 
   return (
+    <DashboardLayout>
     <div className="p-6 space-y-6" dir="rtl">
       <BackButton />
       <div className="flex items-center justify-between">
