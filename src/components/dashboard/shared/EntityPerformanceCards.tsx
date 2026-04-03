@@ -71,9 +71,9 @@ export default function EntityPerformanceCards() {
           .select('created_at')
           .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
           .gte('created_at', sixMonthsAgo),
-        supabase.from('organization_partners')
+        supabase.from('external_partners')
           .select('id', { count: 'exact' })
-          .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`)
+          .eq('organization_id', orgId)
           .eq('status', 'active'),
       ]);
 

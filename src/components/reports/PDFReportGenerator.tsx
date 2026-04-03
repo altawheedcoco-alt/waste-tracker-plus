@@ -75,9 +75,9 @@ export default function PDFReportGenerator() {
         .select('amount, entry_type, entry_category')
         .eq('organization_id', orgId)
         .gte('created_at', fromDate),
-      supabase.from('organization_partners')
+      supabase.from('external_partners')
         .select('id, status')
-        .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`),
+        .eq('organization_id', orgId),
     ]);
 
     const shipments = shipmentsRes.data || [];

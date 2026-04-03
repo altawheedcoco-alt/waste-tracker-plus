@@ -67,9 +67,9 @@ export default function SmartInsightsWidget() {
           .select('id', { count: 'exact' })
           .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
           .in('status', ['new', 'approved'] as any[]),
-        supabase.from('organization_partners')
+        supabase.from('external_partners')
           .select('id', { count: 'exact' })
-          .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`)
+          .eq('organization_id', orgId)
           .eq('status', 'active'),
       ]);
 
