@@ -43,6 +43,7 @@ const MyDataCenter = lazyRetry(() => import('@/pages/dashboard/MyDataCenter'));
 const EmployeeTaskBoard = lazyRetry(() => import('@/pages/dashboard/EmployeeTaskBoard'));
 const DocumentArchive = lazyRetry(() => import('@/pages/dashboard/DocumentArchive'));
 const PartnerReviews = lazyRetry(() => import('@/pages/dashboard/PartnerReviews'));
+const SharedLinksPage = lazyRetry(() => import('@/pages/dashboard/SharedLinksPage'));
 
 export const deferredCommonRoutes = (
   <>
