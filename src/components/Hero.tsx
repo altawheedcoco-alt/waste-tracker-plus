@@ -34,7 +34,7 @@ const Hero = memo(() => {
   // Animated counters based on real data
   const targets = {
     orgs: liveStats?.organizations ?? 500,
-    shipments: 37, // Fixed: operational modules count
+    shipments: 49, // Fixed: operational modules count (37 base + 12 new)
     users: liveStats?.users ?? 98,
   };
 
