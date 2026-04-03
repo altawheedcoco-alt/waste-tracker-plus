@@ -535,6 +535,7 @@ const GlobalCommodityExchange = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
         );
 };
 

@@ -324,6 +324,7 @@ const ApiManagement = () => {
 
       <CreateApiKeyDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </motion.div>
+    </DashboardLayout>
   );
 };
 

@@ -311,5 +311,6 @@ export default function CrossImpactDashboard() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }
