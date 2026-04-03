@@ -25,6 +25,7 @@ import EmployeeWelcomeStrip from './employee/EmployeeWelcomeStrip';
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
+const EmployeeTaskSummary = lazy(() => import('./employee/EmployeeTaskSummary'));
 
 
 const TabFallback = () => (
@@ -160,6 +161,9 @@ const EmployeeDashboard = () => {
         <TabsContent value="overview" className="mt-4 space-y-4">
           {/* Context-aware quick actions */}
           <EmployeeContextWidgets orgType={orgType} />
+
+          {/* ★ ملخص المهام الأسبوعي */}
+          <Suspense fallback={null}><EmployeeTaskSummary /></Suspense>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Leave Balances */}

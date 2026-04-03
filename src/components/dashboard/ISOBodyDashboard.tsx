@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
+const AuditCalendarWidget = lazy(() => import('@/components/dashboard/iso/AuditCalendarWidget'));
 
 import ISOMonthlyActivity from '@/components/iso/ISOMonthlyActivity';
 
@@ -160,6 +161,9 @@ const ISOBodyDashboard = memo(() => {
         <TabsContent value="overview" className="space-y-6 mt-4">
           {/* Monthly Activity */}
           <ISOMonthlyActivity audits={allAudits} />
+
+          {/* ★ ودجة تقويم المراجعات */}
+          <Suspense fallback={null}><AuditCalendarWidget /></Suspense>
 
           {/* Completion Rate */}
           <Card>
