@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Video, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useGlobalCall } from '@/providers/GlobalCallProvider';
+import { useGlobalCallSafe } from '@/providers/GlobalCallProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -13,8 +13,12 @@ interface ChatVideoCallButtonProps {
 }
 
 const ChatVideoCallButton = ({ partnerName, partnerUserId, partnerOrgId, partnerLogo }: ChatVideoCallButtonProps) => {
-  const { startCall } = useGlobalCall();
+  const callCtx = useGlobalCallSafe();
   const [starting, setStarting] = useState(false);
+
+  if (!callCtx) return null; // Not inside GlobalCallProvider — hide buttons
+
+  const { startCall } = callCtx;
 
   const resolvePartnerOrgId = async () => {
     if (partnerOrgId) return partnerOrgId;
