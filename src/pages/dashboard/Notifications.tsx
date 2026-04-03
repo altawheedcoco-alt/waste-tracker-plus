@@ -459,23 +459,7 @@ const Notifications = () => {
             </div>
           </div>
 
-          {/* ═══ Sub-categories ═══ */}
-          {activeCatConfig?.subCategories && activeCatConfig.subCategories.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              {activeCatConfig.subCategories.map(sub => (
-                <Button
-                  key={sub.id}
-                  size="sm"
-                  variant={activeSubCategory === sub.id ? 'default' : 'outline'}
-                  onClick={() => setActiveSubCategory(sub.id)}
-                  className="h-7 text-[10px] px-2.5 shrink-0"
-                >
-                  {sub.label}
-                </Button>
-              ))}
-            </div>
-          )}
+          {/* Sub-categories removed — now using registry categories directly */}
 
           {/* ═══ Search, Filter & View Toggle ═══ */}
           <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
