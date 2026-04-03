@@ -39,6 +39,12 @@ const FleetUtilizationWidget = lazy(() => import('@/components/analytics/FleetUt
 const InventoryTurnoverWidget = lazy(() => import('@/components/analytics/InventoryTurnoverWidget'));
 const LiveAlertsDashboard = lazy(() => import('@/components/analytics/LiveAlertsDashboard'));
 const ExportCenterWidget = lazy(() => import('@/components/analytics/ExportCenterWidget'));
+const RevenueByWasteTypeWidget = lazy(() => import('@/components/analytics/RevenueByWasteTypeWidget'));
+const MonthlyGrowthWidget = lazy(() => import('@/components/analytics/MonthlyGrowthWidget'));
+const TopClientsWidget = lazy(() => import('@/components/analytics/TopClientsWidget'));
+const PaymentStatusWidget = lazy(() => import('@/components/analytics/PaymentStatusWidget'));
+const PeakHoursWidget = lazy(() => import('@/components/analytics/PeakHoursWidget'));
+const SLAComplianceWidget = lazy(() => import('@/components/analytics/SLAComplianceWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -204,6 +210,36 @@ const AdvancedAnalytics = () => {
           </Suspense>
           <Suspense fallback={<ChartSkeleton />}>
             <PredictiveMaintenanceWidget />
+          </Suspense>
+        </div>
+
+        {/* Revenue by Waste Type + Payment Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <RevenueByWasteTypeWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PaymentStatusWidget />
+          </Suspense>
+        </div>
+
+        {/* Monthly Growth + Peak Hours */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <MonthlyGrowthWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PeakHoursWidget />
+          </Suspense>
+        </div>
+
+        {/* Top Clients + SLA Compliance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <TopClientsWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <SLAComplianceWidget />
           </Suspense>
         </div>
 
