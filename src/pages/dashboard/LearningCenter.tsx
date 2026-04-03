@@ -96,7 +96,6 @@ const LearningCenter = () => {
         </TabsContent>
       </Tabs>
     </ResponsivePageContainer>
-      </DashboardLayout>
   );
 };
 
