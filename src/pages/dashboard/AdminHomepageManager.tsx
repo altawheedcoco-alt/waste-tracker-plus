@@ -95,6 +95,7 @@ const AdminHomepageManager = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className="space-y-6" dir="rtl">
       <BackButton />
       {/* Header */}
