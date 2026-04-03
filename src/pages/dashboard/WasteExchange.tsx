@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -181,8 +180,7 @@ const WasteExchange = () => {
 
   if (!hasAccess) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh]">
           <Card className="max-w-md">
             <CardContent className="p-8 text-center">
               <ShieldCheck className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -193,7 +191,6 @@ const WasteExchange = () => {
             </CardContent>
           </Card>
         </div>
-      </DashboardLayout>
     );
   }
 
@@ -357,7 +354,6 @@ const WasteExchange = () => {
         />
       )}
     </div>
-      </DashboardLayout>
   );
 };
 
