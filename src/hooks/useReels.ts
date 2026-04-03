@@ -173,9 +173,24 @@ export function useReelActions() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['reels-feed'] });
       toast({ title: 'تم نشر الريل بنجاح! 🎬' });
+
+      // Fire reel_posted notification to org members + linked partners
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'reel_posted',
+            actorName: 'ريل جديد 🎬',
+            actorUserId: user?.id || '',
+            targetOrgId: vars.organization_id || undefined,
+            organizationId: vars.organization_id || undefined,
+            entityTitle: vars.caption || undefined,
+            includePartners: true,
+          });
+        });
+      } catch {}
     },
   });
 
