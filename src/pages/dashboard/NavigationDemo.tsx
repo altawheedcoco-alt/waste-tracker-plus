@@ -1160,6 +1160,7 @@ const NavigationDemo = () => {
         )}
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 
