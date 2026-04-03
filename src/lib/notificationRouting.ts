@@ -60,6 +60,17 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'dispute_resolved':
     case 'dispute_escalated':
     case 'dispute_created':
+    case 'new_shipment':
+    case 'shipment_offer':
+    case 'shipment_update':
+    case 'delivery_confirmed':
+    case 'collection_request':
+    case 'collection_trip_assigned':
+    case 'collection_trip_status':
+    case 'scheduled_collection':
+    case 'proof_of_service':
+    case 'loading_worker':
+    case 'recycler_timeslot':
       return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/shipments';
 
     // Chat with conversation ID
@@ -154,13 +165,29 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'driver_notification':
     case 'driver_sos':
     case 'driver_license_expiry':
+    case 'driver_alert_admin':
+    case 'driver_online':
+    case 'driver_rating':
+    case 'driver_financial':
+    case 'earning':
       return '/dashboard/transporter-drivers';
+
+    // Driver emergencies → fleet tracking
+    case 'driver_emergency':
+    case 'driver_emergency_admin':
+    case 'transport_incident':
+      return '/dashboard/fleet-tracking';
 
     // Work orders
     case 'work_order':
     case 'work_order_update':
     case 'work_order_completed':
     case 'work_order_cancelled':
+    case 'work_order_overdue':
+    case 'work_order_assigned':
+    case 'operational_plan':
+    case 'task_assigned':
+    case 'task_completed':
       return '/dashboard/work-orders';
 
     // Recycling reports may open PDF
