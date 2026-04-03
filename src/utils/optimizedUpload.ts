@@ -69,20 +69,30 @@ export const uploadFile = async (
     }
   }
 
-  // ضغط الفيديو تلقائياً — يفضل ffmpeg.wasm ثم يرجع لـ MediaRecorder
+  // ضغط الفيديو تلقائياً — يكتشف الشبكة ويختار أفضل إعدادات
   if (compress && needsCompression(file)) {
     try {
+      const { detectNetworkSpeed } = await import('./networkDetector');
+      const networkInfo = detectNetworkSpeed();
+
       if (isFFmpegSupported()) {
         const result = await ffmpegCompressVideo(file, {
-          maxWidth: 1080,
-          crf: 26,
+          preset: 'auto',
+          networkQuality: networkInfo.speed,
+          maxWidth: options.compressionOptions?.maxWidth as number || undefined,
           onProgress: options.onProgress,
         });
         fileToUpload = result.file;
         compressed = result.compressionRatio > 0;
         compressionRatio = result.compressionRatio;
       } else {
-        const result = await quickCompressVideo(file, { onProgress: options.onProgress });
+        const targetWidth = networkInfo.speed === 'slow' ? 480 : 720;
+        const targetBitrate = networkInfo.speed === 'slow' ? 500_000 : 800_000;
+        const result = await quickCompressVideo(file, {
+          maxWidth: targetWidth,
+          videoBitrate: targetBitrate,
+          onProgress: options.onProgress,
+        });
         fileToUpload = result.file;
         compressed = result.compressionRatio > 0;
         compressionRatio = result.compressionRatio;
