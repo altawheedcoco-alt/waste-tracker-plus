@@ -33,7 +33,7 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
-
+const ClientPortfolioWidget = lazy(() => import('./shared/ClientPortfolioWidget'));
 
 import OfficeWorkloadBalance from '@/components/consulting-office/OfficeWorkloadBalance';
 
