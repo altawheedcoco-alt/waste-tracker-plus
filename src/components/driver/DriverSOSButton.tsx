@@ -180,7 +180,7 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId, driverTy
           .single();
 
         if (shipment) {
-          const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id, shipment.disposal_id]
+          const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id]
             .filter(Boolean)
             .filter(id => id !== organizationId);
 
