@@ -60,6 +60,17 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'dispute_resolved':
     case 'dispute_escalated':
     case 'dispute_created':
+    case 'new_shipment':
+    case 'shipment_offer':
+    case 'shipment_update':
+    case 'delivery_confirmed':
+    case 'collection_request':
+    case 'collection_trip_assigned':
+    case 'collection_trip_status':
+    case 'scheduled_collection':
+    case 'proof_of_service':
+    case 'loading_worker':
+    case 'recycler_timeslot':
       return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/shipments';
 
     // Chat with conversation ID
