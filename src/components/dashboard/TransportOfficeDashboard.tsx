@@ -16,6 +16,8 @@ const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAle
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const TransportOfficeFAB = lazy(() => import('@/components/transport-office/TransportOfficeFAB'));
 const FleetOverviewWidget = lazy(() => import('@/components/dashboard/transport-office/FleetOverviewWidget'));
+const DriverPerformanceRanking = lazy(() => import('@/components/dashboard/transport-office/DriverPerformanceRanking'));
+const RevenueBreakdownWidget = lazy(() => import('@/components/dashboard/transport-office/RevenueBreakdownWidget'));
 
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
