@@ -893,6 +893,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
           if (memberIds.length > 0) {
             await supabase.from('notifications').insert(memberIds.map((uid: string) => ({ user_id: uid, title: notifTitle, message: inAppMessage, type: 'shipment_status', is_read: false, reference_id: shipment.id, reference_type: 'shipment', metadata: { skip_auto_channels: true } as any })));
             await supabase.functions.invoke('whatsapp-send', { body: { action: 'broadcast_to_users', user_ids: memberIds, message_text: whatsappText, organization_id: orgId, notification_type: 'shipment_status', interactive_buttons: buttons, metadata: { shipment_id: shipment.id, shipment_number: shipment.shipment_number, new_status: dbStatus, direct_link: richData?.direct_link } } });
+            await supabase.functions.invoke('send-push', { body: { user_ids: memberIds, title: notifTitle, body: inAppMessage, tag: `shipment-${dbStatus}-${Date.now()}`, data: { url: `/dashboard/shipments/${shipment.id}`, type: 'shipment_status', reference_id: shipment.id } } });
           }
         }));
       } catch {}
