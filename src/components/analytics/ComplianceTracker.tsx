@@ -74,7 +74,7 @@ export default function ComplianceTracker() {
         buildItem('environmental_license', 'الترخيص البيئي', !!org?.environmental_license, org?.eeaa_license_expiry_date),
         buildItem('env_approval', 'الموافقة البيئية', !!org?.environmental_license, org?.env_approval_expiry),
         buildItem('commercial_register', 'السجل التجاري', !!org?.commercial_register),
-        buildItem('tax_card', 'البطاقة الضريبية', !!org?.tax_card_number),
+        buildItem('tax_card', 'البطاقة الضريبية', !!org?.tax_card),
         buildItem('ida_license', 'ترخيص هيئة التنمية الصناعية', !!org?.ida_license, org?.ida_license_expiry_date),
         buildItem('hazardous_cert', 'شهادة المخلفات الخطرة', !!org?.hazardous_certified),
         buildItem('quality_certificate', 'شهادة الجودة ISO', false),
