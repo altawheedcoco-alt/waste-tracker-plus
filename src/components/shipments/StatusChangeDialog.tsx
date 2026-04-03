@@ -768,12 +768,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
     };
   })();
 
-  const isDeliveryBlocked = (() => {
-    if (!selectedStatus) return false;
-    const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
-    if (!['delivered', 'confirmed'].includes(dbStatus) || organizationType !== 'transporter' || !hasDeliveryCoords) return false;
-    return geofenceCheck.checking || geofenceCheck.isInside === false;
-  })();
+  const isDeliveryBlocked = false;
 
   const showRecyclerWeightInput = (() => {
     if (!selectedStatus) return false;
