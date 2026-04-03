@@ -125,6 +125,9 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
   optimizeDeps: {
     include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
     force: true,
