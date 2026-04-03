@@ -438,6 +438,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
                   is_read: false,
                   reference_id: shipment.id,
                   reference_type: 'shipment',
+                  metadata: { skip_auto_channels: true } as any,
                 }))
               );
             }
