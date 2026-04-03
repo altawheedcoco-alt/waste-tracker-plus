@@ -51,10 +51,13 @@ export function useWebRTCCall() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
   const callRecordIdRef = useRef<string | null>(null);
+  const signalingCallIdRef = useRef<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const screenStreamRef = useRef<MediaStream | null>(null);
   const originalVideoTrackRef = useRef<MediaStreamTrack | null>(null);
+  const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   // Ringtone
   useEffect(() => {
@@ -104,6 +107,9 @@ export function useWebRTCCall() {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+    signalingCallIdRef.current = null;
+    pendingOfferRef.current = null;
+    pendingIceCandidatesRef.current = [];
     // Stop recording
     if (recorderRef.current && recorderRef.current.state !== 'inactive') {
       recorderRef.current.stop();
@@ -112,6 +118,12 @@ export function useWebRTCCall() {
     recordedChunksRef.current = [];
     stopRingtone();
   }, [localStream, stopRingtone]);
+
+  const resetCallState = useCallback(() => {
+    cleanup();
+    setCallInfo(null);
+    callRecordIdRef.current = null;
+  }, [cleanup]);
 
   // Duration timer
   const startDurationTimer = useCallback(() => {
@@ -178,11 +190,56 @@ export function useWebRTCCall() {
     return pc;
   }, [startDurationTimer, stopRingtone]);
 
+  const applyQueuedSignals = useCallback(async () => {
+    if (!pcRef.current) return;
+
+    if (pendingOfferRef.current && !pcRef.current.currentRemoteDescription) {
+      await pcRef.current.setRemoteDescription(new RTCSessionDescription(pendingOfferRef.current));
+      pendingOfferRef.current = null;
+
+      const answer = await pcRef.current.createAnswer();
+      await pcRef.current.setLocalDescription(answer);
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'answer',
+        payload: { sdp: answer },
+      });
+    }
+
+    if (pendingIceCandidatesRef.current.length > 0 && pcRef.current.remoteDescription) {
+      const queuedCandidates = [...pendingIceCandidatesRef.current];
+      pendingIceCandidatesRef.current = [];
+
+      for (const candidate of queuedCandidates) {
+        try {
+          await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch {
+          pendingIceCandidatesRef.current.push(candidate);
+        }
+      }
+    }
+  }, []);
+
   // Setup signaling channel
   const setupSignaling = useCallback((callId: string, isInitiator = false) => {
+    if (channelRef.current && signalingCallIdRef.current === callId) {
+      return channelRef.current;
+    }
+
+    if (channelRef.current && signalingCallIdRef.current !== callId) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
     const channel = supabase.channel(`call:${callId}`)
       .on('broadcast', { event: 'offer' }, async ({ payload }) => {
-        if (!pcRef.current) return;
+        if (!pcRef.current) {
+          pendingOfferRef.current = payload.sdp;
+          return;
+        }
+
+        if (pcRef.current.currentRemoteDescription) return;
+
         await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.sdp));
         const answer = await pcRef.current.createAnswer();
         await pcRef.current.setLocalDescription(answer);
@@ -190,16 +247,36 @@ export function useWebRTCCall() {
       })
       .on('broadcast', { event: 'answer' }, async ({ payload }) => {
         if (!pcRef.current) return;
+        if (pcRef.current.currentRemoteDescription) return;
         await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.sdp));
       })
       .on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
-        if (!pcRef.current) return;
+        if (!pcRef.current || !pcRef.current.remoteDescription) {
+          pendingIceCandidatesRef.current.push(payload.candidate);
+          return;
+        }
         try {
           await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
-        } catch { /* ignore */ }
+        } catch {
+          pendingIceCandidatesRef.current.push(payload.candidate);
+        }
       })
-      .on('broadcast', { event: 'hangup' }, () => {
-        endCall('partner_ended');
+      .on('broadcast', { event: 'hangup' }, ({ payload }) => {
+        const reason = payload?.reason || 'partner_ended';
+        const recordId = callRecordIdRef.current;
+        const duration = callInfo?.duration || 0;
+        const wasConnected = callInfo?.state === 'connected';
+
+        if (recordId) {
+          supabase.from('call_records').update({
+            status: reason === 'busy' ? 'busy' : wasConnected ? 'ended' : 'missed',
+            ended_at: new Date().toISOString(),
+            end_reason: reason,
+            duration_seconds: duration,
+          }).eq('id', recordId).then(() => {});
+        }
+
+        resetCallState();
       })
       .on('broadcast', { event: 'ready' }, async () => {
         // Receiver joined - re-send offer if we're the caller
@@ -224,8 +301,9 @@ export function useWebRTCCall() {
       });
 
     channelRef.current = channel;
+    signalingCallIdRef.current = callId;
     return channel;
-  }, []);
+  }, [callInfo?.duration, callInfo?.state, resetCallState]);
 
   // Subscribe to call_messages from DB for persistence
   useEffect(() => {
@@ -359,11 +437,11 @@ export function useWebRTCCall() {
       const stream = await getMediaStream(callInfo.callType);
       setupPeerConnection(stream);
       setupSignaling(callInfo.callId, false);
+      await applyQueuedSignals();
     } catch (err) {
-      cleanup();
-      setCallInfo(null);
+      resetCallState();
     }
-  }, [callInfo, getMediaStream, setupPeerConnection, setupSignaling, stopRingtone, cleanup]);
+  }, [callInfo, getMediaStream, setupPeerConnection, setupSignaling, stopRingtone, applyQueuedSignals, resetCallState]);
 
   // End/reject call
   const endCall = useCallback((reason = 'user_ended', busyMessage?: string) => {
@@ -398,10 +476,8 @@ export function useWebRTCCall() {
       }
     }
 
-    cleanup();
-    setCallInfo(null);
-    callRecordIdRef.current = null;
-  }, [callInfo, cleanup, user, organization]);
+    resetCallState();
+  }, [callInfo, resetCallState, user, organization]);
 
   // Toggle controls
   const toggleMute = useCallback(() => {
@@ -608,12 +684,16 @@ export function useWebRTCCall() {
   const handleIncomingCall = useCallback(async (record: any) => {
     if (record.status !== 'ringing') return;
     if (record.caller_id === user?.id) return;
+    if (record.receiver_user_id && record.receiver_user_id !== user?.id) return;
+    if (!record.receiver_user_id && record.receiver_org_id !== organization?.id) return;
+    if (callRecordIdRef.current === record.id || callInfo?.callId === record.id) return;
     if (callInfo) {
       await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
       return;
     }
 
     callRecordIdRef.current = record.id;
+    setupSignaling(record.id, false);
 
     playRingtone();
     setCallInfo({
@@ -631,7 +711,39 @@ export function useWebRTCCall() {
       isScreenSharing: false,
       isRecording: false,
     });
-  }, [user?.id, callInfo, playRingtone]);
+  }, [user?.id, organization?.id, callInfo, playRingtone, setupSignaling]);
+
+  useEffect(() => {
+    if (!callInfo?.callId) return;
+
+    const statusChannel = supabase.channel(`call-record-status:${callInfo.callId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'call_records',
+        filter: `id=eq.${callInfo.callId}`,
+      }, async (payload) => {
+        const record = payload.new as any;
+        const terminalStatuses = ['busy', 'rejected', 'missed', 'ended'];
+
+        if (record.status === 'answered' && callInfo.state === 'calling') {
+          setCallInfo(prev => prev ? { ...prev, state: 'connecting' } : null);
+        }
+
+        if (terminalStatuses.includes(record.status)) {
+          resetCallState();
+        }
+
+        if (record.status === 'ringing' && callInfo.isIncoming) {
+          await applyQueuedSignals();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(statusChannel);
+    };
+  }, [callInfo?.callId, callInfo?.isIncoming, callInfo?.state, applyQueuedSignals, resetCallState]);
 
   const restorePendingIncomingCall = useCallback(async (preferredCallId?: string | null) => {
     if (!user?.id || !organization?.id || callInfo) return;
