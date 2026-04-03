@@ -122,12 +122,26 @@ export function useReelActions() {
   const { toast } = useToast();
 
   const toggleLike = useMutation({
-    mutationFn: async ({ reelId, isLiked }: { reelId: string; isLiked: boolean }) => {
+    mutationFn: async ({ reelId, isLiked, reelOwnerId }: { reelId: string; isLiked: boolean; reelOwnerId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       if (isLiked) {
         await supabase.from('reel_likes').delete().eq('reel_id', reelId).eq('user_id', user.id);
       } else {
         await supabase.from('reel_likes').insert({ reel_id: reelId, user_id: user.id });
+        // Notify reel owner about the like
+        if (reelOwnerId && reelOwnerId !== user.id) {
+          try {
+            import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+              notifySocialEvent({
+                type: 'reel_liked',
+                actorName: 'إعجاب بالريل ❤️',
+                actorUserId: user.id,
+                targetUserId: reelOwnerId,
+                entityId: reelId,
+              });
+            });
+          } catch {}
+        }
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reels-feed'] }),
