@@ -518,6 +518,7 @@ const PlatformTermsAndPolicies = () => {
         </div>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

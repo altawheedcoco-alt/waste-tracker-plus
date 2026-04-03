@@ -366,6 +366,7 @@ const LawsAndRegulations = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

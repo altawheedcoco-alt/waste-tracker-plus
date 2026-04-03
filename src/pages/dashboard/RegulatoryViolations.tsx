@@ -152,6 +152,7 @@ const RegulatoryViolations = () => {
         ))}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

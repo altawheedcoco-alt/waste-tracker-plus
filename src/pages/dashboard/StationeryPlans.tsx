@@ -143,6 +143,7 @@ const StationeryPlans = () => {
         <p>📞 للباقات المؤسسية والتخصيص الكامل تواصل معنا</p>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

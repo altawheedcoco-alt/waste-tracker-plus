@@ -215,6 +215,7 @@ const WazeLiveMap = () => {
         ))}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

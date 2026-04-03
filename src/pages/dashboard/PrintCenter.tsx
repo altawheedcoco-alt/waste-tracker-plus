@@ -1196,6 +1196,7 @@ const PrintCenter = () => {
         </Card>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

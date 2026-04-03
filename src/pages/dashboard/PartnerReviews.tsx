@@ -245,6 +245,7 @@ const PartnerReviews = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

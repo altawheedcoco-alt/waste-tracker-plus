@@ -93,6 +93,7 @@ const RegulatorDashboardNew = () => {
         <RegulatorQuickFAB onSetTab={setActiveTab} />
       </Suspense>
     </div>
+      </DashboardLayout>
   );
 };
 

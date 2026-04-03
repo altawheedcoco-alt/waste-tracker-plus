@@ -302,6 +302,7 @@ const WasteAuctions = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -713,6 +713,7 @@ const DatabaseQueryOptimization = () => {
         </motion.div>
       )}
     </motion.div>
+      </DashboardLayout>
   );
 };
 

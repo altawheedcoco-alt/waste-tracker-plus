@@ -330,6 +330,7 @@ const NodeRow = ({ node, isAr, isLast }: { node: ActionChainNode; isAr: boolean;
         )}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

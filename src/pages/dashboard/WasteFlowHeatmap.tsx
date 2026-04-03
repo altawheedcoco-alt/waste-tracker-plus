@@ -333,6 +333,7 @@ const WasteFlowHeatmap = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -633,6 +633,7 @@ const SecurityPenetrationTesting = () => {
         </motion.div>
       )}
     </motion.div>
+      </DashboardLayout>
   );
 };
 

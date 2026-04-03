@@ -607,6 +607,7 @@ const Quotations = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

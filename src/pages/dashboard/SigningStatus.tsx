@@ -773,6 +773,7 @@ const SigningStatus = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

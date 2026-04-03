@@ -206,6 +206,7 @@ const Settings = () => {
         )}
       </AnimatePresence>
     </div>
+      </DashboardLayout>
   );
 };
 

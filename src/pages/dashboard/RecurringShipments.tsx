@@ -262,6 +262,7 @@ const RecurringShipments = () => {
         )}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

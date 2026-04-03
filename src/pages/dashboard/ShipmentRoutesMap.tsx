@@ -35,6 +35,7 @@ const ShipmentRoutesMap = () => {
       </div>
       <div ref={mapRef} className="rounded-lg border border-border" style={{ height: '500px' }} />
     </div>
+      </DashboardLayout>
   );
 };
 

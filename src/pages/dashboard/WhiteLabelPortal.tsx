@@ -230,6 +230,7 @@ const WhiteLabelPortal = () => {
         </Card>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -188,6 +188,7 @@ const TestimonialsManagement = () => {
         </div>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

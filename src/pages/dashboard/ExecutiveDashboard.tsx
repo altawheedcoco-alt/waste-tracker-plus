@@ -215,6 +215,7 @@ const ExecutiveDashboard = () => {
         </Card>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -175,6 +175,7 @@ const CapacityManagement = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

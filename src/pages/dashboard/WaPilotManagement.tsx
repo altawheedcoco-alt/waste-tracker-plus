@@ -1379,6 +1379,7 @@ const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
         <WhatsAppNotificationManager />
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

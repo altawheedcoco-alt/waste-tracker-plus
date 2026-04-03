@@ -289,6 +289,7 @@ const EquipmentMarketplace = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

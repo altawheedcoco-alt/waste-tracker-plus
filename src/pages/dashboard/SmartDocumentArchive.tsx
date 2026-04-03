@@ -473,6 +473,7 @@ const SmartDocumentArchive = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

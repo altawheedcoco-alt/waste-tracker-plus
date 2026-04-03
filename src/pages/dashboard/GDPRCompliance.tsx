@@ -293,6 +293,7 @@ const GDPRCompliance = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

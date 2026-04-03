@@ -196,6 +196,7 @@ const EmployeeTaskBoard = () => {
         ))}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

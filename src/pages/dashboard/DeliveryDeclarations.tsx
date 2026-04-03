@@ -188,6 +188,7 @@ const DeliveryDeclarations = () => {
         />
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

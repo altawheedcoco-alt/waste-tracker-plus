@@ -150,6 +150,7 @@ const SmartJobRecommendations = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

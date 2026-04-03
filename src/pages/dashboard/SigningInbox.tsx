@@ -250,6 +250,7 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
         </div>
       </CardContent>
     </Card>
+      </DashboardLayout>
   );
 }
 

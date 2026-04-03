@@ -610,6 +610,7 @@ const CamerasPage = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

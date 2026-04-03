@@ -284,6 +284,7 @@ const MyWorkspace = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

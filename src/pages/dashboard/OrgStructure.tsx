@@ -269,6 +269,7 @@ const OrgStructure = () => {
         />
       )}
     </motion.div>
+      </DashboardLayout>
   );
 };
 

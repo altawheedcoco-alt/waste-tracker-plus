@@ -42,6 +42,7 @@ const ORG_TYPE_LABELS: Record<string, { ar: string; en: string }> = {
   employee: { ar: 'موظف', en: 'Employee' },
   regulator: { ar: 'رقابي', en: 'Regulator' },
   admin: { ar: 'مدير', en: 'Admin' },
+  </DashboardLayout>
 };
 
 export default function CrossImpactDashboard() {

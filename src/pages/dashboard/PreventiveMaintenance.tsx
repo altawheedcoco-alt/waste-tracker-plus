@@ -168,6 +168,7 @@ const PreventiveMaintenance = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -342,6 +342,7 @@ function EndpointDoc({ method, path, description, scope }: { method: string; pat
       </div>
       <Badge variant="outline" className="text-xs">{scope}</Badge>
     </div>
+      </DashboardLayout>
   );
 }
 

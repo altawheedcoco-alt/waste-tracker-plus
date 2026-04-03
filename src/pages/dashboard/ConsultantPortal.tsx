@@ -171,6 +171,7 @@ const ConsultantPortal = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

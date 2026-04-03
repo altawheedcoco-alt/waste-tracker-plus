@@ -592,6 +592,7 @@ const StatCard = ({ icon, label, value, sub, color, badge, badgeClass }: { icon:
     )}
     {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
   </div>
+  </DashboardLayout>
 );
 
 export default DetailedWasteAnalysis;

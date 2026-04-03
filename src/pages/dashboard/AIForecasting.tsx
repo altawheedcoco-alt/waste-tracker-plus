@@ -157,6 +157,7 @@ const AIForecasting = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

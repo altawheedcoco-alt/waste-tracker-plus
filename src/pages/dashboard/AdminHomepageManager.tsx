@@ -522,7 +522,8 @@ const BlockFormDialog = memo(({ open, onOpenChange, block, sections, onSave, isS
       </DialogContent>
     </Dialog>
   );
-});
+}  </DashboardLayout>
+);
 BlockFormDialog.displayName = 'BlockFormDialog';
 
 export default AdminHomepageManager;

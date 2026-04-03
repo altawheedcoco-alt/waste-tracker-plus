@@ -81,6 +81,7 @@ const GovernanceDashboard = () => {
         <TabsContent value="alerts"><GovernanceAlertsTab /></TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

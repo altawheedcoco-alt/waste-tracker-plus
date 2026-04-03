@@ -39,6 +39,7 @@ const TabFallback = () => (
     <Skeleton className="h-32 w-full" />
     <Skeleton className="h-8 w-2/3" />
   </div>
+  </DashboardLayout>
 );
 
 const SUGGESTIONS = [

@@ -96,6 +96,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   under_maintenance: { label: 'صيانة', color: 'bg-amber-100 text-amber-700' },
   full: { label: 'ممتلئ', color: 'bg-red-100 text-red-700' },
   closed: { label: 'مغلق', color: 'bg-red-200 text-red-800' },
+  </DashboardLayout>
 };
 
 const governorates = [

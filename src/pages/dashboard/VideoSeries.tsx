@@ -952,6 +952,7 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
       </div>
     </div>
   </motion.div>
+  </DashboardLayout>
 );
 
 export default VideoSeries;

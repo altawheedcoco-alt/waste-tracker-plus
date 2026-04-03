@@ -7,6 +7,7 @@ const RegulatoryDocuments = () => {
       <div className="container mx-auto py-6 px-4">
       <RegulatoryDocumentsCenter />
     </div>
+      </DashboardLayout>
   );
 };
 

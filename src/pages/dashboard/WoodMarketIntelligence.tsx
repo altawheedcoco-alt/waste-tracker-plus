@@ -534,6 +534,7 @@ const WoodMarketIntelligence = () => {
         </AnimatePresence>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

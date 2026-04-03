@@ -149,6 +149,7 @@ const Permits = () => {
         permit={viewPermit}
       />
     </div>
+      </DashboardLayout>
   );
 };
 

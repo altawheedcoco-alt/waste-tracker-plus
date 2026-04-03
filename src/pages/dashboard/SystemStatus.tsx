@@ -602,6 +602,7 @@ const SystemStatus = () => {
         </TabsContent>
       </Tabs>
     </motion.div>
+      </DashboardLayout>
   );
 };
 

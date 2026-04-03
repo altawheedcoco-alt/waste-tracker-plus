@@ -632,6 +632,7 @@ const AdminDocumentStamping = () => {
         loading={signingLoading}
       />
     </div>
+      </DashboardLayout>
   );
 };
 

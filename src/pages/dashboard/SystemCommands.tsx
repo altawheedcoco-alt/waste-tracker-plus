@@ -843,6 +843,7 @@ const SystemCommands = () => {
         </div>
       </ScrollArea>
     </motion.div>
+      </DashboardLayout>
   );
 };
 

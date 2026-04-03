@@ -401,6 +401,7 @@ const ESGReports = () => {
         </TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

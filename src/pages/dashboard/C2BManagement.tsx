@@ -1,7 +1,8 @@
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { lazy, Suspense } from "react";
 
-const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel"));
+const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel")  </DashboardLayout>
+);
 
 export default function C2BManagement() {
   return (

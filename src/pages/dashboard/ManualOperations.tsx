@@ -410,6 +410,7 @@ const ManualOperations = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

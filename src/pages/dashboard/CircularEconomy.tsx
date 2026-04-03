@@ -62,6 +62,7 @@ const CircularEconomy = () => {
         </Tabs>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

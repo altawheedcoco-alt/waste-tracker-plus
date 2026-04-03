@@ -345,6 +345,7 @@ const StationeryTemplates = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

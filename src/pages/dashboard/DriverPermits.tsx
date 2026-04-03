@@ -737,6 +737,7 @@ const DriverPermits = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

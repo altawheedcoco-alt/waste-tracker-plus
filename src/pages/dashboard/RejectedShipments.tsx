@@ -297,6 +297,7 @@ const RejectedShipments = () => {
         </div>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -237,6 +237,7 @@ const CVBuilder = () => {
       {/* Hidden ref for print */}
       <div ref={cvRef} className="hidden" />
     </div>
+      </DashboardLayout>
   );
 };
 

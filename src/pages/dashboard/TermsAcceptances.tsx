@@ -528,6 +528,7 @@ const TermsAcceptances = () => {
         )}
       </div>
     </motion.div>
+      </DashboardLayout>
   );
 };
 
