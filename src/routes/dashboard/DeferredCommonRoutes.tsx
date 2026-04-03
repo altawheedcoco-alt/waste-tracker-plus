@@ -45,6 +45,7 @@ const DocumentArchive = lazyRetry(() => import('@/pages/dashboard/DocumentArchiv
 const PartnerReviews = lazyRetry(() => import('@/pages/dashboard/PartnerReviews'));
 const SharedLinksPage = lazyRetry(() => import('@/pages/dashboard/SharedLinksPage'));
 const AdvancedAnalyticsPage = lazyRetry(() => import('@/pages/dashboard/AdvancedAnalyticsPage'));
+const ExecutiveSummaryPage = lazyRetry(() => import('@/pages/dashboard/ExecutiveSummaryPage'));
 
 export const deferredCommonRoutes = (
   <>
