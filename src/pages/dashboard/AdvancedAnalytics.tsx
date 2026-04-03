@@ -55,9 +55,19 @@ const AdvancedAnalytics = () => {
           </Suspense>
         </div>
 
-        {/* Partner Performance Matrix */}
+        {/* Partner Performance Matrix + Waste Flow */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <PartnerPerformanceMatrix />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <WasteFlowSankey />
+          </Suspense>
+        </div>
+
+        {/* Goal Tracking */}
         <Suspense fallback={<ChartSkeleton />}>
-          <PartnerPerformanceMatrix />
+          <GoalTrackingDashboard />
         </Suspense>
 
         {/* Performance Comparison */}
