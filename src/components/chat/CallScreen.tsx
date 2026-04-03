@@ -121,7 +121,11 @@ const CallScreen = memo(({
 
   const getStatusText = () => {
     switch (callInfo.state) {
-      case 'calling': return 'جاري الاتصال...';
+      case 'calling': 
+        if (callInfo.isReceiverOnline === false) {
+          return 'المستقبل غير متصل بالإنترنت... سيصله إشعار';
+        }
+        return 'جاري الاتصال...';
       case 'ringing': return 'مكالمة واردة';
       case 'connecting': return 'جاري الربط...';
       case 'connected': return formatDuration(callInfo.duration);
