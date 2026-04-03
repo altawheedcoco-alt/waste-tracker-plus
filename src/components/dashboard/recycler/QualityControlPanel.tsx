@@ -18,7 +18,7 @@ const QualityControlPanel = () => {
       if (!organization?.id) return null;
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('id, waste_type, actual_weight, status, created_at, generator:organizations!shipments_generator_id_fkey(name)')
+        .select('id, waste_type, actual_weight, status, created_at, generator_id')
         .eq('recycler_id', organization.id)
         .in('status', ['delivered', 'confirmed'])
         .order('created_at', { ascending: false })
