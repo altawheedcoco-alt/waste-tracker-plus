@@ -10,8 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MusicPicker from '@/components/media/MusicPicker';
 import VideoUploadProgress, { UploadStage } from '@/components/upload/VideoUploadProgress';
-import { ffmpegCompressVideo, isFFmpegSupported, generateThumbnail } from '@/utils/ffmpegCompress';
-import { needsCompression } from '@/utils/quickVideoCompress';
+import { generateThumbnail } from '@/utils/ffmpegCompress';
+import { smartVideoUpload } from '@/utils/smartVideoUpload';
+import { uploadFile as optimizedUploadFile } from '@/utils/optimizedUpload';
 import type { MusicTrack } from '@/lib/musicLibrary';
 
 interface Props {
