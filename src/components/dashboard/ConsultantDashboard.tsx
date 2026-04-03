@@ -40,7 +40,7 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
-
+const ClientPortfolioWidget = lazy(() => import('./shared/ClientPortfolioWidget'));
 
 import ConsultantActiveProjects from '@/components/consultant/ConsultantActiveProjects';
 
