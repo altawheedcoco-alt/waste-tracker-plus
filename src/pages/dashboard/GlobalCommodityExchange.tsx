@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -160,8 +159,7 @@ const GlobalCommodityExchange = () => {
       stable: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
     };
     return (
-      <DashboardLayout>
-        <Badge variant="outline" className={`${colors[trend as keyof typeof colors] || colors.stable} gap-1`}>
+              <Badge variant="outline" className={`${colors[trend as keyof typeof colors] || colors.stable} gap-1`}>
         {getTrendIcon(trend)}
         {change > 0 ? '+' : ''}{change?.toFixed(1)}%
       </Badge>
@@ -535,8 +533,7 @@ const GlobalCommodityExchange = () => {
         </TabsContent>
       </Tabs>
     </div>
-      </DashboardLayout>
-  );
+        );
 };
 
 export default GlobalCommodityExchange;

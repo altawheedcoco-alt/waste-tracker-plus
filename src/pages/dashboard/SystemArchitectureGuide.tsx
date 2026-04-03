@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,8 +24,7 @@ const SystemArchitectureGuide = () => {
   const orgChains = getOrgChains(orgType);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+          <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
@@ -330,8 +328,7 @@ const NodeRow = ({ node, isAr, isLast }: { node: ActionChainNode; isAr: boolean;
         )}
       </div>
     </div>
-      </DashboardLayout>
-  );
+        );
 };
 
 // ═══════════════════════════════════════════

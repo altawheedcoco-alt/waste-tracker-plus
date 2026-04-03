@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Clock, Film, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SkipBack, SkipForward, Pause, Volume2, VolumeX, Maximize, X, Search, Eye, CheckCircle2, Trophy, Sparkles, Tv, ListVideo } from 'lucide-react';
@@ -952,7 +951,6 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
       </div>
     </div>
   </motion.div>
-  </DashboardLayout>
-);
+  );
 
 export default VideoSeries;

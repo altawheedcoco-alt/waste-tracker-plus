@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins, X, Plus, FileText, ImageIcon, ShieldX } from 'lucide-react';
@@ -122,8 +121,7 @@ const DetailedWasteAnalysis = () => {
 
   if (!hasAccess) {
     return (
-      <DashboardLayout>
-        <div className="p-4 md:p-6 max-w-5xl mx-auto" dir="rtl">
+              <div className="p-4 md:p-6 max-w-5xl mx-auto" dir="rtl">
         <BackButton />
         <Card className="mt-6">
           <CardContent className="flex flex-col items-center justify-center py-16 space-y-4">
@@ -592,7 +590,6 @@ const StatCard = ({ icon, label, value, sub, color, badge, badgeClass }: { icon:
     )}
     {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
   </div>
-  </DashboardLayout>
-);
+  );
 
 export default DetailedWasteAnalysis;
