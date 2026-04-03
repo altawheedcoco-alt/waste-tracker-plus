@@ -457,7 +457,7 @@ const EncryptedChatWidget = () => {
                     <Lock className="w-3 h-3 text-primary-foreground/60" />
                   </div>
                   <div className="flex items-center gap-1">
-                    <ChatVideoCallButtonMini partnerName={selectedConvo?.partner?.full_name || ''} partnerUserId={selectedConvo?.partner?.user_id} />
+                    <ChatVideoCallButtonMini partnerName={selectedConvo?.partner?.full_name || ''} partnerUserId={selectedConvo?.partner?.user_id} partnerOrgId={selectedConvo?.partner?.organization_id} partnerLogo={selectedConvo?.partner?.logo_url} />
                   </div>
                 </>
               ) : (
