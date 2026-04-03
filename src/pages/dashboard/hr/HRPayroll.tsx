@@ -85,6 +85,7 @@ export default function HRPayroll() {
   const totalNet = payrollRuns.reduce((s, r) => s + Number(r.total_net || 0), 0);
 
   return (
+    <DashboardLayout>
     <div className="p-6 space-y-6" dir="rtl">
       <BackButton />
       <div className="flex items-center justify-between">
