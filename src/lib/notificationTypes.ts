@@ -368,6 +368,190 @@ export const NOTIFICATION_TYPES_REGISTRY: NotificationTypeMeta[] = [
   { type: 'warning', category: 'system', labelAr: 'تحذير', defaultRoute: null, soundGroup: 'warning', defaultPriority: 'high' },
   { type: 'action', category: 'system', labelAr: 'إجراء', defaultRoute: null, soundGroup: 'default', defaultPriority: 'normal' },
   { type: 'system', category: 'system', labelAr: 'نظام', defaultRoute: '/dashboard', soundGroup: 'default', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 25. أنواع إضافية من SQL Triggers — الشحنات والعمليات (9)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'new_shipment', category: 'shipments', labelAr: 'شحنة جديدة', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_created', defaultPriority: 'normal' },
+  { type: 'shipment_offer', category: 'shipments', labelAr: 'عرض شحنة', defaultRoute: '/dashboard/shipments', soundGroup: 'approval_request', defaultPriority: 'high' },
+  { type: 'delivery_confirmed', category: 'shipments', labelAr: 'تأكيد التسليم', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_delivered', defaultPriority: 'normal' },
+  { type: 'collection_request', category: 'shipments', labelAr: 'طلب تجميع', defaultRoute: '/dashboard/shipments', soundGroup: 'approval_request', defaultPriority: 'high' },
+  { type: 'collection_trip_assigned', category: 'shipments', labelAr: 'تعيين رحلة تجميع', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_assigned', defaultPriority: 'high' },
+  { type: 'collection_trip_status', category: 'shipments', labelAr: 'حالة رحلة التجميع', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'scheduled_collection', category: 'shipments', labelAr: 'تجميع مجدول', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'proof_of_service', category: 'shipments', labelAr: 'إثبات الخدمة', defaultRoute: '/dashboard/shipments', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+  { type: 'loading_worker', category: 'shipments', labelAr: 'عامل التحميل', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_assigned', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 26. أنواع إضافية — السائقون (7)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'driver_emergency', category: 'emergency', labelAr: 'طوارئ سائق', defaultRoute: '/dashboard/fleet-tracking', soundGroup: 'warning', defaultPriority: 'urgent' },
+  { type: 'driver_emergency_admin', category: 'emergency', labelAr: 'طوارئ سائق (إدارة)', defaultRoute: '/dashboard/fleet-tracking', soundGroup: 'warning', defaultPriority: 'urgent' },
+  { type: 'driver_alert_admin', category: 'drivers', labelAr: 'تنبيه سائق (إدارة)', defaultRoute: '/dashboard/fleet', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'driver_online', category: 'drivers', labelAr: 'سائق متصل', defaultRoute: '/dashboard/fleet-tracking', soundGroup: 'shipment_status', defaultPriority: 'low' },
+  { type: 'driver_rating', category: 'drivers', labelAr: 'تقييم سائق', defaultRoute: '/dashboard/fleet', soundGroup: 'chat_message', defaultPriority: 'low' },
+  { type: 'driver_financial', category: 'drivers', labelAr: 'مالية سائق', defaultRoute: '/dashboard/fleet', soundGroup: 'financial', defaultPriority: 'normal' },
+  { type: 'earning', category: 'drivers', labelAr: 'أرباح', defaultRoute: '/dashboard/fleet', soundGroup: 'financial', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 27. أنواع إضافية — المالية (5)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'wallet', category: 'finance', labelAr: 'المحفظة', defaultRoute: '/dashboard/erp/accounting', soundGroup: 'financial', defaultPriority: 'normal' },
+  { type: 'wallet_transaction', category: 'finance', labelAr: 'عملية محفظة', defaultRoute: '/dashboard/erp/accounting', soundGroup: 'financial', defaultPriority: 'normal' },
+  { type: 'counter_offer', category: 'finance', labelAr: 'عرض مقابل', defaultRoute: '/dashboard/erp/accounting', soundGroup: 'approval_request', defaultPriority: 'high' },
+  { type: 'contract_penalty', category: 'finance', labelAr: 'غرامة عقد', defaultRoute: '/dashboard/contracts', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'carbon_credit', category: 'environment', labelAr: 'رصيد كربون', defaultRoute: '/dashboard/carbon-footprint', soundGroup: 'financial', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 28. أنواع إضافية — الامتثال (5)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'sla_violation', category: 'compliance', labelAr: 'مخالفة SLA', defaultRoute: '/dashboard/compliance', soundGroup: 'warning', defaultPriority: 'urgent' },
+  { type: 'corrective_action', category: 'compliance', labelAr: 'إجراء تصحيحي', defaultRoute: '/dashboard/compliance', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'audit_session', category: 'compliance', labelAr: 'جلسة مراجعة', defaultRoute: '/dashboard/compliance', soundGroup: 'approval_request', defaultPriority: 'high' },
+  { type: 'compliance_doc_admin', category: 'compliance', labelAr: 'مستند امتثال (إدارة)', defaultRoute: '/dashboard/compliance', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+  { type: 'consultant_review', category: 'compliance', labelAr: 'مراجعة استشاري', defaultRoute: '/dashboard/compliance', soundGroup: 'approval_request', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 29. أنواع إضافية — السوق والمزايدات (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'auction_bid', category: 'marketplace', labelAr: 'مزايدة', defaultRoute: '/dashboard/marketplace', soundGroup: 'financial', defaultPriority: 'high' },
+  { type: 'auction_status', category: 'marketplace', labelAr: 'حالة المزاد', defaultRoute: '/dashboard/marketplace', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'marketplace_bid', category: 'marketplace', labelAr: 'عرض سعر في السوق', defaultRoute: '/dashboard/marketplace', soundGroup: 'financial', defaultPriority: 'high' },
+  { type: 'waste_auction', category: 'marketplace', labelAr: 'مزاد نفايات', defaultRoute: '/dashboard/marketplace', soundGroup: 'broadcast', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 30. أنواع إضافية — الأعضاء والموارد البشرية (9)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'daily_attendance', category: 'hr', labelAr: 'حضور يومي', defaultRoute: '/dashboard/erp/hr', soundGroup: 'shipment_status', defaultPriority: 'low' },
+  { type: 'hr_request', category: 'hr', labelAr: 'طلب موارد بشرية', defaultRoute: '/dashboard/erp/hr', soundGroup: 'approval_request', defaultPriority: 'normal' },
+  { type: 'job_title_updated', category: 'hr', labelAr: 'تحديث المسمى الوظيفي', defaultRoute: '/dashboard/erp/hr', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'employee_document_uploaded', category: 'hr', labelAr: 'مستند موظف', defaultRoute: '/dashboard/erp/hr', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+  { type: 'permissions_updated', category: 'members', labelAr: 'تحديث الصلاحيات', defaultRoute: '/dashboard/members', soundGroup: 'shipment_status', defaultPriority: 'high' },
+  { type: 'member_invitation_sent', category: 'members', labelAr: 'إرسال دعوة عضو', defaultRoute: '/dashboard/members', soundGroup: 'approval_request', defaultPriority: 'normal' },
+  { type: 'member_invitation_accepted', category: 'members', labelAr: 'قبول دعوة عضو', defaultRoute: '/dashboard/members', soundGroup: 'partner_linked', defaultPriority: 'normal' },
+  { type: 'member_status_admin', category: 'members', labelAr: 'حالة عضو (إدارة)', defaultRoute: '/dashboard/members', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'member_removed', category: 'members', labelAr: 'حذف عضو', defaultRoute: '/dashboard/members', soundGroup: 'warning', defaultPriority: 'high' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 31. أنواع إضافية — التدوير والتخلص (5)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'disposal_byproduct', category: 'certificates', labelAr: 'منتج ثانوي للتخلص', defaultRoute: '/dashboard/reports', soundGroup: 'recycling_report', defaultPriority: 'normal' },
+  { type: 'disposal_certificate', category: 'certificates', labelAr: 'شهادة تخلص', defaultRoute: '/dashboard/reports', soundGroup: 'recycling_report', defaultPriority: 'normal' },
+  { type: 'recycler_timeslot', category: 'shipments', labelAr: 'موعد استلام المدوّر', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'production_batch_new', category: 'certificates', labelAr: 'دفعة إنتاج جديدة', defaultRoute: '/dashboard/reports', soundGroup: 'shipment_created', defaultPriority: 'normal' },
+  { type: 'recycling_report_generator', category: 'certificates', labelAr: 'تقرير تدوير (مولد)', defaultRoute: '/dashboard/reports', soundGroup: 'recycling_report', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 32. أنواع إضافية — البلديات (5)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'municipal_contract', category: 'contracts', labelAr: 'عقد بلدي', defaultRoute: '/dashboard/contracts', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+  { type: 'citizen_complaint', category: 'compliance', labelAr: 'شكوى مواطن', defaultRoute: '/dashboard/compliance', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'complaint_status', category: 'compliance', labelAr: 'حالة الشكوى', defaultRoute: '/dashboard/compliance', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'wmis_event', category: 'system', labelAr: 'حدث WMIS', defaultRoute: '/dashboard', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'operational_plan', category: 'work_orders', labelAr: 'خطة تشغيلية', defaultRoute: '/dashboard/work-orders', soundGroup: 'approval_request', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 33. أنواع إضافية — الأمن والاحتيال (3)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'fraud_alert', category: 'security', labelAr: 'تنبيه احتيال', defaultRoute: '/dashboard/organization-profile', soundGroup: 'warning', defaultPriority: 'urgent' },
+  { type: 'transport_incident', category: 'security', labelAr: 'حادث نقل', defaultRoute: '/dashboard/fleet-tracking', soundGroup: 'warning', defaultPriority: 'urgent' },
+  { type: 'crisis_incident', category: 'emergency', labelAr: 'حادث أزمة', defaultRoute: '/dashboard', soundGroup: 'warning', defaultPriority: 'urgent' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 34. أنواع إضافية — التوثيق والتوقيعات (3)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'document_signature', category: 'documents', labelAr: 'توقيع مستند', defaultRoute: '/dashboard/signing-inbox', soundGroup: 'document_signed', defaultPriority: 'high' },
+  { type: 'signature_rejected', category: 'documents', labelAr: 'رفض التوقيع', defaultRoute: '/dashboard/signing-inbox', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'signing_rejected', category: 'documents', labelAr: 'رفض طلب التوقيع', defaultRoute: '/dashboard/signing-inbox', soundGroup: 'warning', defaultPriority: 'high' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 35. أنواع إضافية — IoT والسلامة (2)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'iot_alert', category: 'fleet', labelAr: 'تنبيه IoT', defaultRoute: '/dashboard/fleet-tracking', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'safety_inspection', category: 'compliance', labelAr: 'فحص سلامة', defaultRoute: '/dashboard/compliance', soundGroup: 'approval_request', defaultPriority: 'high' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 36. أنواع إضافية — الدعم والمساعد (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'support_ticket', category: 'system', labelAr: 'تذكرة دعم', defaultRoute: '/dashboard/support', soundGroup: 'approval_request', defaultPriority: 'normal' },
+  { type: 'support_ticket_status', category: 'system', labelAr: 'حالة تذكرة الدعم', defaultRoute: '/dashboard/support', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'copilot_task', category: 'ai', labelAr: 'مهمة المساعد الذكي', defaultRoute: '/dashboard/ai-tools', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'customer_conversation', category: 'chat', labelAr: 'محادثة عميل', defaultRoute: '/dashboard/chat', soundGroup: 'chat_message', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 37. أنواع إضافية — الوقود والطاقة (6)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'fuel_request', category: 'fleet', labelAr: 'طلب وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'approval_request', defaultPriority: 'normal' },
+  { type: 'fuel_approved', category: 'fleet', labelAr: 'اعتماد وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+  { type: 'fuel_rejected', category: 'fleet', labelAr: 'رفض طلب وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'warning', defaultPriority: 'normal' },
+  { type: 'fuel_consumption', category: 'fleet', labelAr: 'استهلاك وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'shipment_status', defaultPriority: 'low' },
+  { type: 'fuel_anomaly', category: 'fleet', labelAr: 'شذوذ استهلاك وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'fuel_report', category: 'fleet', labelAr: 'تقرير وقود', defaultRoute: '/dashboard/fleet', soundGroup: 'recycling_report', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 38. أنواع إضافية — ESG والاستدامة (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'esg_score_update', category: 'environment', labelAr: 'تحديث درجة ESG', defaultRoute: '/dashboard/carbon-footprint', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'esg_alert', category: 'environment', labelAr: 'تنبيه ESG', defaultRoute: '/dashboard/carbon-footprint', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'carbon_offset', category: 'environment', labelAr: 'تعويض كربوني', defaultRoute: '/dashboard/carbon-footprint', soundGroup: 'financial', defaultPriority: 'normal' },
+  { type: 'sustainability_report', category: 'environment', labelAr: 'تقرير استدامة', defaultRoute: '/dashboard/carbon-footprint', soundGroup: 'recycling_report', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 39. أنواع إضافية — أوامر العمل (2)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'work_order_cancelled', category: 'work_orders', labelAr: 'إلغاء أمر عمل', defaultRoute: '/dashboard/work-orders', soundGroup: 'warning', defaultPriority: 'normal' },
+  { type: 'work_order_overdue', category: 'work_orders', labelAr: 'أمر عمل متأخر', defaultRoute: '/dashboard/work-orders', soundGroup: 'warning', defaultPriority: 'high' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 40. أنواع إضافية — الشركاء (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'partner_link', category: 'partners', labelAr: 'ربط شريك', defaultRoute: '/dashboard/partners', soundGroup: 'partner_linked', defaultPriority: 'normal' },
+  { type: 'partner_unlinked', category: 'partners', labelAr: 'فك ربط شريك', defaultRoute: '/dashboard/partners', soundGroup: 'warning', defaultPriority: 'normal' },
+  { type: 'partner_document', category: 'partners', labelAr: 'مستند شريك', defaultRoute: '/dashboard/partners', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+  { type: 'partner_contract', category: 'partners', labelAr: 'عقد شريك', defaultRoute: '/dashboard/contracts', soundGroup: 'document_uploaded', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 41. أنواع إضافية — التوظيف والتدريب (5)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'recruitment_application', category: 'hr', labelAr: 'طلب توظيف', defaultRoute: '/dashboard/erp/hr', soundGroup: 'approval_request', defaultPriority: 'normal' },
+  { type: 'interview_scheduled', category: 'hr', labelAr: 'مقابلة مجدولة', defaultRoute: '/dashboard/erp/hr', soundGroup: 'approval_request', defaultPriority: 'high' },
+  { type: 'training_completed', category: 'hr', labelAr: 'اكتمال التدريب', defaultRoute: '/dashboard/erp/hr', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+  { type: 'certification_earned', category: 'hr', labelAr: 'شهادة مكتسبة', defaultRoute: '/dashboard/erp/hr', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+  { type: 'academy_progress', category: 'hr', labelAr: 'تقدم في الأكاديمية', defaultRoute: '/dashboard/erp/hr', soundGroup: 'shipment_status', defaultPriority: 'low' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 42. أنواع إضافية — متنوعة (6)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'task_assigned', category: 'work_orders', labelAr: 'مهمة مسندة', defaultRoute: '/dashboard/work-orders', soundGroup: 'shipment_assigned', defaultPriority: 'high' },
+  { type: 'task_completed', category: 'work_orders', labelAr: 'مهمة مكتملة', defaultRoute: '/dashboard/work-orders', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+  { type: 'reminder', category: 'system', labelAr: 'تذكير', defaultRoute: null, soundGroup: 'warning', defaultPriority: 'normal' },
+  { type: 'data_sync', category: 'system', labelAr: 'مزامنة بيانات', defaultRoute: '/dashboard', soundGroup: 'default', defaultPriority: 'low' },
+  { type: 'backup_complete', category: 'system', labelAr: 'اكتمال النسخ الاحتياطي', defaultRoute: '/dashboard', soundGroup: 'shipment_approved', defaultPriority: 'low' },
+  { type: 'import_complete', category: 'system', labelAr: 'اكتمال الاستيراد', defaultRoute: '/dashboard', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 43. أنواع إضافية — الإعلانات والاشتراكات (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'ad_approved', category: 'system', labelAr: 'إعلان معتمد', defaultRoute: '/dashboard', soundGroup: 'shipment_approved', defaultPriority: 'normal' },
+  { type: 'ad_rejected', category: 'system', labelAr: 'إعلان مرفوض', defaultRoute: '/dashboard', soundGroup: 'warning', defaultPriority: 'normal' },
+  { type: 'ad_expired', category: 'system', labelAr: 'إعلان منتهي', defaultRoute: '/dashboard', soundGroup: 'warning', defaultPriority: 'low' },
+  { type: 'subscription_renewed', category: 'finance', labelAr: 'تجديد الاشتراك', defaultRoute: '/dashboard/organization-profile', soundGroup: 'financial', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 44. أنواع إضافية — مركز الاتصال (4)
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'call_center_queue', category: 'system', labelAr: 'قائمة انتظار مركز الاتصال', defaultRoute: '/dashboard/call-center', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'call_center_missed', category: 'system', labelAr: 'مكالمة فائتة (مركز)', defaultRoute: '/dashboard/call-center', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'call_recording_ready', category: 'system', labelAr: 'تسجيل مكالمة جاهز', defaultRoute: '/dashboard/call-center', soundGroup: 'shipment_status', defaultPriority: 'low' },
+  { type: 'agent_performance_alert', category: 'system', labelAr: 'تنبيه أداء عميل', defaultRoute: '/dashboard/call-center', soundGroup: 'warning', defaultPriority: 'normal' },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 45. Alias types — أسماء بديلة لأنواع موجودة
+  // ═══════════════════════════════════════════════════════════════
+  { type: 'shipment_update', category: 'shipments', labelAr: 'تحديث شحنة', defaultRoute: '/dashboard/shipments', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'invoice_reminder', category: 'finance', labelAr: 'تذكير فاتورة', defaultRoute: '/dashboard/erp/accounting', soundGroup: 'warning', defaultPriority: 'high' },
+  { type: 'contract_update', category: 'contracts', labelAr: 'تحديث عقد', defaultRoute: '/dashboard/contracts', soundGroup: 'shipment_status', defaultPriority: 'normal' },
+  { type: 'employee_update', category: 'members', labelAr: 'تحديث موظف', defaultRoute: '/dashboard/members', soundGroup: 'shipment_status', defaultPriority: 'normal' },
 ];
 
 /** خريطة سريعة للبحث بالنوع */

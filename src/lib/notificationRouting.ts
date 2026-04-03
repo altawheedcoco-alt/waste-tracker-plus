@@ -161,6 +161,11 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'work_order_update':
     case 'work_order_completed':
     case 'work_order_cancelled':
+    case 'work_order_overdue':
+    case 'work_order_assigned':
+    case 'operational_plan':
+    case 'task_assigned':
+    case 'task_completed':
       return '/dashboard/work-orders';
 
     // Recycling reports may open PDF
