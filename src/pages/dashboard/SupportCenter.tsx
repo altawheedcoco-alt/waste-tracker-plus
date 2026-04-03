@@ -321,7 +321,6 @@ const UserSupportPage = () => {
         />
       )}
     </motion.div>
-      </DashboardLayout>
   );
 };
 
