@@ -77,6 +77,7 @@ export default function CrossImpactDashboard() {
   }, [impacts]);
 
   return (
+    <DashboardLayout>
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
