@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Package, FileText, DollarSign, Users, Shield } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { getNotificationIcon, getNotificationIconColor } from '@/lib/notificationVisuals';
 
 interface Notification {
   id: string;
@@ -12,14 +13,6 @@ interface Notification {
   is_read: boolean;
   created_at: string;
 }
-
-const typeIcons: Record<string, React.ElementType> = {
-  shipment: Package,
-  financial: DollarSign,
-  document: FileText,
-  partner: Users,
-  system: Shield,
-};
 
 const EmployeeNotificationsWidget = ({ notifications }: { notifications: Notification[] }) => {
   if (notifications.length === 0) {
