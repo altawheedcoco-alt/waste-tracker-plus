@@ -46,7 +46,7 @@ import DashboardHeader from './DashboardHeader';
 import SidebarNavContent from './SidebarNavContent';
 
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
-const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
+
 const NetworkStatusBanner = lazy(() => import('@/components/mobile/NetworkStatusBanner'));
 const ProactiveAlertsBanner = lazy(() => import('@/components/alerts/ProactiveAlertsBanner'));
 
@@ -524,8 +524,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Action Button */}
-          <Suspense fallback={null}><UnifiedFloatingMenu /></Suspense>
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />

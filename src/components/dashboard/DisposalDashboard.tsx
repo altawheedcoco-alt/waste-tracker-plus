@@ -24,7 +24,7 @@ const DisposalInputIntelligence = lazy(() => import('@/components/dashboard/disp
 const DisposalScorecard = lazy(() => import('@/components/dashboard/disposal/DisposalScorecard'));
 const DisposalSiteStatus = lazy(() => import('@/components/dashboard/disposal/DisposalSiteStatus'));
 const DisposalEnvironmentalMonitor = lazy(() => import('@/components/dashboard/disposal/DisposalEnvironmentalMonitor'));
-const DisposalQuickFAB = lazy(() => import('@/components/dashboard/disposal/DisposalQuickFAB'));
+
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
@@ -534,10 +534,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
 
-      {/* FAB — زر عائم لجهة التخلص */}
-      <Suspense fallback={null}>
-        <DisposalQuickFAB />
-      </Suspense>
     </div>
   );
 };

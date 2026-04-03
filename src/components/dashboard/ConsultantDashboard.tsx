@@ -40,7 +40,7 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
-const ConsultantQuickFAB = lazy(() => import('@/components/consultant/ConsultantQuickFAB'));
+
 
 import ConsultantActiveProjects from '@/components/consultant/ConsultantActiveProjects';
 
@@ -591,9 +591,6 @@ const ConsultantDashboard = memo(() => {
 
       <Suspense fallback={null}>
         <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <ConsultantQuickFAB onSetTab={setActiveTab} mode="individual" />
       </Suspense>
     </div>
   );

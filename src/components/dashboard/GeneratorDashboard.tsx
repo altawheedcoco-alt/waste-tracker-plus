@@ -80,7 +80,7 @@ const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab')
 const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
 const ShipmentStatusPipeline = lazy(() => import('./generator/ShipmentStatusPipeline'));
 const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
-const GeneratorQuickShipmentFAB = lazy(() => import('./generator/GeneratorQuickShipmentFAB'));
+
 
 interface RecentShipment {
   id: string;
@@ -590,12 +590,6 @@ const GeneratorDashboard = () => {
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
       </Suspense>
 
-      {/* زر الإجراء السريع العائم (موبايل) */}
-      {isMobile && (
-        <Suspense fallback={null}>
-          <GeneratorQuickShipmentFAB />
-        </Suspense>
-      )}
     </div>
   );
 };

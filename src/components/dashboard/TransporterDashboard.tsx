@@ -62,7 +62,7 @@ const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriver
 const FleetHealthSummary = lazy(() => import('./transporter/FleetHealthSummary'));
 const DriverShiftTracker = lazy(() => import('./transporter/DriverShiftTracker'));
 const RevenueCostMini = lazy(() => import('./transporter/RevenueCostMini'));
-const TransporterQuickFAB = lazy(() => import('./transporter/TransporterQuickFAB'));
+
 const TransporterMaintenanceAlert = lazy(() => import('./transporter/TransporterMaintenanceAlert'));
 const TransporterFuelTracker = lazy(() => import('./transporter/TransporterFuelTracker'));
 const TransporterTodayPlan = lazy(() => import('./transporter/TransporterTodayPlan'));
@@ -424,10 +424,6 @@ const TransporterDashboard = () => {
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       </Suspense>
 
-      {/* FAB — زر عائم متعدد الإجراءات للموبايل */}
-      <Suspense fallback={null}>
-        <TransporterQuickFAB />
-      </Suspense>
     </div>
   );
 };

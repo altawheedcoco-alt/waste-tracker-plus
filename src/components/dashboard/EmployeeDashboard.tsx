@@ -20,7 +20,7 @@ import EmployeeLeaveWidget from './employee/EmployeeLeaveWidget';
 import EmployeeNotificationsWidget from './employee/EmployeeNotificationsWidget';
 import EmployeeContextWidgets from './employee/EmployeeContextWidgets';
 import EmployeeWelcomeStrip from './employee/EmployeeWelcomeStrip';
-import EmployeeQuickFAB from './employee/EmployeeQuickFAB';
+
 // Lazy load heavy tab content
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
@@ -357,8 +357,6 @@ const EmployeeDashboard = () => {
         </Card>
       )}
 
-      {/* FAB */}
-      <EmployeeQuickFAB />
     </div>
   );
 };
