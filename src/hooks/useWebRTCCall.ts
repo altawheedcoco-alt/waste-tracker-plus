@@ -68,6 +68,7 @@ export function useWebRTCCall() {
     };
   }, []);
 
+  // Normal ringtone (receiver online)
   const playRingtone = useCallback(() => {
     try {
       const ctx = new AudioContext();
@@ -83,6 +84,27 @@ export function useWebRTCCall() {
       const interval = setInterval(() => {
         gain.gain.value = gain.gain.value > 0 ? 0 : 0.15;
       }, 500);
+      
+      ringtoneRef.current = { pause: () => { osc.stop(); clearInterval(interval); ctx.close(); } } as any;
+    } catch { /* silent */ }
+  }, []);
+
+  // Offline ringtone (receiver offline) — lower pitch, slower rhythm
+  const playOfflineRingtone = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 280; // lower pitch
+      gain.gain.value = 0.1;
+      osc.type = 'triangle'; // softer tone
+      osc.start();
+      
+      const interval = setInterval(() => {
+        gain.gain.value = gain.gain.value > 0 ? 0 : 0.1;
+      }, 1200); // slower rhythm
       
       ringtoneRef.current = { pause: () => { osc.stop(); clearInterval(interval); ctx.close(); } } as any;
     } catch { /* silent */ }
