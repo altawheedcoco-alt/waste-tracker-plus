@@ -14,6 +14,8 @@ const SmartInsightsWidget = lazy(() => import('@/components/dashboard/shared/Sma
 const EntityPerformanceCards = lazy(() => import('@/components/dashboard/shared/EntityPerformanceCards'));
 const PDFReportGenerator = lazy(() => import('@/components/reports/PDFReportGenerator'));
 const PartnerPerformanceMatrix = lazy(() => import('@/components/analytics/PartnerPerformanceMatrix'));
+const GoalTrackingDashboard = lazy(() => import('@/components/analytics/GoalTrackingDashboard'));
+const WasteFlowSankey = lazy(() => import('@/components/analytics/WasteFlowSankey'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
