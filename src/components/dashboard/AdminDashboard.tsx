@@ -309,7 +309,7 @@ const AdminDashboard = () => {
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
       </Suspense>
 
-      <AdminMobileQuickBar />
+      
     </motion.div>
   );
 };

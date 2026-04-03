@@ -424,10 +424,6 @@ const TransporterDashboard = () => {
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       </Suspense>
 
-      {/* FAB — زر عائم متعدد الإجراءات للموبايل */}
-      <Suspense fallback={null}>
-        <TransporterQuickFAB />
-      </Suspense>
     </div>
   );
 };

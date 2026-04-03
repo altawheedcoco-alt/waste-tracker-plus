@@ -592,9 +592,6 @@ const ConsultantDashboard = memo(() => {
       <Suspense fallback={null}>
         <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       </Suspense>
-      <Suspense fallback={null}>
-        <ConsultantQuickFAB onSetTab={setActiveTab} mode="individual" />
-      </Suspense>
     </div>
   );
 });

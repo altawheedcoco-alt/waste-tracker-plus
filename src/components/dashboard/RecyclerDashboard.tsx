@@ -360,10 +360,6 @@ const RecyclerDashboard = () => {
       )}
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
 
-      {/* FAB — زر عائم للمدوّر */}
-      <Suspense fallback={null}>
-        <RecyclerQuickFAB />
-      </Suspense>
     </div>
   );
 };

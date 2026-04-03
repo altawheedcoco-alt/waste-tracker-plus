@@ -590,12 +590,6 @@ const GeneratorDashboard = () => {
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
       </Suspense>
 
-      {/* زر الإجراء السريع العائم (موبايل) */}
-      {isMobile && (
-        <Suspense fallback={null}>
-          <GeneratorQuickShipmentFAB />
-        </Suspense>
-      )}
     </div>
   );
 };

@@ -662,12 +662,6 @@ const DriverDashboard = () => {
         </>
       )}
 
-      {/* Floating Quick Actions FAB */}
-      {driverInfo && (
-        <Suspense fallback={null}>
-          <DriverQuickFAB driverId={driverInfo.id} />
-        </Suspense>
-      )}
 
       {/* DiDi-style popup for incoming offers */}
       {pendingOffer && (

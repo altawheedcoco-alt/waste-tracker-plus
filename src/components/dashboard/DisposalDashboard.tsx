@@ -534,10 +534,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
 
-      {/* FAB — زر عائم لجهة التخلص */}
-      <Suspense fallback={null}>
-        <DisposalQuickFAB />
-      </Suspense>
     </div>
   );
 };
