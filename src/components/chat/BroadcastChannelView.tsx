@@ -801,7 +801,7 @@ CommentSection.displayName = 'CommentSection';
 // AutoPlay Video — plays on scroll into view, pauses when out
 const AutoPlayVideo = ({ src }: { src: string }) => {
   const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true); // Start muted for autoplay policy
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {

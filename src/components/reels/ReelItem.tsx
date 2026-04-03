@@ -36,7 +36,8 @@ interface ReelItemProps {
 const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare, onDelete, onDuet }: ReelItemProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay policy
+  const [userInteracted, setUserInteracted] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
