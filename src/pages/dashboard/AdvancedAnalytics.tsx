@@ -31,12 +31,27 @@ const AdvancedAnalytics = () => {
       <div className="space-y-6" dir="rtl">
         <BackButton />
 
+        {/* Daily Pulse */}
+        <Suspense fallback={<CardSkeleton />}>
+          <DailyPulseWidget />
+        </Suspense>
+
         {/* Entity Performance Cards */}
         <Suspense fallback={<div className="grid grid-cols-2 md:grid-cols-4 gap-3">{Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)}</div>}>
           <EntityPerformanceCards />
         </Suspense>
 
         <AnalyticsDashboard />
+
+        {/* Benchmark + Timeline */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <BenchmarkIndicator />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <OrganizationTimeline />
+          </Suspense>
+        </div>
 
         {/* Smart Insights + PDF Export */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
