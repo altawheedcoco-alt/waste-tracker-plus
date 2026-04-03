@@ -74,6 +74,7 @@ export async function sendDualNotification(notification: DualNotification): Prom
   const logoUrl = branding.notification_logo_url || branding.logo_url || '';
 
   // 1. إشعار داخلي مع بيانات الهوية
+  // skip_auto_channels = true → يمنع الـ DB Trigger من إرسال push/whatsapp مرة ثانية
   try {
     const { error } = await supabase.from('notifications').insert({
       user_id: notification.user_id,
@@ -85,6 +86,7 @@ export async function sendDualNotification(notification: DualNotification): Prom
         ...(notification.metadata || {}),
         system_name: systemName,
         logo_url: logoUrl,
+        skip_auto_channels: true,
       } as any,
     });
     result.inApp = error ? { success: false, error: error.message } : { success: true };
@@ -155,6 +157,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
   }
 
   // 1. إشعارات داخلية (دفعة واحدة)
+  // skip_auto_channels = true → يمنع الـ DB Trigger من إرسال push/whatsapp مرة ثانية
   try {
     const rows = notification.user_ids.map(uid => ({
       user_id: uid,
@@ -162,6 +165,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
       message: notification.message,
       type: notification.type || 'general',
       is_read: false,
+      metadata: { skip_auto_channels: true } as any,
     }));
     const { error } = await supabase.from('notifications').insert(rows);
     result.inApp = error ? { success: false, error: error.message } : { success: true };
