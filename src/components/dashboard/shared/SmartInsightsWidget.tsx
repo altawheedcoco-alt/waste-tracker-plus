@@ -70,7 +70,7 @@ export default function SmartInsightsWidget() {
         supabase.from('external_partners')
           .select('id', { count: 'exact' })
           .eq('organization_id', orgId)
-          .eq('status', 'active'),
+          .eq('is_active', true),
       ]);
 
       const currentShipments = shipmentsRes.data || [];

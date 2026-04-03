@@ -74,7 +74,7 @@ export default function EntityPerformanceCards() {
         supabase.from('external_partners')
           .select('id', { count: 'exact' })
           .eq('organization_id', orgId)
-          .eq('status', 'active'),
+          .eq('is_active', true),
       ]);
 
       const current = currentRes.data || [];
