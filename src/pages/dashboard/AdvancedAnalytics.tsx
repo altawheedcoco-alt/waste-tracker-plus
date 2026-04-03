@@ -155,6 +155,31 @@ const AdvancedAnalytics = () => {
         <Suspense fallback={<ChartSkeleton />}>
           <GeographicDistribution />
         </Suspense>
+
+        {/* Environmental Passport */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <EnvironmentalPassportWidget />
+        </Suspense>
+
+        {/* Driver Leaderboard + Invoice Aging */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <DriverPerformanceLeaderboard />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <InvoiceAgingReport />
+          </Suspense>
+        </div>
+
+        {/* Waste Recovery + Shipment Velocity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <WasteRecoveryRate />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ShipmentVelocityTracker />
+          </Suspense>
+        </div>
       </div>
     </DashboardLayout>
   );
