@@ -85,5 +85,6 @@ export const deferredCommonRoutes = (
     <Route path="/dashboard/task-board" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
     <Route path="/dashboard/partner-reviews" element={<PartnerReviews />} />
+    <Route path="/dashboard/shared-links" element={<SharedLinksPage />} />
   </>
 );
