@@ -15,12 +15,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DEMO_PASSWORD = 'Demo@575757';
 const ACCESS_PIN_HASH = '575757';
-const SESSION_WAIT_MS = 5000;
+const SESSION_WAIT_MS = 15000;
 const SESSION_POLL_MS = 250;
 
 interface DemoAccount {
   email: string;
   label: string;
+  entityLabel?: string;
   desc: string;
   icon: any;
   color: string;
@@ -32,11 +33,11 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     label: 'عبدالله',
     icon: Users,
     accounts: [
-      { email: 'abdullah-generator@irecycle.test', label: 'عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
-      { email: 'abdullah-transporter@irecycle.test', label: 'عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
-      { email: 'abdullah-recycler@irecycle.test', label: 'عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
-      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق ⚡ كيان مستقل', icon: Car, color: 'from-pink-500 to-rose-700' },
-      { email: 'abdullah.abdelnasser@irecycle.test', label: 'عبدالله عبدالناصر', desc: 'إدارة → جهة عبدالله الناقل', icon: Shield, color: 'from-indigo-500 to-violet-700' },
+      { email: 'abdullah-generator@irecycle.test', label: 'عبدالله المولد', entityLabel: 'عبدالله المولد للمخلفات', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
+      { email: 'abdullah-transporter@irecycle.test', label: 'عبدالله الناقل', entityLabel: 'عبدالله الناقل للنقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'abdullah-recycler@irecycle.test', label: 'عبدالله المدور', entityLabel: 'عبدالله المدور للتدوير', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
+      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', entityLabel: 'عبدالله الناقل للنقل', desc: 'سائق تابع للجهة', icon: Car, color: 'from-pink-500 to-rose-700' },
+      { email: 'abdullah.abdelnasser@irecycle.test', label: 'عبدالله عبدالناصر', entityLabel: 'عبدالله الناقل للنقل', desc: 'إدارة الجهة', icon: Shield, color: 'from-indigo-500 to-violet-700' },
     ],
   },
   {
@@ -45,17 +46,17 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: Building2,
     hint: 'المنظمات التشغيلية',
     accounts: [
-      { email: 'generator@demo.com', label: 'شركة التوليد', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'generator@demo.com', label: 'شركة التوليد', entityLabel: 'شركة التوليد للنفايات', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'demo-generator@irecycle.test', label: 'المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-      { email: 'generator2@demo.com', label: 'الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-      { email: 'transporter@demo.com', label: 'النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
+      { email: 'generator2@demo.com', label: 'الصناعات البلاستيكية', entityLabel: 'مصنع الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'transporter@demo.com', label: 'النقل السريع', entityLabel: 'شركة النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
       { email: 'demo-transporter@irecycle.test', label: 'النقل التجريبية', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
       { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
-      { email: 'recycler@demo.com', label: 'التدوير الخضراء', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+      { email: 'recycler@demo.com', label: 'التدوير الخضراء', entityLabel: 'شركة إعادة التدوير الخضراء', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
       { email: 'demo-recycler@irecycle.test', label: 'التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
-      { email: 'disposal@demo.com', label: 'الأمان للتخلص', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+      { email: 'disposal@demo.com', label: 'الأمان للتخلص', entityLabel: 'شركة الأمان للتخلص الآمن من النفايات الخطرة', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
       { email: 'demo-disposal@irecycle.test', label: 'التخلص التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
-      { email: 'municipal@irecycle.test', label: 'النظافة المتحدة', desc: 'مقاول بلدي 🏗️', icon: HardHat, color: 'from-lime-600 to-green-800' },
+      { email: 'municipal@irecycle.test', label: 'النظافة المتحدة', entityLabel: 'شركة النظافة المتحدة', desc: 'مقاول بلدي 🏗️', icon: HardHat, color: 'from-lime-600 to-green-800' },
     ],
   },
   {
@@ -64,17 +65,17 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: Shield,
     hint: 'الهيكل الإداري لجهة النقل',
     accounts: [
-      { email: 'ceo@transporter.demo', label: 'أحمد محمد السيد', desc: 'الرئيس التنفيذي 👑', icon: Shield, color: 'from-amber-500 to-yellow-700' },
-      { email: 'deputy@transporter.demo', label: 'محمود عبدالرحمن', desc: 'نائب المدير العام ⭐', icon: Shield, color: 'from-amber-400 to-orange-600' },
-      { email: 'strategy@transporter.demo', label: 'خالد إبراهيم', desc: 'التخطيط الاستراتيجي', icon: Briefcase, color: 'from-indigo-500 to-purple-700' },
-      { email: 'operations@transporter.demo', label: 'عمرو حسين', desc: 'مدير العمليات 🔧', icon: UserCog, color: 'from-blue-600 to-indigo-800' },
-      { email: 'fleet@transporter.demo', label: 'مصطفى عادل', desc: 'مدير الأسطول 🚛', icon: Truck, color: 'from-sky-500 to-blue-700' },
-      { email: 'finance@transporter.demo', label: 'ماجد فؤاد', desc: 'مدير المالية 💰', icon: Landmark, color: 'from-emerald-500 to-green-700' },
-      { email: 'sales@transporter.demo', label: 'سامح وليد', desc: 'مدير المبيعات 📈', icon: Building2, color: 'from-orange-500 to-red-600' },
-      { email: 'hr@transporter.demo', label: 'شريف كمال', desc: 'مدير الموارد البشرية 👥', icon: Users, color: 'from-violet-500 to-purple-700' },
-      { email: 'it@transporter.demo', label: 'أحمد هشام', desc: 'مدير IT 💻', icon: UserCog, color: 'from-cyan-500 to-teal-700' },
-      { email: 'compliance@transporter.demo', label: 'هاني وجيه', desc: 'مدير الامتثال 🛡️', icon: ShieldCheck, color: 'from-red-500 to-rose-700' },
-      { email: 'cs@transporter.demo', label: 'منى إبراهيم', desc: 'مدير خدمة العملاء 📞', icon: Users, color: 'from-teal-400 to-cyan-600' },
+      { email: 'ceo@transporter.demo', label: 'أحمد محمد السيد', entityLabel: 'مكتب النقل التجريبي', desc: 'الرئيس التنفيذي 👑', icon: Shield, color: 'from-amber-500 to-yellow-700' },
+      { email: 'deputy@transporter.demo', label: 'محمود عبدالرحمن', entityLabel: 'مكتب النقل التجريبي', desc: 'نائب المدير العام ⭐', icon: Shield, color: 'from-amber-400 to-orange-600' },
+      { email: 'strategy@transporter.demo', label: 'خالد إبراهيم', entityLabel: 'مكتب النقل التجريبي', desc: 'التخطيط الاستراتيجي', icon: Briefcase, color: 'from-indigo-500 to-purple-700' },
+      { email: 'operations@transporter.demo', label: 'عمرو حسين', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير العمليات 🔧', icon: UserCog, color: 'from-blue-600 to-indigo-800' },
+      { email: 'fleet@transporter.demo', label: 'مصطفى عادل', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير الأسطول 🚛', icon: Truck, color: 'from-sky-500 to-blue-700' },
+      { email: 'finance@transporter.demo', label: 'ماجد فؤاد', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير المالية 💰', icon: Landmark, color: 'from-emerald-500 to-green-700' },
+      { email: 'sales@transporter.demo', label: 'سامح وليد', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير المبيعات 📈', icon: Building2, color: 'from-orange-500 to-red-600' },
+      { email: 'hr@transporter.demo', label: 'شريف كمال', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير الموارد البشرية 👥', icon: Users, color: 'from-violet-500 to-purple-700' },
+      { email: 'it@transporter.demo', label: 'أحمد هشام', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير IT 💻', icon: UserCog, color: 'from-cyan-500 to-teal-700' },
+      { email: 'compliance@transporter.demo', label: 'هاني وجيه', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير الامتثال 🛡️', icon: ShieldCheck, color: 'from-red-500 to-rose-700' },
+      { email: 'cs@transporter.demo', label: 'منى إبراهيم', entityLabel: 'مكتب النقل التجريبي', desc: 'مدير خدمة العملاء 📞', icon: Users, color: 'from-teal-400 to-cyan-600' },
     ],
   },
   {
@@ -83,15 +84,15 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: User,
     hint: 'يُوجَّهون لمساحة العمل الشخصية',
     accounts: [
-      { email: 'assistant@transporter.demo', label: 'سارة أحمد', desc: 'مساعد تنفيذي → مساحة العمل', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
-      { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', desc: 'مشرف الحركة → مساحة العمل', icon: Truck, color: 'from-blue-400 to-sky-600' },
-      { email: 'dispatch@transporter.demo', label: 'ياسر محمد', desc: 'مسؤول الجدولة → مساحة العمل', icon: ClipboardCheck, color: 'from-blue-400 to-indigo-600' },
-      { email: 'accountant@transporter.demo', label: 'رشا عبدالناصر', desc: 'المحاسب → مساحة العمل', icon: Landmark, color: 'from-green-400 to-emerald-600' },
-      { email: 'driver.head@transporter.demo', label: 'عبدالله سامي', desc: 'رئيس السائقين → مساحة العمل', icon: Car, color: 'from-rose-400 to-pink-600' },
-      { email: 'safety@transporter.demo', label: 'كريم طاهر', desc: 'أخصائي السلامة → مساحة العمل', icon: ShieldCheck, color: 'from-red-400 to-orange-600' },
-      { email: 'callcenter@transporter.demo', label: 'هبة سعيد', desc: 'قائد مركز الاتصال → مساحة العمل', icon: Users, color: 'from-teal-400 to-green-600' },
-      { email: 'analyst@transporter.demo', label: 'نورهان محمد', desc: 'محلل البيانات → مساحة العمل', icon: ClipboardCheck, color: 'from-purple-400 to-indigo-600' },
-      { email: 'maintenance@transporter.demo', label: 'محمد جمال', desc: 'مشرف الصيانة → مساحة العمل', icon: HardHat, color: 'from-amber-400 to-yellow-600' },
+      { email: 'assistant@transporter.demo', label: 'سارة أحمد', entityLabel: 'مكتب النقل التجريبي', desc: 'مساعد تنفيذي → مساحة العمل', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
+      { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', entityLabel: 'مكتب النقل التجريبي', desc: 'مشرف الحركة → مساحة العمل', icon: Truck, color: 'from-blue-400 to-sky-600' },
+      { email: 'dispatch@transporter.demo', label: 'ياسر محمد', entityLabel: 'مكتب النقل التجريبي', desc: 'مسؤول الجدولة → مساحة العمل', icon: ClipboardCheck, color: 'from-blue-400 to-indigo-600' },
+      { email: 'accountant@transporter.demo', label: 'رشا عبدالناصر', entityLabel: 'مكتب النقل التجريبي', desc: 'المحاسب → مساحة العمل', icon: Landmark, color: 'from-green-400 to-emerald-600' },
+      { email: 'driver.head@transporter.demo', label: 'عبدالله سامي', entityLabel: 'مكتب النقل التجريبي', desc: 'رئيس السائقين → مساحة العمل', icon: Car, color: 'from-rose-400 to-pink-600' },
+      { email: 'safety@transporter.demo', label: 'كريم طاهر', entityLabel: 'مكتب النقل التجريبي', desc: 'أخصائي السلامة → مساحة العمل', icon: ShieldCheck, color: 'from-red-400 to-orange-600' },
+      { email: 'callcenter@transporter.demo', label: 'هبة سعيد', entityLabel: 'مكتب النقل التجريبي', desc: 'قائد مركز الاتصال → مساحة العمل', icon: Users, color: 'from-teal-400 to-green-600' },
+      { email: 'analyst@transporter.demo', label: 'نورهان محمد', entityLabel: 'مكتب النقل التجريبي', desc: 'محلل البيانات → مساحة العمل', icon: ClipboardCheck, color: 'from-purple-400 to-indigo-600' },
+      { email: 'maintenance@transporter.demo', label: 'محمد جمال', entityLabel: 'مكتب النقل التجريبي', desc: 'مشرف الصيانة → مساحة العمل', icon: HardHat, color: 'from-amber-400 to-yellow-600' },
     ],
   },
   {
@@ -100,13 +101,13 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: Car,
     hint: 'كيان مستقل — المؤجر يعمل برابط مؤقت فقط بدون حساب',
     accounts: [
-      { email: 'company-driver@irecycle.test', label: 'سائق تابع', desc: 'موظف دائم بحساب كامل — صلاحيات تشغيلية 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'company-driver@irecycle.test', label: 'سائق تابع', entityLabel: 'التوحيد لنقل المخلفات', desc: 'موظف دائم بحساب كامل — صلاحيات تشغيلية 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
       { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'نموذج Uber — سوق شحنات + محفظة + تحليلات 🟢', icon: Zap, color: 'from-emerald-500 to-green-700' },
       { email: 'hired-driver@irecycle.test', label: 'سائق مؤجر', desc: 'سائق حر مؤجر تجريبي 🔄', icon: User, color: 'from-violet-500 to-purple-700' },
-      { email: 'demo-driver@irecycle.test', label: 'سائق التوحيد', desc: 'سائق تابع لجهة التوحيد 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
-      { email: 'driver@demo.com', label: 'سائق النقل السريع', desc: 'سائق تابع لجهة النقل السريع 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
-      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق تابع لجهة عبدالله 🏢', icon: Car, color: 'from-pink-500 to-rose-700' },
-      { email: 'driver940@transport.local', label: 'محمد (سائق)', desc: 'سائق عبدالله الناقل 🚗', icon: Car, color: 'from-amber-500 to-orange-700' },
+      { email: 'demo-driver@irecycle.test', label: 'سائق التوحيد', entityLabel: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'سائق تابع لجهة التوحيد 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'driver@demo.com', label: 'سائق النقل السريع', entityLabel: 'شركة النقل السريع', desc: 'سائق تابع لجهة النقل السريع 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', entityLabel: 'عبدالله الناقل للنقل', desc: 'سائق تابع لجهة عبدالله 🏢', icon: Car, color: 'from-pink-500 to-rose-700' },
+      { email: 'driver940@transport.local', label: 'محمد (سائق)', entityLabel: 'عبدالله الناقل للنقل', desc: 'سائق عبدالله الناقل 🚗', icon: Car, color: 'from-amber-500 to-orange-700' },
     ],
   },
   {
@@ -114,9 +115,9 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     label: 'استشاريون',
     icon: Briefcase,
     accounts: [
-      { email: 'demo-consultant@irecycle.test', label: 'الاستشارات البيئية', desc: 'استشاري بيئي', icon: Briefcase, color: 'from-teal-500 to-teal-700' },
-      { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
-      { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', desc: 'جهة مانحة', icon: Award, color: 'from-emerald-600 to-green-800' },
+      { email: 'demo-consultant@irecycle.test', label: 'الاستشارات البيئية', entityLabel: 'مكتب الاستشارات البيئية التجريبي', desc: 'استشاري بيئي', icon: Briefcase, color: 'from-teal-500 to-teal-700' },
+      { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', entityLabel: 'المكتب الاستشاري التجريبي', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
+      { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', entityLabel: 'جهة الأيزو التجريبية', desc: 'جهة مانحة', icon: Award, color: 'from-emerald-600 to-green-800' },
     ],
   },
   {
@@ -126,9 +127,9 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     hint: 'الجهات الحكومية الرقابية',
     accounts: [
       { email: 'wmra@irecycle.demo', label: 'WMRA', desc: 'تنظيم المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
-      { email: 'eeaa@irecycle.demo', label: 'EEAA', desc: 'شؤون البيئة', icon: Leaf, color: 'from-green-600 to-green-800' },
-      { email: 'ltra@irecycle.demo', label: 'LTRA', desc: 'تنظيم النقل', icon: Truck, color: 'from-blue-600 to-blue-800' },
-      { email: 'ida@irecycle.demo', label: 'IDA', desc: 'التنمية الصناعية', icon: HardHat, color: 'from-amber-600 to-amber-800' },
+      { email: 'eeaa@irecycle.demo', label: 'EEAA', entityLabel: 'جهاز شؤون البيئة (EEAA)', desc: 'شؤون البيئة', icon: Leaf, color: 'from-green-600 to-green-800' },
+      { email: 'ltra@irecycle.demo', label: 'LTRA', entityLabel: 'جهاز تنظيم النقل البري (LTRA)', desc: 'تنظيم النقل', icon: Truck, color: 'from-blue-600 to-blue-800' },
+      { email: 'ida@irecycle.demo', label: 'IDA', entityLabel: 'الهيئة العامة للتنمية الصناعية (IDA)', desc: 'التنمية الصناعية', icon: HardHat, color: 'from-amber-600 to-amber-800' },
     ],
   },
   {
@@ -137,8 +138,8 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: UserCog,
     accounts: [
       { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin سيادي', icon: Shield, color: 'from-yellow-500 to-amber-700' },
-      { email: 'altawheedforwasteandwoodtrade@gmail.com', label: 'التوحيد للنقل', desc: 'الحساب الرسمي للتوحيد', icon: Building2, color: 'from-emerald-600 to-green-800' },
-      { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
+      { email: 'altawheedforwasteandwoodtrade@gmail.com', label: 'التوحيد للنقل', entityLabel: 'التوحيد لنقل المخلفات', desc: 'الحساب الرسمي للتوحيد', icon: Building2, color: 'from-emerald-600 to-green-800' },
+      { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', entityLabel: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
 ];
@@ -155,7 +156,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const [pinVerified, setPinVerified] = useState(false);
   const [pinError, setPinError] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const { toast } = useToast();
 
   const waitForSession = async (email: string) => {
@@ -172,7 +173,9 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     setLoading(email);
     onLoginStart?.();
     try {
-      await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
+      await signOut().catch(() => undefined);
+      sessionStorage.removeItem('__tab_active_org_id');
+
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {
@@ -182,8 +185,14 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         }
         return;
       }
+
       const sessionReady = await waitForSession(email);
-      if (!sessionReady) throw new Error('تم تسجيل الدخول لكن الجلسة لم تكتمل بعد، حاول مرة أخرى خلال ثوانٍ.');
+      if (!sessionReady) {
+        toast({ title: 'تم تسجيل الدخول ✅', description: `جارٍ تجهيز حساب ${label}...` });
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+
       toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
@@ -282,8 +291,10 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[11px] font-semibold text-foreground/90 truncate">{account.label}</p>
-                              <p className="text-[9px] text-muted-foreground">{account.desc}</p>
+                              <p className="text-[11px] font-semibold text-foreground/90 truncate">{account.entityLabel || account.label}</p>
+                              <p className="text-[9px] text-muted-foreground truncate">
+                                {account.entityLabel ? `${account.label} — ${account.desc}` : account.desc}
+                              </p>
                             </div>
                           </motion.button>
                         ))}
