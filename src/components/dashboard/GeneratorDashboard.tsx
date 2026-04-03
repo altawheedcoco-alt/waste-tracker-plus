@@ -58,6 +58,9 @@ const WorkOrderInbox = lazy(() => import('@/components/work-orders/WorkOrderInbo
 const CreateWorkOrderDialog = lazy(() => import('@/components/work-orders/CreateWorkOrderDialog'));
 const ComplianceCertificateWidget = lazy(() => import('@/components/compliance/ComplianceCertificateWidget'));
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 const ComplianceAlertsWidget = lazy(() => import('@/components/compliance/ComplianceAlertsWidget'));
 const RiskMatrixWidget = lazy(() => import('@/components/compliance/RiskMatrixWidget'));
 const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/CorrectiveActionsWidget'));
@@ -350,10 +353,17 @@ const GeneratorDashboard = () => {
       {/* 5. التنبيهات والإشعارات */}
       <DashboardAlertsHub orgType="generator" />
 
-      {/* 6. التواصل */}
+       {/* 6. التواصل */}
       <Suspense fallback={null}>
         <CommunicationHubWidget />
       </Suspense>
+
+      {/* ★ ودجات التميز والتنبيهات الذكية */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
 
       {/* 7. التوثيق والبحث */}
       <PendingApprovalsWidget />
