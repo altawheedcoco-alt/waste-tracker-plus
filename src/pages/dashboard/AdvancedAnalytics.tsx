@@ -19,6 +19,9 @@ const WasteFlowSankey = lazy(() => import('@/components/analytics/WasteFlowSanke
 const ActivityHeatmap = lazy(() => import('@/components/analytics/ActivityHeatmap'));
 const CostOptimizationEngine = lazy(() => import('@/components/analytics/CostOptimizationEngine'));
 const ComplianceTracker = lazy(() => import('@/components/analytics/ComplianceTracker'));
+const DailyPulseWidget = lazy(() => import('@/components/dashboard/shared/DailyPulseWidget'));
+const OrganizationTimeline = lazy(() => import('@/components/analytics/OrganizationTimeline'));
+const BenchmarkIndicator = lazy(() => import('@/components/analytics/BenchmarkIndicator'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
