@@ -175,6 +175,7 @@ const sections: SectionConfig[] = [
     items: [
       { icon: MessageCircle, label: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat' },
       { icon: Video, label: 'الاجتماعات', labelEn: 'Meetings', path: '/dashboard/meetings' },
+      { icon: Phone, label: 'سجل المكالمات', labelEn: 'Call History', path: '/dashboard/call-history' },
       { icon: Send, label: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests' },
       { icon: FileText, label: 'عروض الأسعار', labelEn: 'Quotations', path: '/dashboard/quotations' },
       { icon: Users, label: 'حسابات الشركاء', labelEn: 'Partner Accounts', path: '/dashboard/partner-accounts' },
