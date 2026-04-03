@@ -1,7 +1,7 @@
 import { Route } from 'react-router-dom';
 import { lazyRetry } from './lazyRetry';
 
-// Secondary shared routes — loaded dynamically when user enters dashboard
+const SharedLinksPage = lazyRetry(() => import('@/pages/dashboard/SharedLinksPage'));
 const MyWorkspace = lazyRetry(() => import('@/pages/dashboard/MyWorkspace'));
 const DigitalIdentityCardPage = lazyRetry(() => import('@/pages/dashboard/DigitalIdentityCardPage'));
 const PrintCenter = lazyRetry(() => import('@/pages/dashboard/PrintCenter'));
