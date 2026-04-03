@@ -26,12 +26,13 @@ const LearningCenter = () => {
     return (
       <DashboardLayout>
         <ResponsivePageContainer>
-        <Button variant="ghost" onClick={() => setSelectedCourseId(null)} className="mb-4 gap-2">
-          <ChevronLeft className="w-4 h-4" />
-          العودة للمركز التعليمي
-        </Button>
-        <LMSCourseViewer courseId={selectedCourseId} />
-      </ResponsivePageContainer>
+          <Button variant="ghost" onClick={() => setSelectedCourseId(null)} className="mb-4 gap-2">
+            <ChevronLeft className="w-4 h-4" />
+            العودة للمركز التعليمي
+          </Button>
+          <LMSCourseViewer courseId={selectedCourseId} />
+        </ResponsivePageContainer>
+      </DashboardLayout>
     );
   }
 
@@ -95,7 +96,6 @@ const LearningCenter = () => {
         </TabsContent>
       </Tabs>
     </ResponsivePageContainer>
-      </DashboardLayout>
   );
 };
 
