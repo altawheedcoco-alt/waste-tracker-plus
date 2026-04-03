@@ -235,6 +235,7 @@ const SystemArchitectureGuide = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 
