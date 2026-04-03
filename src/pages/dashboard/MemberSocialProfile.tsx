@@ -351,6 +351,21 @@ export default function MemberSocialProfile() {
       setNewPostContent('');
       setSelectedFiles([]);
       toast.success('تم نشر المنشور');
+
+      // Fire member_post notification to org members + linked partners
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'member_post',
+            actorName: myProfile?.full_name || 'عضو',
+            actorUserId: user?.id || '',
+            targetOrgId: organization?.id,
+            organizationId: organization?.id,
+            entityTitle: newPostContent.trim().slice(0, 80) || 'منشور جديد',
+            includePartners: true,
+          });
+        });
+      } catch {}
     },
     onError: () => toast.error('فشل نشر المنشور'),
   });

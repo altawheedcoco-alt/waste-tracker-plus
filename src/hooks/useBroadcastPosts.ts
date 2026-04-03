@@ -125,16 +125,36 @@ export function useBroadcastPosts(channelId: string | undefined) {
       qc.invalidateQueries({ queryKey: ['broadcast-posts', channelId] });
       toast.success('تم نشر المنشور');
 
-      // Fire broadcast_new_post notification
+      // Fire broadcast_new_post notification to channel subscribers
       try {
-        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
-          notifySocialEvent({
-            type: 'broadcast_new_post',
-            actorName: 'منشور بث',
-            actorUserId: user?.id || '',
-            entityId: channelId,
-          });
-        });
+        (async () => {
+          // Get all subscribers of this channel
+          const { data: subscribers } = await (supabase as any)
+            .from('broadcast_subscriptions')
+            .select('user_id')
+            .eq('channel_id', channelId);
+
+          const subscriberIds = (subscribers || []).map((s: any) => s.user_id).filter((id: string) => id !== user?.id);
+
+          if (subscriberIds.length > 0) {
+            const { notifyMultiple } = await import('@/utils/notifyAction');
+            await notifyMultiple(subscriberIds, {
+              title: '📢 منشور بث جديد',
+              message: 'منشور جديد في قناة البث',
+              type: 'broadcast_new_post',
+              metadata: { entity_id: channelId },
+            });
+          } else {
+            // Fallback: notify org members
+            const { notifySocialEvent } = await import('@/services/notificationTriggers');
+            await notifySocialEvent({
+              type: 'broadcast_new_post',
+              actorName: 'منشور بث',
+              actorUserId: user?.id || '',
+              entityId: channelId,
+            });
+          }
+        })();
       } catch {}
     },
     onError: () => toast.error('فشل نشر المنشور'),

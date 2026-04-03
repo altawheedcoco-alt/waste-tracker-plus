@@ -232,7 +232,7 @@ export const useStories = () => {
       toast.success('تم نشر الحالة بنجاح!');
       queryClient.invalidateQueries({ queryKey: ['stories'] });
 
-      // Fire story_posted notification to followers
+      // Fire story_posted notification to followers + linked partners
       try {
         import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
           notifySocialEvent({
@@ -241,6 +241,7 @@ export const useStories = () => {
             actorUserId: user?.id || '',
             targetOrgId: organization?.id,
             organizationId: organization?.id,
+            includePartners: true,
           });
         });
       } catch {}

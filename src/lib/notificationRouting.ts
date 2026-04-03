@@ -71,6 +71,7 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'proof_of_service':
     case 'loading_worker':
     case 'recycler_timeslot':
+    case 'shipment_status_change':
       return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/shipments';
 
     // Chat with conversation ID

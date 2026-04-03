@@ -122,12 +122,26 @@ export function useReelActions() {
   const { toast } = useToast();
 
   const toggleLike = useMutation({
-    mutationFn: async ({ reelId, isLiked }: { reelId: string; isLiked: boolean }) => {
+    mutationFn: async ({ reelId, isLiked, reelOwnerId }: { reelId: string; isLiked: boolean; reelOwnerId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       if (isLiked) {
         await supabase.from('reel_likes').delete().eq('reel_id', reelId).eq('user_id', user.id);
       } else {
         await supabase.from('reel_likes').insert({ reel_id: reelId, user_id: user.id });
+        // Notify reel owner about the like
+        if (reelOwnerId && reelOwnerId !== user.id) {
+          try {
+            import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+              notifySocialEvent({
+                type: 'reel_liked',
+                actorName: 'إعجاب بالريل ❤️',
+                actorUserId: user.id,
+                targetUserId: reelOwnerId,
+                entityId: reelId,
+              });
+            });
+          } catch {}
+        }
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reels-feed'] }),
@@ -149,7 +163,7 @@ export function useReelActions() {
   });
 
   const addComment = useMutation({
-    mutationFn: async ({ reelId, content }: { reelId: string; content: string }) => {
+    mutationFn: async ({ reelId, content, reelOwnerId }: { reelId: string; content: string; reelOwnerId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase.from('reel_comments').insert({
         reel_id: reelId,
@@ -157,6 +171,21 @@ export function useReelActions() {
         content,
       });
       if (error) throw error;
+
+      // Notify reel owner about the comment
+      if (reelOwnerId && reelOwnerId !== user.id) {
+        try {
+          import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+            notifySocialEvent({
+              type: 'reel_commented',
+              actorName: content.slice(0, 50),
+              actorUserId: user.id,
+              targetUserId: reelOwnerId,
+              entityId: reelId,
+            });
+          });
+        } catch {}
+      }
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['reel-comments', vars.reelId] });
@@ -173,9 +202,24 @@ export function useReelActions() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['reels-feed'] });
       toast({ title: 'تم نشر الريل بنجاح! 🎬' });
+
+      // Fire reel_posted notification to org members + linked partners
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'reel_posted',
+            actorName: 'ريل جديد 🎬',
+            actorUserId: user?.id || '',
+            targetOrgId: vars.organization_id || undefined,
+            organizationId: vars.organization_id || undefined,
+            entityTitle: vars.caption || undefined,
+            includePartners: true,
+          });
+        });
+      } catch {}
     },
   });
 
