@@ -1,6 +1,8 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useDriverOffers } from '@/hooks/useDriverOffers';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDriverSmartLocation } from '@/hooks/useDriverSmartLocation';
+import DriverLocationToggle from '@/components/driver/DriverLocationToggle';
 import { useDriverDashboardData, type DriverShipment } from '@/hooks/useDriverDashboardData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
