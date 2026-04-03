@@ -263,7 +263,9 @@
   /* ── Ensure bg-white / text-black / text-white adapt ── */
   .bg-white { background-color: hsl(var(--card)) !important; }
   .text-black { color: hsl(var(--foreground)) !important; }
-  .text-white { color: hsl(var(--primary-foreground)) !important; }
+  /* text-white: keep white on gradient backgrounds, adapt elsewhere */
+  .text-white:not([class*="bg-gradient"]) { color: hsl(var(--primary-foreground)) !important; }
+  [class*="bg-gradient"] .text-white { color: white !important; }
   .bg-black { background-color: hsl(var(--foreground)) !important; }
   .bg-black\/50 { background-color: hsl(var(--foreground) / 0.5) !important; }
   .bg-black\/40 { background-color: hsl(var(--foreground) / 0.4) !important; }
@@ -309,6 +311,55 @@
   /* ── Placeholder overrides ── */
   .placeholder\:text-gray-400::placeholder { color: hsl(var(--muted-foreground) / 0.6) !important; }
   .placeholder\:text-gray-500::placeholder { color: hsl(var(--muted-foreground)) !important; }
+
+  /* ── Print exclusion: keep white bg for print containers ── */
+  .print-container.bg-white,
+  .print-container .bg-white,
+  [data-print] .bg-white,
+  .brochure-page.bg-white {
+    background-color: white !important;
+  }
+  .print-container.text-black,
+  .print-container .text-black,
+  [data-print] .text-black {
+    color: black !important;
+  }
+
+  /* ── Border color overrides ── */
+  .border-white { border-color: hsl(var(--border)) !important; }
+  .border-white\/10 { border-color: hsl(var(--border) / 0.3) !important; }
+  .border-white\/20 { border-color: hsl(var(--border) / 0.4) !important; }
+  .border-white\/30 { border-color: hsl(var(--border) / 0.5) !important; }
+  .border-black { border-color: hsl(var(--foreground)) !important; }
+
+  /* ── Gradient overrides ── */
+  .from-white { --tw-gradient-from: hsl(var(--card)) !important; }
+  .to-white { --tw-gradient-to: hsl(var(--card)) !important; }
+  .via-white { --tw-gradient-via: hsl(var(--card)) !important; }
+  .to-white\/80 { --tw-gradient-to: hsl(var(--card) / 0.8) !important; }
+  .from-white\/20 { --tw-gradient-from: hsl(var(--card) / 0.2) !important; }
+
+  /* ── Shadow overrides ── */
+  .shadow-black\/10 { --tw-shadow-color: hsl(var(--foreground) / 0.1) !important; }
+  .shadow-black\/5 { --tw-shadow-color: hsl(var(--foreground) / 0.05) !important; }
+
+  /* ── Additional bg-white opacity variants ── */
+  .bg-white\/10 { background-color: hsl(var(--card) / 0.1) !important; }
+  .bg-white\/15 { background-color: hsl(var(--card) / 0.15) !important; }
+  .bg-white\/20 { background-color: hsl(var(--card) / 0.2) !important; }
+  .bg-white\/30 { background-color: hsl(var(--card) / 0.3) !important; }
+  .bg-white\/40 { background-color: hsl(var(--card) / 0.4) !important; }
+  .bg-white\/60 { background-color: hsl(var(--card) / 0.6) !important; }
+  .bg-white\/70 { background-color: hsl(var(--card) / 0.7) !important; }
+  .bg-black\/20 { background-color: hsl(var(--foreground) / 0.2) !important; }
+  .bg-black\/30 { background-color: hsl(var(--foreground) / 0.3) !important; }
+  .bg-black\/90 { background-color: hsl(var(--foreground) / 0.9) !important; }
+
+  /* ── Hover bg-white opacity ── */
+  .hover\:bg-white\/10:hover { background-color: hsl(var(--card) / 0.1) !important; }
+  .hover\:bg-white\/20:hover { background-color: hsl(var(--card) / 0.2) !important; }
+  .hover\:bg-white\/40:hover { background-color: hsl(var(--card) / 0.4) !important; }
+  .hover\:bg-white\/90:hover { background-color: hsl(var(--card) / 0.9) !important; }
 }
 
 /* ═══════════════════════════════════════════════ */
