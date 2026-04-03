@@ -1,6 +1,8 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useDriverOffers } from '@/hooks/useDriverOffers';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDriverSmartLocation } from '@/hooks/useDriverSmartLocation';
+import DriverLocationToggle from '@/components/driver/DriverLocationToggle';
 import { useDriverDashboardData, type DriverShipment } from '@/hooks/useDriverDashboardData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -169,6 +171,9 @@ const DriverDashboard = () => {
   const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<DriverShipment | null>(null);
   const [activeFieldTool, setActiveFieldTool] = useState<string>('checklist');
 
+  const hasActiveShipment = activeShipments.length > 0;
+  const smartLocation = useDriverSmartLocation(driverInfo?.id, hasActiveShipment);
+
   const { pendingOffer, acceptOffer, rejectOffer, counterOffer } = useDriverOffers();
 
   const quickActions = useQuickActions({
@@ -272,6 +277,16 @@ const DriverDashboard = () => {
           </Button>
         </div>
       </div>
+
+      {/* Location Toggle — All Driver Types */}
+      {driverInfo && (
+        <DriverLocationToggle
+          status={smartLocation}
+          shouldShare={smartLocation.shouldShare}
+          manualOn={smartLocation.manualOn}
+          onToggle={smartLocation.toggleSharing}
+        />
+      )}
 
       {/* Performance Strip */}
       {driverInfo && (
