@@ -33,6 +33,12 @@ const InvoiceAgingReport = lazy(() => import('@/components/analytics/InvoiceAgin
 const WasteRecoveryRate = lazy(() => import('@/components/analytics/WasteRecoveryRate'));
 const ShipmentVelocityTracker = lazy(() => import('@/components/analytics/ShipmentVelocityTracker'));
 const EnvironmentalPassportWidget = lazy(() => import('@/components/analytics/EnvironmentalPassportWidget'));
+const AnomalyDetectionWidget = lazy(() => import('@/components/analytics/AnomalyDetectionWidget'));
+const PredictiveMaintenanceWidget = lazy(() => import('@/components/analytics/PredictiveMaintenanceWidget'));
+const FleetUtilizationWidget = lazy(() => import('@/components/analytics/FleetUtilizationWidget'));
+const InventoryTurnoverWidget = lazy(() => import('@/components/analytics/InventoryTurnoverWidget'));
+const LiveAlertsDashboard = lazy(() => import('@/components/analytics/LiveAlertsDashboard'));
+const ExportCenterWidget = lazy(() => import('@/components/analytics/ExportCenterWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -178,6 +184,36 @@ const AdvancedAnalytics = () => {
           </Suspense>
           <Suspense fallback={<ChartSkeleton />}>
             <ShipmentVelocityTracker />
+          </Suspense>
+        </div>
+
+        {/* AI: Anomaly Detection + Live Alerts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <AnomalyDetectionWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <LiveAlertsDashboard />
+          </Suspense>
+        </div>
+
+        {/* Fleet + Predictive Maintenance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <FleetUtilizationWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PredictiveMaintenanceWidget />
+          </Suspense>
+        </div>
+
+        {/* Inventory Turnover + Export Center */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <InventoryTurnoverWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ExportCenterWidget />
           </Suspense>
         </div>
       </div>
