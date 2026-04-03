@@ -63,7 +63,16 @@ export function useNativePush() {
   }, [user, isSupported]);
 
   const subscribe = useCallback(async () => {
-    if (!user || !isSupported) return false;
+    if (!user) {
+      toast.error('يجب تسجيل الدخول أولاً لتفعيل الإشعارات');
+      return false;
+    }
+
+    if (!isSupported) {
+      toast.error('هذا الجهاز أو المتصفح لا يدعم Web Push حالياً');
+      return false;
+    }
+
     setLoading(true);
 
     try {
