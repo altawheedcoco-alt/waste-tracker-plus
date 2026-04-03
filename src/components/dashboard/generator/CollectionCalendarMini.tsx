@@ -20,7 +20,7 @@ const CollectionCalendarMini = () => {
       if (!organization?.id) return [];
       const { data } = await supabase
         .from('shipments')
-        .select('id, scheduled_date, waste_type, status, transporter:organizations!shipments_transporter_id_fkey(name)')
+        .select('id, pickup_date, waste_type, status, transporter_id')
         .eq('generator_id', organization.id)
         .in('status', ['new', 'approved', 'collecting'])
         .order('scheduled_date', { ascending: true })
