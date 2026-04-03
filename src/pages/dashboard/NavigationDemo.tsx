@@ -569,6 +569,7 @@ const NavigationDemo = () => {
 
   if (error) {
     return (
+      <DashboardLayout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted" dir="rtl">
         <Card className="p-8 shadow-xl">
           <div className="flex flex-col items-center gap-4">
