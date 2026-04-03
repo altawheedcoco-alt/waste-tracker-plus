@@ -32,12 +32,12 @@ const ESGComplianceScorecard: React.FC = () => {
     queryKey: ['esg-scorecard-data', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
-      const { data } = await supabase
-        .from('shipments')
+      const { data } = await (supabase
+        .from('shipments' as any)
         .select('waste_type, quantity, unit, status, disposal_method, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude')
-        .eq('organization_id', organization.id)
+        .eq('organization_id', organization.id) as any)
         .in('status', ['delivered', 'confirmed']);
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!organization?.id,
   });
