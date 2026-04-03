@@ -199,8 +199,8 @@ export default function C2BSubmissionForm() {
 
       if (error) throw error;
 
-      // Also save to c2b_submissions for admin tracking
-      await supabase.from("c2b_submissions").insert({
+      // Also save to c2b_submissions for admin tracking (fire and forget)
+      supabase.from("c2b_submissions").insert({
         full_name: sanitizeText(form.customer_name),
         phone: sanitizePhone(form.customer_phone),
         email: form.customer_email ? sanitizeEmail(form.customer_email) : null,
@@ -211,7 +211,7 @@ export default function C2BSubmissionForm() {
         estimated_quantity: form.estimated_quantity || null,
         location: form.customer_address || form.area_name || form.governorate || null,
         photo_urls: photoUrls,
-      }).catch(() => { /* ignore secondary insert failure */ });
+      }).then(() => {});
 
       setSubmitted(true);
       toast.success("تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً");
