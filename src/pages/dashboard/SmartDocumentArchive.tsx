@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,7 +89,8 @@ const SmartDocumentArchive = () => {
   ];
 
   return (
-    <div dir="rtl" className="space-y-6 p-6">
+    <DashboardLayout>
+      <div dir="rtl" className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Brain className="w-8 h-8 text-primary" />
@@ -471,6 +473,7 @@ const SmartDocumentArchive = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

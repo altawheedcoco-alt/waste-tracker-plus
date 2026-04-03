@@ -1,6 +1,7 @@
 /**
  * StationeryTemplates — Browse, preview, and print secure letterheads
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -168,7 +169,8 @@ const StationeryTemplates = () => {
   const vCode = useMemo(() => generateVerificationCode(), [selectedTemplate]);
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -343,6 +345,7 @@ const StationeryTemplates = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

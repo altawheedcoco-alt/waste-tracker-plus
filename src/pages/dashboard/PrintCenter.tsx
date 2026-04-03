@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -751,7 +752,8 @@ const PrintCenter = () => {
   }, [documents]);
 
   return (
-    <div className="space-y-4 sm:space-y-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-4 sm:space-y-6" dir="rtl">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="shrink-0">
@@ -1194,6 +1196,7 @@ const PrintCenter = () => {
         </Card>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

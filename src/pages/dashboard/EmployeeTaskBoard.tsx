@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,7 +85,8 @@ const EmployeeTaskBoard = () => {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -194,6 +196,7 @@ const EmployeeTaskBoard = () => {
         ))}
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

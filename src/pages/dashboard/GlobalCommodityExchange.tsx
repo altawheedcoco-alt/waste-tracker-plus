@@ -159,7 +159,7 @@ const GlobalCommodityExchange = () => {
       stable: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
     };
     return (
-      <Badge variant="outline" className={`${colors[trend as keyof typeof colors] || colors.stable} gap-1`}>
+              <Badge variant="outline" className={`${colors[trend as keyof typeof colors] || colors.stable} gap-1`}>
         {getTrendIcon(trend)}
         {change > 0 ? '+' : ''}{change?.toFixed(1)}%
       </Badge>
@@ -533,7 +533,7 @@ const GlobalCommodityExchange = () => {
         </TabsContent>
       </Tabs>
     </div>
-  );
+        );
 };
 
 export default GlobalCommodityExchange;

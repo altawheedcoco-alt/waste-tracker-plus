@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -151,7 +152,8 @@ const ManualOperations = () => {
   }, [logs, totalCount]);
 
   return (
-    <div className="space-y-3 sm:space-y-4" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-3 sm:space-y-4" dir="rtl">
       <BackButton />
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
@@ -408,6 +410,7 @@ const ManualOperations = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

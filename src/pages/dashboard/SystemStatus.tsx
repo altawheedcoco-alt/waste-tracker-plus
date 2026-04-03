@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,7 +83,8 @@ const SystemStatus = () => {
   };
 
   return (
-    <motion.div
+    <DashboardLayout>
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -600,6 +602,7 @@ const SystemStatus = () => {
         </TabsContent>
       </Tabs>
     </motion.div>
+      </DashboardLayout>
   );
 };
 

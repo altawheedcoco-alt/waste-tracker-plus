@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,7 +101,8 @@ const ExecutiveDashboard = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6" dir="rtl">
       <BackButton />
       {/* Header */}
       <div className="space-y-1">
@@ -213,6 +215,7 @@ const ExecutiveDashboard = () => {
         </Card>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

@@ -32,7 +32,7 @@ const ApiManagement = () => {
   const apiBaseUrl = `${window.location.origin.replace('id-preview--', '')}/functions/v1/public-api`;
 
   return (
-    <motion.div
+          <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
@@ -340,7 +340,7 @@ function EndpointDoc({ method, path, description, scope }: { method: string; pat
       </div>
       <Badge variant="outline" className="text-xs">{scope}</Badge>
     </div>
-  );
+        );
 }
 
 export default ApiManagement;

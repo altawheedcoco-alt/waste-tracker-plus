@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '@/components/ui/back-button';
@@ -253,7 +254,8 @@ const DriverPermits = () => {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6" dir="rtl">
       <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -735,6 +737,7 @@ const DriverPermits = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 

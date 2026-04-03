@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -158,7 +159,8 @@ const WoodMarketIntelligence = () => {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -532,6 +534,7 @@ const WoodMarketIntelligence = () => {
         </AnimatePresence>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

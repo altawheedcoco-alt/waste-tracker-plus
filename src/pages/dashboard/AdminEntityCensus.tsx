@@ -487,7 +487,8 @@ const AdminEntityCensus = memo(() => {
       </Tabs>
     </div>
   );
-});
+}
+);
 
 AdminEntityCensus.displayName = 'AdminEntityCensus';
 

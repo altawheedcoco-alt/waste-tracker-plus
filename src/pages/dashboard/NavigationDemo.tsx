@@ -352,7 +352,6 @@ const NavigationDemo = () => {
   // Calculate average speed
   const avgSpeed = elapsedTime > 0 ? (currentDistance / (elapsedTime / 3600)).toFixed(0) : '0';
 
-
   // Mode Selection Screen
   if (navigationMode === 'selection') {
     return (

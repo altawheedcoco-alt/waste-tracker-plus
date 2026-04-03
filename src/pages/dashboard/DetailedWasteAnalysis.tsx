@@ -121,7 +121,7 @@ const DetailedWasteAnalysis = () => {
 
   if (!hasAccess) {
     return (
-      <div className="p-4 md:p-6 max-w-5xl mx-auto" dir="rtl">
+              <div className="p-4 md:p-6 max-w-5xl mx-auto" dir="rtl">
         <BackButton />
         <Card className="mt-6">
           <CardContent className="flex flex-col items-center justify-center py-16 space-y-4">
@@ -590,6 +590,6 @@ const StatCard = ({ icon, label, value, sub, color, badge, badgeClass }: { icon:
     )}
     {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
   </div>
-);
+  );
 
 export default DetailedWasteAnalysis;

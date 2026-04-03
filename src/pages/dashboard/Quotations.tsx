@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/AuthContext';
@@ -150,7 +151,7 @@ const Quotations = () => {
   const renderQuotationList = (list: Quotation[], direction: QuotationDirection) => {
     if (isLoading) return <div className="text-center py-12 text-muted-foreground">جاري التحميل...</div>;
     if (list.length === 0) return (
-      <Card>
+        <Card>
         <CardContent className="py-12 text-center">
           <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
           <p className="text-muted-foreground mb-1">
@@ -168,6 +169,7 @@ const Quotations = () => {
     );
 
     return (
+      <DashboardLayout>
       <div className="grid gap-3">
         {list.map(q => (
           <Card key={q.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleView(q)}>
@@ -200,6 +202,7 @@ const Quotations = () => {
           </Card>
         ))}
       </div>
+      </DashboardLayout>
     );
   };
 

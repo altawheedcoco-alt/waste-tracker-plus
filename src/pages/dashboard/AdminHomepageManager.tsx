@@ -88,7 +88,7 @@ const AdminHomepageManager = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+              <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -520,7 +520,7 @@ const BlockFormDialog = memo(({ open, onOpenChange, block, sections, onSave, isS
       </DialogContent>
     </Dialog>
   );
-});
+}  );
 BlockFormDialog.displayName = 'BlockFormDialog';
 
 export default AdminHomepageManager;

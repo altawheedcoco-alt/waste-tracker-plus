@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -546,7 +547,8 @@ const WaPilotManagement = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <DashboardLayout>
+      <div className="space-y-5">
       {/* ══════════ HEADER ══════════ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -1377,6 +1379,7 @@ const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
         <WhatsAppNotificationManager />
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

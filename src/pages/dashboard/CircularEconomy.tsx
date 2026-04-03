@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Recycle, FileCheck, Network, BarChart3, Brain } from 'lucide-react';
@@ -11,7 +12,8 @@ const CircularEconomy = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
+    <DashboardLayout>
+      <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         <BackButton />
         {/* Header */}
@@ -60,6 +62,7 @@ const CircularEconomy = () => {
         </Tabs>
       </div>
     </div>
+      </DashboardLayout>
   );
 };
 

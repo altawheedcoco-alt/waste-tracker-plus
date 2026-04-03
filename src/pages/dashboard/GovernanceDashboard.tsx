@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,7 +23,8 @@ const GovernanceDashboard = () => {
   ];
 
   return (
-    <div dir="rtl" className="space-y-6 p-6">
+    <DashboardLayout>
+      <div dir="rtl" className="space-y-6 p-6">
       <BackButton />
       <div className="flex items-center gap-3">
         <Shield className="w-8 h-8 text-primary" />
@@ -79,6 +81,7 @@ const GovernanceDashboard = () => {
         <TabsContent value="alerts"><GovernanceAlertsTab /></TabsContent>
       </Tabs>
     </div>
+      </DashboardLayout>
   );
 };
 

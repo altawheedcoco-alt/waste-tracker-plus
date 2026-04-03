@@ -181,16 +181,16 @@ const WasteExchange = () => {
   if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="max-w-md">
-          <CardContent className="p-8 text-center">
-            <ShieldCheck className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-bold mb-2">{t('exchangePage.accessRestricted')}</h2>
-            <p className="text-muted-foreground">
-              {t('exchangePage.accessRestrictedDesc')}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="max-w-md">
+            <CardContent className="p-8 text-center">
+              <ShieldCheck className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-xl font-bold mb-2">{t('exchangePage.accessRestricted')}</h2>
+              <p className="text-muted-foreground">
+                {t('exchangePage.accessRestrictedDesc')}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
     );
   }
 

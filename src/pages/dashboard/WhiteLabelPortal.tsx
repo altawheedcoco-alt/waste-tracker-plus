@@ -2,6 +2,7 @@
  * WhiteLabelPortal — Organizations create branded client portals
  * Clients track shipments, view invoices, certificates via a custom branded page
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -113,7 +114,8 @@ const WhiteLabelPortal = () => {
   };
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -228,6 +230,7 @@ const WhiteLabelPortal = () => {
         </Card>
       )}
     </div>
+      </DashboardLayout>
   );
 };
 

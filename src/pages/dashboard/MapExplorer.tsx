@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import BackButton from '@/components/ui/back-button';
@@ -21,7 +22,8 @@ const MapExplorer = () => {
   }, []);
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-3">
         <BackButton />
         <div>
@@ -33,6 +35,7 @@ const MapExplorer = () => {
       </div>
       <div ref={mapRef} className="rounded-lg border border-border" style={{ height: '500px' }} />
     </div>
+      </DashboardLayout>
   );
 };
 

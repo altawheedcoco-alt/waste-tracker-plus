@@ -21,7 +21,7 @@ import { ar } from 'date-fns/locale';
 const StarRating = ({ value, onChange, readonly = false, size = 'md' }: { value: number; onChange?: (v: number) => void; readonly?: boolean; size?: string }) => {
   const sizeClass = size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
   return (
-    <div className="flex gap-0.5" dir="ltr">
+          <div className="flex gap-0.5" dir="ltr">
       {[1, 2, 3, 4, 5].map(i => (
         <Star
           key={i}
@@ -243,7 +243,7 @@ const PartnerReviews = () => {
         </DialogContent>
       </Dialog>
     </div>
-  );
+        );
 };
 
 export default PartnerReviews;

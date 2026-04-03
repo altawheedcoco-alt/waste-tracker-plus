@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import BackButton from '@/components/ui/back-button';
@@ -38,7 +39,8 @@ const RegulatorDashboardNew = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 sm:p-6">
       <BackButton />
 
       <DashboardV2Header
@@ -91,6 +93,7 @@ const RegulatorDashboardNew = () => {
         <RegulatorQuickFAB onSetTab={setActiveTab} />
       </Suspense>
     </div>
+      </DashboardLayout>
   );
 };
 

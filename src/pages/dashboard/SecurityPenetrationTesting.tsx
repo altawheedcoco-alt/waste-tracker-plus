@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -360,7 +361,8 @@ const SecurityPenetrationTesting = () => {
   const filteredTests = activeTab === 'all' ? tests : tests.filter(t => t.categoryAr === activeTab);
 
   return (
-    <motion.div
+    <DashboardLayout>
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="space-y-6 p-4 md:p-6"
@@ -631,6 +633,7 @@ const SecurityPenetrationTesting = () => {
         </motion.div>
       )}
     </motion.div>
+      </DashboardLayout>
   );
 };
 

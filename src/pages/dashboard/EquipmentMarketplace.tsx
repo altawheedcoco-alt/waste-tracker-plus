@@ -2,6 +2,7 @@
  * EquipmentMarketplace — Buy/sell used recycling & transport equipment
  * Platform earns 3-5% commission on each transaction
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,7 +138,8 @@ const EquipmentMarketplace = () => {
   const myListings = listings.filter((l: any) => l.organization_id === profile?.organization_id);
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4" dir="rtl">
       <BackButton />
       <div className="flex items-center justify-between">
         <div>
@@ -287,6 +289,7 @@ const EquipmentMarketplace = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </DashboardLayout>
   );
 };
 
