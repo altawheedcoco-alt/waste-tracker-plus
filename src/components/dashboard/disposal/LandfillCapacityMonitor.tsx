@@ -20,8 +20,8 @@ const LandfillCapacityMonitor = () => {
       // حساب الأوزان المستقبلة هذا الشهر
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('actual_weight, estimated_weight, created_at')
-        .eq('disposal_id', organization.id)
+        .select('actual_weight, quantity, created_at')
+        .eq('disposal_facility_id', organization.id)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .limit(500);
