@@ -3,6 +3,7 @@
  */
 import { useState, useMemo } from 'react';
 import BackButton from '@/components/ui/back-button';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
