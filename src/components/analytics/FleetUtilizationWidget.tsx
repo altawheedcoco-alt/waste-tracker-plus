@@ -1,9 +1,10 @@
 /**
  * FleetUtilizationWidget — استخدام الأسطول
+ * يحلل نشاط السائقين كمؤشر لاستخدام الأسطول
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Activity, Fuel, Route } from 'lucide-react';
+import { Truck, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,34 +19,40 @@ export default function FleetUtilizationWidget() {
     queryFn: async () => {
       if (!orgId) return null;
 
-      const [vehiclesRes, shipmentsRes] = await Promise.all([
-        supabase.from('vehicles').select('id, plate_number, is_active, total_trips').eq('organization_id', orgId),
-        supabase.from('shipments').select('id, driver_id, status, actual_weight')
-          .eq('transporter_id', orgId)
-          .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-      ]);
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-      const vehicles = vehiclesRes.data || [];
-      const shipments = shipmentsRes.data || [];
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('driver_id, status, actual_weight')
+        .eq('transporter_id', orgId)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .not('driver_id', 'is', null);
 
-      const totalVehicles = vehicles.length;
-      const activeVehicles = vehicles.filter(v => v.is_active).length;
-      const utilizationRate = totalVehicles > 0 ? Math.round((activeVehicles / totalVehicles) * 100) : 0;
-      const avgTripsPerVehicle = totalVehicles > 0
-        ? Math.round(vehicles.reduce((s, v) => s + (v.total_trips || 0), 0) / totalVehicles)
-        : 0;
+      const driverTrips = new Map<string, number>();
+      let totalWeight = 0;
 
-      const totalTonnage = Math.round(shipments.reduce((s, sh) => s + (sh.actual_weight || 0), 0) / 1000 * 10) / 10;
+      (shipments || []).forEach(s => {
+        if (s.driver_id) {
+          driverTrips.set(s.driver_id, (driverTrips.get(s.driver_id) || 0) + 1);
+        }
+        totalWeight += s.actual_weight || 0;
+      });
 
-      // Group by vehicle activity level
+      const totalDrivers = driverTrips.size;
+      const totalTrips = shipments?.length || 0;
+      const avgTrips = totalDrivers > 0 ? Math.round(totalTrips / totalDrivers) : 0;
+
+      // Activity buckets
+      const trips = Array.from(driverTrips.values());
       const chartData = [
-        { name: 'نشط جداً', count: vehicles.filter(v => (v.total_trips || 0) > avgTripsPerVehicle * 1.5).length },
-        { name: 'نشط', count: vehicles.filter(v => { const t = v.total_trips || 0; return t > avgTripsPerVehicle * 0.5 && t <= avgTripsPerVehicle * 1.5; }).length },
-        { name: 'منخفض', count: vehicles.filter(v => { const t = v.total_trips || 0; return t > 0 && t <= avgTripsPerVehicle * 0.5; }).length },
-        { name: 'خامل', count: vehicles.filter(v => !v.total_trips || v.total_trips === 0).length },
+        { name: 'نشط جداً', count: trips.filter(t => t > avgTrips * 1.5).length },
+        { name: 'نشط', count: trips.filter(t => t > avgTrips * 0.5 && t <= avgTrips * 1.5).length },
+        { name: 'منخفض', count: trips.filter(t => t > 0 && t <= avgTrips * 0.5).length },
       ].filter(d => d.count > 0);
 
-      return { totalVehicles, activeVehicles, utilizationRate, avgTripsPerVehicle, totalTonnage, shipmentCount: shipments.length, chartData };
+      const utilizationRate = totalDrivers > 0 ? Math.round((trips.filter(t => t >= avgTrips * 0.5).length / totalDrivers) * 100) : 0;
+
+      return { totalDrivers, totalTrips, avgTrips, totalTonnage: Math.round(totalWeight / 1000 * 10) / 10, utilizationRate, chartData };
     },
     enabled: !!orgId,
     staleTime: 15 * 60 * 1000,
@@ -74,16 +81,16 @@ export default function FleetUtilizationWidget() {
           <>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div className="p-2 rounded-lg bg-muted/30">
-                <p className="text-lg font-bold">{data.totalVehicles}</p>
-                <p className="text-[9px] text-muted-foreground">مركبة</p>
+                <p className="text-lg font-bold">{data.totalDrivers}</p>
+                <p className="text-[9px] text-muted-foreground">سائق</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/30">
-                <p className="text-lg font-bold">{data.activeVehicles}</p>
-                <p className="text-[9px] text-muted-foreground">نشطة</p>
+                <p className="text-lg font-bold">{data.totalTrips}</p>
+                <p className="text-[9px] text-muted-foreground">رحلة</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/30">
-                <p className="text-lg font-bold">{data.avgTripsPerVehicle}</p>
-                <p className="text-[9px] text-muted-foreground">رحلة/مركبة</p>
+                <p className="text-lg font-bold">{data.avgTrips}</p>
+                <p className="text-[9px] text-muted-foreground">رحلة/سائق</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/30">
                 <p className="text-lg font-bold">{data.totalTonnage}</p>
@@ -97,7 +104,7 @@ export default function FleetUtilizationWidget() {
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} className="text-muted-foreground" />
                   <YAxis tick={{ fontSize: 10 }} className="text-muted-foreground" />
                   <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, direction: 'rtl' }} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="عدد المركبات" />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="عدد السائقين" />
                 </BarChart>
               </ResponsiveContainer>
             )}

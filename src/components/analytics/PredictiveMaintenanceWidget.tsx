@@ -1,6 +1,6 @@
 /**
  * PredictiveMaintenanceWidget — الصيانة التنبؤية
- * يتنبأ بأوقات الصيانة المطلوبة للأسطول
+ * يتنبأ بحالة الأسطول بناءً على بيانات الشحنات
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,17 +8,6 @@ import { Wrench, AlertCircle, CheckCircle2, Clock, Truck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface VehicleHealth {
-  id: string;
-  plate: string;
-  tripCount: number;
-  lastTrip: string;
-  healthScore: number;
-  status: 'good' | 'attention' | 'critical';
-  nextMaintenance: string;
-  daysUntilMaintenance: number;
-}
 
 export default function PredictiveMaintenanceWidget() {
   const { organization } = useAuth();
@@ -29,44 +18,52 @@ export default function PredictiveMaintenanceWidget() {
     queryFn: async () => {
       if (!orgId) return [];
 
-      const { data: vehicles } = await supabase
-        .from('vehicles')
-        .select('id, plate_number, vehicle_type, last_maintenance_date, total_trips, created_at')
-        .eq('organization_id', orgId)
-        .eq('is_active', true);
+      // Analyze driver activity as proxy for fleet health
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('driver_id, created_at, delivered_at, status, actual_weight')
+        .eq('transporter_id', orgId)
+        .gte('created_at', threeMonthsAgo.toISOString())
+        .not('driver_id', 'is', null);
+
+      const driverMap = new Map<string, { trips: number; lastTrip: Date; totalWeight: number }>();
+
+      (shipments || []).forEach(s => {
+        if (!s.driver_id) return;
+        const existing = driverMap.get(s.driver_id) || { trips: 0, lastTrip: new Date(0), totalWeight: 0 };
+        existing.trips++;
+        const d = new Date(s.created_at!);
+        if (d > existing.lastTrip) existing.lastTrip = d;
+        existing.totalWeight += s.actual_weight || 0;
+        driverMap.set(s.driver_id, existing);
+      });
 
       const now = new Date();
+      return Array.from(driverMap.entries()).map(([id, stats]) => {
+        const daysSinceLastTrip = Math.floor((now.getTime() - stats.lastTrip.getTime()) / (1000 * 60 * 60 * 24));
+        const loadStress = stats.totalWeight / Math.max(stats.trips, 1);
 
-      return (vehicles || []).map(v => {
-        const lastMaint = v.last_maintenance_date ? new Date(v.last_maintenance_date) : new Date(v.created_at);
-        const daysSinceMaint = Math.floor((now.getTime() - lastMaint.getTime()) / (1000 * 60 * 60 * 24));
-        const trips = v.total_trips || 0;
-
-        // Predict next maintenance based on trips and time
-        const maintenanceIntervalDays = 90; // every 3 months
-        const tripThreshold = 100;
-        
-        const daysFactor = Math.min(daysSinceMaint / maintenanceIntervalDays, 1);
-        const tripFactor = Math.min(trips / tripThreshold, 1);
-        const healthScore = Math.max(0, Math.round((1 - Math.max(daysFactor, tripFactor)) * 100));
-
-        const daysUntilMaintenance = Math.max(0, maintenanceIntervalDays - daysSinceMaint);
-        const nextMaintDate = new Date(lastMaint.getTime() + maintenanceIntervalDays * 24 * 60 * 60 * 1000);
+        // Health score based on activity and load
+        const activityFactor = Math.min(daysSinceLastTrip / 30, 1);
+        const loadFactor = Math.min(loadStress / 5000, 1); // 5000kg threshold
+        const healthScore = Math.max(0, Math.round((1 - Math.max(activityFactor, loadFactor * 0.5)) * 100));
 
         let status: 'good' | 'attention' | 'critical' = 'good';
         if (healthScore < 30) status = 'critical';
         else if (healthScore < 60) status = 'attention';
 
         return {
-          id: v.id,
-          plate: v.plate_number || 'غير محدد',
-          tripCount: trips,
-          lastTrip: lastMaint.toLocaleDateString('ar-EG'),
+          id,
+          plate: `سائق-${id.slice(0, 6)}`,
+          tripCount: stats.trips,
+          lastTrip: stats.lastTrip.toLocaleDateString('ar-EG'),
           healthScore,
           status,
-          nextMaintenance: nextMaintDate.toLocaleDateString('ar-EG'),
-          daysUntilMaintenance,
-        } as VehicleHealth;
+          daysInactive: daysSinceLastTrip,
+        };
       }).sort((a, b) => a.healthScore - b.healthScore).slice(0, 6);
     },
     enabled: !!orgId,
@@ -85,11 +82,11 @@ export default function PredictiveMaintenanceWidget() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Wrench className="h-5 w-5 text-primary" />
-            الصيانة التنبؤية
+            صحة الأسطول التنبؤية
           </CardTitle>
           {data && data.length > 0 && (
             <Badge variant={data.some(v => v.status === 'critical') ? 'destructive' : 'default'} className="text-xs">
-              {data.filter(v => v.status === 'critical').length} تحتاج صيانة
+              {data.filter(v => v.status !== 'good').length} يحتاج انتباه
             </Badge>
           )}
         </div>
@@ -112,22 +109,20 @@ export default function PredictiveMaintenanceWidget() {
                     <span className="text-sm font-medium truncate">{v.plate}</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground">
-                    {v.tripCount} رحلة · آخر صيانة: {v.lastTrip}
+                    {v.tripCount} رحلة · آخر نشاط: {v.lastTrip}
                   </p>
                 </div>
                 <div className="text-left flex-shrink-0">
                   <div className="text-sm font-bold">{v.healthScore}%</div>
                   <p className="text-[9px] text-muted-foreground">
-                    {v.daysUntilMaintenance > 0 ? `${v.daysUntilMaintenance} يوم` : 'الآن!'}
+                    {v.daysInactive === 0 ? 'نشط' : `${v.daysInactive} يوم خمول`}
                   </p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">
-            لا توجد مركبات مسجلة
-          </div>
+          <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">لا توجد بيانات أسطول</div>
         )}
       </CardContent>
     </Card>
