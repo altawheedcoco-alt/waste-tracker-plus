@@ -53,13 +53,21 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
     const video = videoRef.current;
     if (!video) return;
     if (isActive) {
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
+      video.muted = true; // Ensure muted for autoplay
+      video.play().then(() => {
+        setIsPlaying(true);
+        // Try to unmute after successful play if user already interacted
+        if (userInteracted) {
+          video.muted = false;
+          setIsMuted(false);
+        }
+      }).catch(() => {});
     } else {
       video.pause();
       video.currentTime = 0;
       setIsPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, userInteracted]);
 
   useEffect(() => {
     const video = videoRef.current;
