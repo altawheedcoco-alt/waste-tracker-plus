@@ -53,7 +53,7 @@ export default function ComplianceTracker() {
 
       const { data: org } = await supabase
         .from('organizations')
-        .select('commercial_register, environmental_license, eeaa_license_expiry_date, env_approval_expiry, ida_license, ida_license_expiry_date, hazardous_certified, tax_card_number')
+        .select('commercial_register, environmental_license, eeaa_license_expiry_date, env_approval_expiry, ida_license, ida_license_expiry_date, hazardous_certified, tax_card')
         .eq('id', orgId)
         .single();
 
