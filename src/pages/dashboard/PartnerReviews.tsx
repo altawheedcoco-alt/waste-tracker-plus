@@ -17,6 +17,7 @@ import { Star, MessageSquare, Plus, TrendingUp, Award, Shield, ThumbsUp } from '
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import BackButton from '@/components/ui/back-button';
 
 const StarRating = ({ value, onChange, readonly = false, size = 'md' }: { value: number; onChange?: (v: number) => void; readonly?: boolean; size?: string }) => {
   const sizeClass = size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
@@ -139,6 +140,7 @@ const PartnerReviews = () => {
 
   return (
     <div className="space-y-6 p-4" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

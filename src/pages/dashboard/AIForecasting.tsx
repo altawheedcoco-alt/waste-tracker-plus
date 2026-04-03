@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, BarChart3, Brain, AlertTriangle, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const AIForecasting = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -112,6 +113,7 @@ const AIForecasting = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+        <BackButton />
                 {seasonalPatterns.map((s, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <span className="text-sm text-muted-foreground w-16">{s.month}</span>

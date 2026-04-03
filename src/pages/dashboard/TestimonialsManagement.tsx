@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, X, Trash2, MessageSquare, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import BackButton from '@/components/ui/back-button';
 
 const TestimonialsManagement = () => {
   const { toast } = useToast();
@@ -81,6 +82,7 @@ const TestimonialsManagement = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

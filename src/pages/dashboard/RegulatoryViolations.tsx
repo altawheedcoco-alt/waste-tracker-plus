@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, MapPin, Calendar, Building2, FileText, Eye, Scale, Clock } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const RegulatoryViolations = () => {
   const violations = [
@@ -104,6 +105,7 @@ const RegulatoryViolations = () => {
       </div>
 
       <div className="space-y-4">
+        <BackButton />
         {violations.map((v) => (
           <Card key={v.id} className={`border-r-4 ${
             v.severity === 'critical' ? 'border-r-destructive' :

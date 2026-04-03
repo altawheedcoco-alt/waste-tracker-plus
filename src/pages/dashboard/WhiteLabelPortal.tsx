@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Globe, Plus, Users, Settings, Copy, ExternalLink, Palette, Eye, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
+import BackButton from '@/components/ui/back-button';
 
 const WhiteLabelPortal = () => {
   const { user, profile } = useAuth();
@@ -116,6 +117,7 @@ const WhiteLabelPortal = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

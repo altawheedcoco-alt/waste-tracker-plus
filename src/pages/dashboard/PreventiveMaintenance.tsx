@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wrench, AlertTriangle, CheckCircle, Clock, Truck, Calendar, TrendingUp } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const PreventiveMaintenance = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -33,6 +34,7 @@ const PreventiveMaintenance = () => {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

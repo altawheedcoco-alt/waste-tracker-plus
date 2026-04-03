@@ -31,6 +31,7 @@ import SignatoryCard from '@/components/signatories/SignatoryCard';
 import AutoSignatureSettings from '@/components/signatories/AutoSignatureSettings';
 import { SignaturesStampsManager } from '@/components/endorsement';
 import OrganizationSignatureSettings from '@/components/signature/OrganizationSignatureSettings';
+import BackButton from '@/components/ui/back-button';
 
 const SigningStatus = () => {
   const { organization, profile, user } = useAuth();
@@ -293,6 +294,7 @@ const SigningStatus = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">

@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import BackButton from '@/components/ui/back-button';
 
 interface Task {
   id: string;
@@ -87,6 +88,7 @@ const EmployeeTaskBoard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
