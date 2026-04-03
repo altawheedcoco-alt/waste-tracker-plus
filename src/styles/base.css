@@ -263,7 +263,9 @@
   /* ── Ensure bg-white / text-black / text-white adapt ── */
   .bg-white { background-color: hsl(var(--card)) !important; }
   .text-black { color: hsl(var(--foreground)) !important; }
-  .text-white { color: hsl(var(--primary-foreground)) !important; }
+  /* text-white: keep white on gradient backgrounds, adapt elsewhere */
+  .text-white:not([class*="bg-gradient"]) { color: hsl(var(--primary-foreground)) !important; }
+  [class*="bg-gradient"] .text-white { color: white !important; }
   .bg-black { background-color: hsl(var(--foreground)) !important; }
   .bg-black\/50 { background-color: hsl(var(--foreground) / 0.5) !important; }
   .bg-black\/40 { background-color: hsl(var(--foreground) / 0.4) !important; }
