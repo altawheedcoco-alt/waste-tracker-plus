@@ -86,6 +86,7 @@ export default function HRPerformance() {
   const avgScore = reviews.length > 0 ? reviews.reduce((s, r) => s + Number(r.overall_score || 0), 0) / reviews.length : 0;
 
   return (
+    <DashboardLayout>
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
