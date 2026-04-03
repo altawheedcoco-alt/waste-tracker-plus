@@ -166,55 +166,101 @@
   .text-neutral-500 { color: hsl(var(--muted-foreground)) !important; }
   .text-neutral-600 { color: hsl(var(--muted-foreground)) !important; }
 
-  /* ── Specific colored bg+text combos for badges/tags ── */
-  .bg-blue-100 { background-color: hsl(205, 78%, 42%, 0.15) !important; }
-  .text-blue-800 { color: hsl(205, 78%, 65%) !important; }
-  .text-blue-700 { color: hsl(205, 78%, 60%) !important; }
-  .text-blue-600 { color: hsl(205, 78%, 58%) !important; }
+  /* ── Badge bg+text combos ── */
+  .bg-blue-100 { background-color: hsl(205 78% 42% / 0.15) !important; }
+  .bg-blue-50 { background-color: hsl(205 78% 42% / 0.1) !important; }
+  .text-blue-800 { color: hsl(205 78% 65%) !important; }
+  .text-blue-700 { color: hsl(205 78% 60%) !important; }
+  .text-blue-600 { color: hsl(205 78% 62%) !important; }
+  .text-blue-500 { color: hsl(205 78% 65%) !important; }
 
-  .bg-green-100 { background-color: hsl(160, 68%, 40%, 0.15) !important; }
-  .text-green-800 { color: hsl(160, 68%, 60%) !important; }
-  .text-green-700 { color: hsl(160, 68%, 55%) !important; }
+  .bg-green-100 { background-color: hsl(160 68% 40% / 0.15) !important; }
+  .bg-green-50 { background-color: hsl(160 68% 40% / 0.1) !important; }
+  .text-green-800 { color: hsl(160 68% 60%) !important; }
+  .text-green-700 { color: hsl(160 68% 55%) !important; }
+  .text-green-600 { color: hsl(160 68% 58%) !important; }
+  .text-green-500 { color: hsl(160 68% 62%) !important; }
 
-  .bg-red-100 { background-color: hsl(0, 72%, 50%, 0.15) !important; }
-  .text-red-800 { color: hsl(0, 72%, 65%) !important; }
-  .text-red-700 { color: hsl(0, 72%, 60%) !important; }
+  .bg-red-100 { background-color: hsl(0 72% 50% / 0.15) !important; }
+  .bg-red-50 { background-color: hsl(0 72% 50% / 0.1) !important; }
+  .text-red-800 { color: hsl(0 72% 65%) !important; }
+  .text-red-700 { color: hsl(0 72% 60%) !important; }
+  .text-red-600 { color: hsl(0 72% 62%) !important; }
+  .text-red-500 { color: hsl(0 72% 65%) !important; }
 
-  .bg-yellow-100 { background-color: hsl(42, 90%, 52%, 0.15) !important; }
-  .text-yellow-800 { color: hsl(42, 90%, 65%) !important; }
-  .text-yellow-700 { color: hsl(42, 90%, 60%) !important; }
+  .bg-yellow-100 { background-color: hsl(42 90% 52% / 0.15) !important; }
+  .bg-yellow-50 { background-color: hsl(42 90% 52% / 0.1) !important; }
+  .text-yellow-800 { color: hsl(42 90% 65%) !important; }
+  .text-yellow-700 { color: hsl(42 90% 60%) !important; }
+  .text-yellow-600 { color: hsl(42 90% 62%) !important; }
 
-  .bg-orange-100 { background-color: hsl(25, 85%, 55%, 0.15) !important; }
-  .text-orange-800 { color: hsl(25, 85%, 65%) !important; }
-  .text-orange-700 { color: hsl(25, 85%, 60%) !important; }
+  .bg-orange-100 { background-color: hsl(25 85% 55% / 0.15) !important; }
+  .bg-orange-50 { background-color: hsl(25 85% 55% / 0.1) !important; }
+  .text-orange-800 { color: hsl(25 85% 65%) !important; }
+  .text-orange-700 { color: hsl(25 85% 60%) !important; }
+  .text-orange-600 { color: hsl(25 85% 62%) !important; }
+  .text-orange-500 { color: hsl(25 85% 65%) !important; }
 
-  .bg-amber-50 { background-color: hsl(42, 90%, 52%, 0.1) !important; }
-  .bg-amber-100 { background-color: hsl(42, 90%, 52%, 0.15) !important; }
-  .text-amber-700 { color: hsl(42, 90%, 60%) !important; }
-  .text-amber-800 { color: hsl(42, 90%, 65%) !important; }
+  .bg-amber-50 { background-color: hsl(42 90% 52% / 0.1) !important; }
+  .bg-amber-100 { background-color: hsl(42 90% 52% / 0.15) !important; }
+  .text-amber-700 { color: hsl(42 90% 60%) !important; }
+  .text-amber-800 { color: hsl(42 90% 65%) !important; }
+  .text-amber-600 { color: hsl(42 90% 62%) !important; }
+  .text-amber-500 { color: hsl(42 90% 65%) !important; }
 
-  .bg-emerald-50 { background-color: hsl(160, 68%, 40%, 0.1) !important; }
-  .bg-emerald-100 { background-color: hsl(160, 68%, 40%, 0.15) !important; }
-  .text-emerald-700 { color: hsl(160, 68%, 55%) !important; }
-  .text-emerald-800 { color: hsl(160, 68%, 60%) !important; }
+  .bg-emerald-50 { background-color: hsl(160 68% 40% / 0.1) !important; }
+  .bg-emerald-100 { background-color: hsl(160 68% 40% / 0.15) !important; }
+  .text-emerald-700 { color: hsl(160 68% 55%) !important; }
+  .text-emerald-800 { color: hsl(160 68% 60%) !important; }
+  .text-emerald-600 { color: hsl(160 68% 58%) !important; }
+  .text-emerald-500 { color: hsl(160 68% 62%) !important; }
 
-  .bg-purple-100 { background-color: hsl(270, 60%, 50%, 0.15) !important; }
-  .text-purple-800 { color: hsl(270, 60%, 65%) !important; }
-  .text-purple-700 { color: hsl(270, 60%, 60%) !important; }
+  .bg-purple-100 { background-color: hsl(270 60% 50% / 0.15) !important; }
+  .bg-purple-50 { background-color: hsl(270 60% 50% / 0.1) !important; }
+  .text-purple-800 { color: hsl(270 60% 65%) !important; }
+  .text-purple-700 { color: hsl(270 60% 60%) !important; }
+  .text-purple-600 { color: hsl(270 60% 62%) !important; }
+  .text-purple-500 { color: hsl(270 60% 65%) !important; }
 
-  .bg-cyan-100 { background-color: hsl(178, 60%, 38%, 0.15) !important; }
-  .text-cyan-800 { color: hsl(178, 60%, 60%) !important; }
+  .bg-violet-100 { background-color: hsl(260 60% 50% / 0.15) !important; }
+  .bg-violet-50 { background-color: hsl(260 60% 50% / 0.1) !important; }
+  .text-violet-700 { color: hsl(260 60% 62%) !important; }
+  .text-violet-600 { color: hsl(260 60% 62%) !important; }
+  .text-violet-500 { color: hsl(260 60% 65%) !important; }
 
-  .bg-teal-100 { background-color: hsl(178, 60%, 38%, 0.15) !important; }
-  .text-teal-800 { color: hsl(178, 60%, 60%) !important; }
+  .bg-cyan-100 { background-color: hsl(178 60% 38% / 0.15) !important; }
+  .text-cyan-800 { color: hsl(178 60% 60%) !important; }
+  .text-cyan-600 { color: hsl(178 60% 58%) !important; }
+  .text-cyan-500 { color: hsl(178 60% 62%) !important; }
 
-  .bg-indigo-100 { background-color: hsl(230, 60%, 50%, 0.15) !important; }
-  .text-indigo-800 { color: hsl(230, 60%, 65%) !important; }
+  .bg-teal-100 { background-color: hsl(178 60% 38% / 0.15) !important; }
+  .text-teal-800 { color: hsl(178 60% 60%) !important; }
+  .text-teal-600 { color: hsl(178 60% 58%) !important; }
+  .text-teal-500 { color: hsl(178 60% 62%) !important; }
 
-  .bg-pink-100 { background-color: hsl(330, 60%, 50%, 0.15) !important; }
-  .text-pink-800 { color: hsl(330, 60%, 65%) !important; }
+  .bg-indigo-100 { background-color: hsl(230 60% 50% / 0.15) !important; }
+  .text-indigo-800 { color: hsl(230 60% 65%) !important; }
+  .text-indigo-600 { color: hsl(230 60% 62%) !important; }
+  .text-indigo-500 { color: hsl(230 60% 65%) !important; }
 
-  /* ── Ensure bg-white adapts ── */
+  .bg-pink-100 { background-color: hsl(330 60% 50% / 0.15) !important; }
+  .text-pink-800 { color: hsl(330 60% 65%) !important; }
+  .text-pink-600 { color: hsl(330 60% 62%) !important; }
+  .text-pink-500 { color: hsl(330 60% 65%) !important; }
+
+  .bg-rose-100 { background-color: hsl(350 60% 50% / 0.15) !important; }
+  .text-rose-600 { color: hsl(350 60% 62%) !important; }
+  .text-rose-500 { color: hsl(350 60% 65%) !important; }
+
+  .bg-lime-100 { background-color: hsl(80 60% 40% / 0.15) !important; }
+  .text-lime-600 { color: hsl(80 60% 58%) !important; }
+  .text-lime-500 { color: hsl(80 60% 62%) !important; }
+
+  .bg-sky-100 { background-color: hsl(200 78% 48% / 0.15) !important; }
+  .text-sky-600 { color: hsl(200 78% 60%) !important; }
+  .text-sky-500 { color: hsl(200 78% 65%) !important; }
+
+  /* ── Ensure bg-white / text-black adapt ── */
   .bg-white { background-color: hsl(var(--card)) !important; }
   .text-black { color: hsl(var(--foreground)) !important; }
 
