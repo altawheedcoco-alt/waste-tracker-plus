@@ -27,7 +27,7 @@ const WasteSourceTracker = () => {
       if (!organization?.id) return [];
       const { data } = await supabase
         .from('shipments')
-        .select('waste_type, estimated_weight, pickup_location, status, created_at')
+        .select('waste_type, quantity, pickup_address, status, created_at')
         .eq('generator_id', organization.id)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at', { ascending: false })
