@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
+const AuditCalendarWidget = lazy(() => import('@/components/dashboard/iso/AuditCalendarWidget'));
 
 import ISOMonthlyActivity from '@/components/iso/ISOMonthlyActivity';
 
