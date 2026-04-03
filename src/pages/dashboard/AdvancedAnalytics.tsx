@@ -28,6 +28,11 @@ const QuickKPIStrip = lazy(() => import('@/components/dashboard/shared/QuickKPIS
 const CustomerRetentionAnalysis = lazy(() => import('@/components/analytics/CustomerRetentionAnalysis'));
 const WasteCompositionChart = lazy(() => import('@/components/analytics/WasteCompositionChart'));
 const GeographicDistribution = lazy(() => import('@/components/analytics/GeographicDistribution'));
+const DriverPerformanceLeaderboard = lazy(() => import('@/components/analytics/DriverPerformanceLeaderboard'));
+const InvoiceAgingReport = lazy(() => import('@/components/analytics/InvoiceAgingReport'));
+const WasteRecoveryRate = lazy(() => import('@/components/analytics/WasteRecoveryRate'));
+const ShipmentVelocityTracker = lazy(() => import('@/components/analytics/ShipmentVelocityTracker'));
+const EnvironmentalPassportWidget = lazy(() => import('@/components/analytics/EnvironmentalPassportWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -150,6 +155,31 @@ const AdvancedAnalytics = () => {
         <Suspense fallback={<ChartSkeleton />}>
           <GeographicDistribution />
         </Suspense>
+
+        {/* Environmental Passport */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <EnvironmentalPassportWidget />
+        </Suspense>
+
+        {/* Driver Leaderboard + Invoice Aging */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <DriverPerformanceLeaderboard />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <InvoiceAgingReport />
+          </Suspense>
+        </div>
+
+        {/* Waste Recovery + Shipment Velocity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <WasteRecoveryRate />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ShipmentVelocityTracker />
+          </Suspense>
+        </div>
       </div>
     </DashboardLayout>
   );
