@@ -58,6 +58,8 @@ const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/Transp
 const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
 const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
+const FuelEfficiencyTracker = lazy(() => import('./transporter/FuelEfficiencyTracker'));
+const DriverAvailabilityBoard = lazy(() => import('./transporter/DriverAvailabilityBoard'));
 const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
 const FleetHealthSummary = lazy(() => import('./transporter/FleetHealthSummary'));
 const DriverShiftTracker = lazy(() => import('./transporter/DriverShiftTracker'));
