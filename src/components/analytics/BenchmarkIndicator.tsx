@@ -38,10 +38,10 @@ export default function BenchmarkIndicator() {
         .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
         .gte('created_at', yearStart);
 
-      // Platform-wide stats (use materialized view for performance)
+      // Platform-wide stats from materialized view
       const { data: platformStats } = await supabase
         .from('mv_organization_summary')
-        .select('total_shipments, completion_rate')
+        .select('total_generated_shipments, total_recycled_shipments, total_transported_shipments, total_generated_quantity')
         .limit(50);
 
       const yours = yourShipments || [];
@@ -53,11 +53,11 @@ export default function BenchmarkIndicator() {
       // Platform averages
       const platform = platformStats || [];
       const avgShipments = platform.length > 0
-        ? Math.round(platform.reduce((s, p) => s + (p.total_shipments || 0), 0) / platform.length)
+        ? Math.round(platform.reduce((s, p) => s + (p.total_generated_shipments || 0) + (p.total_recycled_shipments || 0) + (p.total_transported_shipments || 0), 0) / platform.length)
         : yourTotal;
-      const avgCompletion = platform.length > 0
-        ? Math.round(platform.reduce((s, p) => s + (p.completion_rate || 0), 0) / platform.length)
-        : yourCompletionRate;
+      const avgTons = platform.length > 0
+        ? Math.round(platform.reduce((s, p) => s + (p.total_generated_quantity || 0), 0) / platform.length * 10) / 10
+        : yourTons;
 
       return [
         {
