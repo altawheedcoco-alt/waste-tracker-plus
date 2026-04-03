@@ -39,6 +39,12 @@ const FleetUtilizationWidget = lazy(() => import('@/components/analytics/FleetUt
 const InventoryTurnoverWidget = lazy(() => import('@/components/analytics/InventoryTurnoverWidget'));
 const LiveAlertsDashboard = lazy(() => import('@/components/analytics/LiveAlertsDashboard'));
 const ExportCenterWidget = lazy(() => import('@/components/analytics/ExportCenterWidget'));
+const RevenueByWasteTypeWidget = lazy(() => import('@/components/analytics/RevenueByWasteTypeWidget'));
+const MonthlyGrowthWidget = lazy(() => import('@/components/analytics/MonthlyGrowthWidget'));
+const TopClientsWidget = lazy(() => import('@/components/analytics/TopClientsWidget'));
+const PaymentStatusWidget = lazy(() => import('@/components/analytics/PaymentStatusWidget'));
+const PeakHoursWidget = lazy(() => import('@/components/analytics/PeakHoursWidget'));
+const SLAComplianceWidget = lazy(() => import('@/components/analytics/SLAComplianceWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
