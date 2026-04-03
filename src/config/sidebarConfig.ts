@@ -81,6 +81,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: CircleDot, labelAr: 'الحالات (Stories)', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
       { icon: Rss, labelAr: 'آخر الأخبار', labelEn: 'News Feed', path: '/dashboard/feed', key: 'social-feed', bindingType: 'internal' as const },
       { icon: Newspaper, labelAr: 'المنشورات', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'social-posts', bindingType: 'internal' as const },
+      { icon: Image, labelAr: 'الريلز', labelEn: 'Reels', path: '/dashboard/reels', key: 'reels', bindingType: 'internal' as const },
+      { icon: Phone, labelAr: 'سجل المكالمات', labelEn: 'Call History', path: '/dashboard/call-history', key: 'call-history', bindingType: 'partner' as const },
     ],
   },
 
