@@ -2,10 +2,13 @@
  * زر اختبار Web Push الأصلي — للتجربة فقط
  */
 import { Bell, Loader2, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useNativePush } from '@/hooks/useNativePush';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function NativePushTestButton() {
+  const { user } = useAuth();
   const { isSupported, isSubscribed, loading, subscribe, unsubscribe } = useNativePush();
 
   if (!isSupported) {
@@ -27,7 +30,16 @@ export default function NativePushTestButton() {
         اضغط الزر وهيوصلك إشعار على الموبايل/اللابتوب مباشرة بدون Firebase
       </p>
 
-      {isSubscribed ? (
+      {!user ? (
+        <div className="space-y-2">
+          <div className="text-sm text-muted-foreground text-center">
+            لازم تسجّل الدخول أولاً عشان نقدر نربط الإشعارات بحسابك ونبعت لك إشعار تجريبي.
+          </div>
+          <Button asChild className="w-full">
+            <Link to="/auth">سجّل الدخول لتجربة الإشعارات</Link>
+          </Button>
+        </div>
+      ) : isSubscribed ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-green-600">
             <CheckCircle className="w-4 h-4" />
