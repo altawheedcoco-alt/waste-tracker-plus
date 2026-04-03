@@ -35,6 +35,16 @@ const SecondaryMaterials = lazyRetry(() => import('@/pages/dashboard/SecondaryMa
 const MarketIntelligence = lazyRetry(() => import('@/pages/dashboard/MarketIntelligence'));
 const Webhooks = lazyRetry(() => import('@/pages/dashboard/Webhooks'));
 const CommunityRewards = lazyRetry(() => import('@/pages/dashboard/CommunityRewards'));
+const PreventiveMaintenance = lazyRetry(() => import('@/pages/dashboard/PreventiveMaintenance'));
+const SmartInventory = lazyRetry(() => import('@/pages/dashboard/SmartInventory'));
+const QualityControl = lazyRetry(() => import('@/pages/dashboard/QualityControl'));
+const EmergencyResponse = lazyRetry(() => import('@/pages/dashboard/EmergencyResponse'));
+const DynamicPricing = lazyRetry(() => import('@/pages/dashboard/DynamicPricing'));
+const B2BLoyalty = lazyRetry(() => import('@/pages/dashboard/B2BLoyalty'));
+const RecurringServices = lazyRetry(() => import('@/pages/dashboard/RecurringServices'));
+const Benchmarking = lazyRetry(() => import('@/pages/dashboard/Benchmarking'));
+const PredictiveFailure = lazyRetry(() => import('@/pages/dashboard/PredictiveFailure'));
+const SmartHelpCenter = lazyRetry(() => import('@/pages/dashboard/SmartHelpCenter'));
 
 export const extendedRoutes = (
   <>
@@ -72,5 +82,15 @@ export const extendedRoutes = (
     <Route path="/dashboard/market-intelligence" element={<MarketIntelligence />} />
     <Route path="/dashboard/webhooks" element={<Webhooks />} />
     <Route path="/dashboard/community-rewards" element={<CommunityRewards />} />
+    <Route path="/dashboard/preventive-maintenance" element={<PreventiveMaintenance />} />
+    <Route path="/dashboard/smart-inventory" element={<SmartInventory />} />
+    <Route path="/dashboard/quality-control" element={<QualityControl />} />
+    <Route path="/dashboard/emergency-response" element={<EmergencyResponse />} />
+    <Route path="/dashboard/dynamic-pricing" element={<DynamicPricing />} />
+    <Route path="/dashboard/b2b-loyalty" element={<B2BLoyalty />} />
+    <Route path="/dashboard/recurring-services" element={<RecurringServices />} />
+    <Route path="/dashboard/benchmarking" element={<Benchmarking />} />
+    <Route path="/dashboard/predictive-failure" element={<PredictiveFailure />} />
+    <Route path="/dashboard/help-center" element={<SmartHelpCenter />} />
   </>
 );
