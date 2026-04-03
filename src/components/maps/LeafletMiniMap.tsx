@@ -50,7 +50,13 @@ const LeafletMiniMap = ({ latitude, longitude, zoom = 14, height = '200px', clas
 
     mapInstanceRef.current = map;
 
+    // Fix grey tiles when inside dialogs/tabs
+    const t1 = setTimeout(() => map.invalidateSize(), 150);
+    const t2 = setTimeout(() => map.invalidateSize(), 400);
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
       map.remove();
       mapInstanceRef.current = null;
     };
