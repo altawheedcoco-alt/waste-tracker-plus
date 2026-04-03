@@ -44,6 +44,7 @@ export const extendedRoutes = (
     <Route path="/dashboard/stories" element={<Stories />} />
     <Route path="/dashboard/reels" element={<Reels />} />
     <Route path="/dashboard/meetings" element={<Meetings />} />
+    <Route path="/dashboard/call-history" element={<CallHistory />} />
     <Route path="/dashboard/subscription" element={<SubscriptionManagement />} />
     <Route path="/dashboard/my-ads" element={<AdvertiserDashboard />} />
     <Route path="/dashboard/ad-plans" element={<AdPlans />} />
