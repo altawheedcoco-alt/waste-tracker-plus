@@ -330,7 +330,7 @@ export function useWebRTCCall() {
       setCallInfo(prev => prev ? { ...prev, state: 'connecting' } : null);
       const stream = await getMediaStream(callInfo.callType);
       setupPeerConnection(stream);
-      setupSignaling(callInfo.callId);
+      setupSignaling(callInfo.callId, false);
     } catch (err) {
       cleanup();
       setCallInfo(null);
