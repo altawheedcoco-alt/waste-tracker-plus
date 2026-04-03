@@ -537,6 +537,7 @@ const NavigationDemo = () => {
 
   if (loading) {
     return (
+      <DashboardLayout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted" dir="rtl">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
