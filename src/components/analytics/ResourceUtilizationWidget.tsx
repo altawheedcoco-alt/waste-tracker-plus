@@ -28,7 +28,7 @@ export default function ResourceUtilizationWidget() {
         supabase.from('shipments').select('id', { count: 'exact', head: true })
           .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
           .gte('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('vehicles').select('id', { count: 'exact', head: true }).eq('organization_id', orgId!),
+        supabase.from('organization_positions').select('id', { count: 'exact', head: true }).eq('organization_id', orgId!),
       ]);
 
       const activeDrivers = new Set((driversRes.data || []).map(d => d.driver_id)).size;
