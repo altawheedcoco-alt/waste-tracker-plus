@@ -278,7 +278,12 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
               </button>
               {story.media_type === 'video' && (
                 <button
-                  onClick={() => setIsMuted(m => !m)}
+                  onClick={() => {
+                    if (!userInteracted) setUserInteracted(true);
+                    const next = !isMuted;
+                    setIsMuted(next);
+                    if (videoRef.current) videoRef.current.muted = next;
+                  }}
                   className="w-7 h-7 rounded-full bg-black/25 backdrop-blur-md flex items-center justify-center text-white/80 active:scale-90 transition-transform"
                 >
                   {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
