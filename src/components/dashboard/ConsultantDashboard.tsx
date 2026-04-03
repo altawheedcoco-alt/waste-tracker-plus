@@ -405,6 +405,9 @@ const ConsultantDashboard = memo(() => {
             />
           </Suspense>
 
+          {/* ودجة محفظة العملاء */}
+          <Suspense fallback={null}><ClientPortfolioWidget /></Suspense>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ConsultantActiveProjects
               assignments={assignments}

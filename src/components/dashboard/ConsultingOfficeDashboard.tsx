@@ -368,6 +368,8 @@ const ConsultingOfficeDashboard = memo(() => {
             />
           </Suspense>
 
+          {/* ودجة محفظة العملاء */}
+          <Suspense fallback={null}><ClientPortfolioWidget /></Suspense>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <TeamPerformance members={members} clients={clients} />
             <OfficeWorkloadBalance members={members} clients={clients} />
