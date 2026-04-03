@@ -563,6 +563,7 @@ const NavigationDemo = () => {
           </Card>
         </motion.div>
       </div>
+      </DashboardLayout>
     );
   }
 
