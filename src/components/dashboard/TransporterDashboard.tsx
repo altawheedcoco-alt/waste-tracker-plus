@@ -59,6 +59,9 @@ const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/Transpor
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
 const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
 const FuelEfficiencyTracker = lazy(() => import('./transporter/FuelEfficiencyTracker'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 const DriverAvailabilityBoard = lazy(() => import('./transporter/DriverAvailabilityBoard'));
 const RoutePerformanceWidget = lazy(() => import('./transporter/RoutePerformanceWidget'));
 const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
@@ -356,7 +359,13 @@ const TransporterDashboard = () => {
         <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
       </div>
 
-      {/* 7. التوثيق والبحث */}
+      {/* ★ ودجات التميز والتنبيهات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
+
       <div id="section-docs">
         <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
         <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>

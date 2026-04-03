@@ -35,6 +35,9 @@ import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
 const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQuality'));
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
@@ -317,6 +320,13 @@ const RecyclerDashboard = () => {
 
       {/* 5. التواصل */}
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+
+      {/* ★ ودجات التميز والتنبيهات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
 
       {/* 6. المنشأة */}
       {facility && <FacilityCapacityCard facility={facility} />}

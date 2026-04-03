@@ -34,6 +34,9 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
+const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
+const SmartAlertsWidget = lazy(() => import('./widgets/SmartAlertsWidget'));
+const WeeklyActivityChart = lazy(() => import('./widgets/WeeklyActivityChart'));
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -343,6 +346,13 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       {/* 4. التواصل */}
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+
+      {/* ★ ودجات التميز والتنبيهات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
 
       {/* 5. المنشأة */}
       {facility && <FacilityCapacityCard facility={facility} />}
