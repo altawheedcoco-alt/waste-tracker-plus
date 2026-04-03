@@ -25,6 +25,7 @@ import EmployeeWelcomeStrip from './employee/EmployeeWelcomeStrip';
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
+const EmployeeTaskSummary = lazy(() => import('./employee/EmployeeTaskSummary'));
 
 
 const TabFallback = () => (
