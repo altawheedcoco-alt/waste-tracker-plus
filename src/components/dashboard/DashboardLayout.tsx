@@ -56,6 +56,8 @@ interface DashboardLayoutProps {
 const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
+  // Smart presence — tracks online/away/offline for notification delivery
+  useUserActivityPresence();
   
   const { fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
