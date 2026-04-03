@@ -2,7 +2,7 @@ import { startTransition, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MessageCircle, Bell, FileText, CircleDot, Video, Send, 
+  MessageCircle, Bell, FileText, CircleDot, Video, Send, Phone, 
   Hash, BarChart3, Bot, PenTool, Radio, 
   TrendingUp, Eye, X, ArrowLeft, ExternalLink
 } from 'lucide-react';

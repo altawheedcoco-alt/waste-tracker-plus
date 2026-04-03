@@ -194,6 +194,10 @@ const ChatHeader = ({
                 )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/dashboard/call-history')}>
+                <Phone className="w-4 h-4 ml-2" />
+                سجل المكالمات
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/dashboard/meetings')} className="text-emerald-600">
                 <Users className="w-4 h-4 ml-2" />
                 اجتماع جماعي (Meeting)
