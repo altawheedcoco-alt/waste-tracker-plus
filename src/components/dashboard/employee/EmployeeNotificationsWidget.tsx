@@ -41,7 +41,8 @@ const EmployeeNotificationsWidget = ({ notifications }: { notifications: Notific
       </CardHeader>
       <CardContent className="space-y-3">
         {notifications.map((n) => {
-          const Icon = typeIcons[n.type] || Bell;
+          const Icon = getNotificationIcon(n.type);
+          const iconColorClass = getNotificationIconColor(n.type);
           return (
             <div
               key={n.id}
@@ -49,8 +50,8 @@ const EmployeeNotificationsWidget = ({ notifications }: { notifications: Notific
                 !n.is_read ? 'bg-primary/5 border border-primary/10' : 'hover:bg-muted/50'
               }`}
             >
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Icon className="w-4 h-4 text-primary" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${iconColorClass}`}>
+                <Icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
