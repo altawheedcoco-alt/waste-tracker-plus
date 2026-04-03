@@ -16,7 +16,7 @@ import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useGroupChat } from '@/hooks/useGroupChat';
-import { useWebRTCCall } from '@/hooks/useWebRTCCall';
+import { useGlobalCall } from '@/providers/GlobalCallProvider';
 import { soundEngine } from '@/lib/soundEngine';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -97,7 +97,7 @@ const EnhancedChatWidget = () => {
     toggleScreenShare,
     toggleRecording,
     sendCallMessage,
-  } = useWebRTCCall();
+  } = useGlobalCall();
 
   const handleStartCall = async (type: 'voice' | 'video') => {
     if (!selectedPartner) return;
@@ -684,23 +684,7 @@ const EnhancedChatWidget = () => {
         isCreating={isCreatingGroup}
       />
 
-      {/* Call Screen Overlay */}
-      {callInfo && (
-        <CallScreen
-          callInfo={callInfo}
-          localStream={localStream}
-          remoteStream={remoteStream}
-          callMessages={callMessages}
-          onAnswer={answerCall}
-          onEnd={() => endCall()}
-          onToggleMute={toggleMute}
-          onToggleVideo={toggleVideo}
-          onToggleSpeaker={toggleSpeaker}
-          onToggleScreenShare={toggleScreenShare}
-          onToggleRecording={toggleRecording}
-          onSendMessage={sendCallMessage}
-        />
-      )}
+      {/* Call screen is now handled by GlobalCallProvider */}
     </>
   );
 };

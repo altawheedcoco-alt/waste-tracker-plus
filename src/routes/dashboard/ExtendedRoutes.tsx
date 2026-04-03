@@ -11,6 +11,7 @@ const Gamification = lazyRetry(() => import('@/pages/dashboard/Gamification'));
 const Stories = lazyRetry(() => import('@/pages/dashboard/Stories'));
 const Reels = lazyRetry(() => import('@/pages/dashboard/Reels'));
 const Meetings = lazyRetry(() => import('@/pages/dashboard/Meetings'));
+const CallHistory = lazyRetry(() => import('@/pages/dashboard/CallHistory'));
 const SubscriptionManagement = lazyRetry(() => import('@/pages/dashboard/SubscriptionManagement'));
 const AdvertiserDashboard = lazyRetry(() => import('@/pages/dashboard/AdvertiserDashboard'));
 const AdPlans = lazyRetry(() => import('@/pages/dashboard/AdPlans'));
@@ -43,6 +44,7 @@ export const extendedRoutes = (
     <Route path="/dashboard/stories" element={<Stories />} />
     <Route path="/dashboard/reels" element={<Reels />} />
     <Route path="/dashboard/meetings" element={<Meetings />} />
+    <Route path="/dashboard/call-history" element={<CallHistory />} />
     <Route path="/dashboard/subscription" element={<SubscriptionManagement />} />
     <Route path="/dashboard/my-ads" element={<AdvertiserDashboard />} />
     <Route path="/dashboard/ad-plans" element={<AdPlans />} />

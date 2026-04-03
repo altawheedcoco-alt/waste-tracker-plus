@@ -238,19 +238,27 @@ export function useWebRTCCall() {
   }, [callInfo?.callId, callInfo?.state, user?.id]);
 
   // Start outgoing call
-  const startCall = useCallback(async (partnerOrgId: string, type: CallType, partnerName: string, partnerLogo?: string | null) => {
+  const startCall = useCallback(async (partnerOrgId: string, type: CallType, partnerName: string, partnerLogo?: string | null, receiverUserId?: string) => {
     if (!user || !organization || callInfo) return;
 
     try {
       const stream = await getMediaStream(type);
       
-      const { data: record } = await supabase.from('call_records').insert({
+      const callerProfile = await getCachedProfile(user.id);
+      const insertData: any = {
         caller_id: user.id,
         caller_org_id: organization.id,
         receiver_org_id: partnerOrgId,
         call_type: type,
         status: 'ringing',
-      }).select('id').single();
+        caller_name: callerProfile?.full_name || 'مستخدم',
+        caller_avatar_url: callerProfile?.avatar_url,
+        receiver_name: partnerName,
+        receiver_avatar_url: partnerLogo,
+      };
+      if (receiverUserId) insertData.receiver_user_id = receiverUserId;
+      
+      const { data: record } = await supabase.from('call_records').insert(insertData).select('id').single();
 
       const callId = record?.id || crypto.randomUUID();
       callRecordIdRef.current = callId;
@@ -315,24 +323,37 @@ export function useWebRTCCall() {
   }, [callInfo, getMediaStream, setupPeerConnection, setupSignaling, stopRingtone, cleanup]);
 
   // End/reject call
-  const endCall = useCallback((reason = 'user_ended') => {
+  const endCall = useCallback((reason = 'user_ended', busyMessage?: string) => {
     channelRef.current?.send({ type: 'broadcast', event: 'hangup', payload: { reason } });
     
     const duration = callInfo?.duration || 0;
     if (callRecordIdRef.current) {
-      const status = callInfo?.state === 'connected' ? 'ended' : reason === 'user_ended' && callInfo?.isIncoming ? 'rejected' : 'missed';
-      supabase.from('call_records').update({ 
+      const status = reason === 'busy' ? 'busy' : callInfo?.state === 'connected' ? 'ended' : reason === 'user_ended' && callInfo?.isIncoming ? 'rejected' : 'missed';
+      const updateData: any = { 
         status, 
         ended_at: new Date().toISOString(), 
         duration_seconds: duration,
         end_reason: reason,
-      }).eq('id', callRecordIdRef.current).then(() => {});
+      };
+      if (busyMessage) updateData.busy_message = busyMessage;
+      supabase.from('call_records').update(updateData).eq('id', callRecordIdRef.current).then(() => {});
+      
+      // Send busy message via direct_messages if applicable
+      if (busyMessage && callInfo?.isIncoming && callInfo?.partnerOrgId) {
+        supabase.from('direct_messages').insert({
+          sender_id: user?.id,
+          sender_organization_id: organization?.id,
+          receiver_organization_id: callInfo.partnerOrgId,
+          content: `📞 ${busyMessage}`,
+          message_type: 'text',
+        }).then(() => {});
+      }
     }
     
     cleanup();
     setCallInfo(null);
     callRecordIdRef.current = null;
-  }, [callInfo, cleanup]);
+  }, [callInfo, cleanup, user, organization]);
 
   // Toggle controls
   const toggleMute = useCallback(() => {
@@ -570,7 +591,6 @@ export function useWebRTCCall() {
         }
 
         callRecordIdRef.current = record.id;
-        const profile = await getCachedProfile(record.caller_id);
         
         playRingtone();
         setCallInfo({
@@ -578,7 +598,8 @@ export function useWebRTCCall() {
           callType: record.call_type,
           state: 'ringing',
           isIncoming: true,
-          partnerName: profile?.full_name || 'مستخدم',
+          partnerName: record.caller_name || 'مستخدم',
+          partnerLogo: record.caller_avatar_url,
           partnerOrgId: record.caller_org_id,
           duration: 0,
           isMuted: false,

@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense, useState } from 'react';
+import GlobalCallProvider from '@/providers/GlobalCallProvider';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -171,6 +172,7 @@ const Dashboard = () => {
           organizationType={organizationType}
         />
       )}
+    <GlobalCallProvider>
     <SubscriptionGuard>
         <PinVerificationGate>
           <>
@@ -209,6 +211,7 @@ const Dashboard = () => {
           </>
         </PinVerificationGate>
     </SubscriptionGuard>
+    </GlobalCallProvider>
     </>
   );
 };
