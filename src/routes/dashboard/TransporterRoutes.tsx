@@ -50,6 +50,7 @@ const ScopedAccessLinks = lazyRetry(() => import('@/pages/dashboard/ScopedAccess
 const AuthorizedSignatories = lazyRetry(() => import('@/pages/dashboard/AuthorizedSignatories'));
 const WhiteLabelPortal = lazyRetry(() => import('@/pages/dashboard/WhiteLabelPortal'));
 const CollectionRequests = lazyRetry(() => import('@/pages/dashboard/CollectionRequests'));
+const B2CCollectionFeed = lazyRetry(() => import('@/pages/dashboard/B2CCollectionFeed'));
 const DriverProfile = lazyRetry(() => import('@/pages/dashboard/DriverProfile'));
 const DriverData = lazyRetry(() => import('@/pages/dashboard/DriverData'));
 
