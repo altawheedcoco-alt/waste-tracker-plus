@@ -3,13 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
 
-function generateCode(length = 8): string {
+function generateCode(length = 12): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (b) => chars[b % chars.length]).join('');
 }
 
 interface CreateShareLinkParams {
@@ -38,6 +36,8 @@ export function useShareLink() {
     setLoading(true);
     try {
       const code = generateCode();
+
+      // Create the link WITHOUT pin first (pin will be hashed server-side)
       const { data, error } = await supabase
         .from('shared_links')
         .insert({
@@ -49,8 +49,8 @@ export function useShareLink() {
           visibility_level: params.visibilityLevel || 'public',
           title: params.title,
           description: params.description,
-          requires_pin: params.requiresPin || false,
-          pin_hash: params.pin || null,
+          requires_pin: false, // Will be set to true after hashing
+          pin_hash: null,
           expires_at: params.expiresAt || null,
           max_views: params.maxViews || null,
           allowed_fields: params.allowedFields || [],
@@ -59,6 +59,19 @@ export function useShareLink() {
         .single();
 
       if (error) throw error;
+
+      // If PIN is provided, hash it server-side via edge function
+      if (params.requiresPin && params.pin) {
+        const { error: hashError } = await supabase.functions.invoke(
+          'hash-share-pin',
+          { body: { pin: params.pin, link_id: data.id } }
+        );
+        if (hashError) {
+          console.error('PIN hashing failed:', hashError);
+          toast.error('فشل تشفير الرقم السري');
+          // Link is created but without PIN — user can retry
+        }
+      }
 
       const shareUrl = `${window.location.origin}/s/${params.resourceType}/${code}`;
       return { ...data, shareUrl };
@@ -102,5 +115,20 @@ export function useShareLink() {
     return data || [];
   };
 
-  return { createShareLink, deactivateLink, getMyLinks, loading };
+  const getAccessLog = async (linkId: string) => {
+    const { data, error } = await supabase
+      .from('shared_link_access_attempts')
+      .select('*')
+      .eq('shared_link_id', linkId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error(error);
+      return [];
+    }
+    return data || [];
+  };
+
+  return { createShareLink, deactivateLink, getMyLinks, getAccessLog, loading };
 }

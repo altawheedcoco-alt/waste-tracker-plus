@@ -1,10 +1,46 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { encode as hexEncode } from "https://deno.land/std@0.224.0/encoding/hex.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const MAX_PIN_ATTEMPTS = 5;
+const LOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+// Verify PIN against PBKDF2 hash
+async function verifyPin(pin: string, storedHash: string): Promise<boolean> {
+  // Support new PBKDF2 format: pbkdf2:iterations:salt:hash
+  if (storedHash.startsWith("pbkdf2:")) {
+    const parts = storedHash.split(":");
+    if (parts.length !== 4) return false;
+    const iterations = parseInt(parts[1]);
+    const saltHex = parts[2];
+    const expectedHashHex = parts[3];
+
+    const encoder = new TextEncoder();
+    const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(pin),
+      "PBKDF2",
+      false,
+      ["deriveBits"]
+    );
+    const derivedBits = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+      keyMaterial,
+      256
+    );
+    const hashHex = new TextDecoder().decode(hexEncode(new Uint8Array(derivedBits)));
+    return hashHex === expectedHashHex;
+  }
+
+  // Legacy: plain text comparison (backwards compatible)
+  return pin === storedHash;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -25,6 +61,10 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
     const adminClient = createClient(supabaseUrl, serviceKey);
+
+    // Extract client info for logging
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const userAgent = req.headers.get("user-agent") || "unknown";
 
     // Check if user is authenticated
     let userId: string | null = null;
@@ -57,14 +97,28 @@ Deno.serve(async (req) => {
       .single();
 
     if (linkErr || !link) {
+      // Log failed attempt
+      await logAttempt(adminClient, null, clientIp, userAgent, userId, "view", false, "link_not_found");
       return new Response(
         JSON.stringify({ error: "link_not_found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Check if link is locked due to too many failed PIN attempts
+    if (link.locked_until && new Date(link.locked_until) > new Date()) {
+      const remainingMs = new Date(link.locked_until).getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "link_locked");
+      return new Response(
+        JSON.stringify({ error: "link_locked", remaining_minutes: remainingMin }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Check expiry
     if (link.expires_at && new Date(link.expires_at) < new Date()) {
+      await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "link_expired");
       return new Response(
         JSON.stringify({ error: "link_expired" }),
         { status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -73,13 +127,14 @@ Deno.serve(async (req) => {
 
     // Check max views
     if (link.max_views && link.view_count >= link.max_views) {
+      await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "max_views_reached");
       return new Response(
         JSON.stringify({ error: "max_views_reached" }),
         { status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check PIN
+    // Check PIN with brute-force protection
     if (link.requires_pin) {
       if (!pin) {
         return new Response(
@@ -87,12 +142,35 @@ Deno.serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (pin !== link.pin_hash) {
+
+      const pinValid = await verifyPin(pin, link.pin_hash);
+      if (!pinValid) {
+        const newAttempts = (link.failed_pin_attempts || 0) + 1;
+        const updateData: Record<string, any> = { failed_pin_attempts: newAttempts };
+
+        if (newAttempts >= MAX_PIN_ATTEMPTS) {
+          updateData.locked_until = new Date(Date.now() + LOCK_DURATION_MS).toISOString();
+        }
+
+        await adminClient.from("shared_links").update(updateData).eq("id", link.id);
+        await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "pin", false, "invalid_pin", true);
+
+        const attemptsLeft = MAX_PIN_ATTEMPTS - newAttempts;
         return new Response(
-          JSON.stringify({ error: "invalid_pin" }),
+          JSON.stringify({
+            error: "invalid_pin",
+            attempts_left: Math.max(0, attemptsLeft),
+            locked: newAttempts >= MAX_PIN_ATTEMPTS,
+          }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // PIN correct — reset failed attempts
+      await adminClient
+        .from("shared_links")
+        .update({ failed_pin_attempts: 0, locked_until: null })
+        .eq("id", link.id);
     }
 
     // Determine access level
@@ -106,12 +184,14 @@ Deno.serve(async (req) => {
 
     // Check visibility
     if (link.visibility_level === "authenticated" && !userId) {
+      await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "auth_required");
       return new Response(
         JSON.stringify({ error: "auth_required", visibility_level: "authenticated" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     if (link.visibility_level === "linked_only" && accessLevel !== "linked") {
+      await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "not_linked");
       return new Response(
         JSON.stringify({
           error: userId ? "not_linked" : "auth_required",
@@ -121,7 +201,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check partner restrictions - block shared links if restricted
+    // Check partner restrictions
     if (userOrgId && userOrgId !== link.organization_id) {
       const { data: restrictionCheck } = await adminClient
         .from("partner_restrictions")
@@ -133,6 +213,7 @@ Deno.serve(async (req) => {
         .limit(1);
 
       if (restrictionCheck && restrictionCheck.length > 0) {
+        await logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", false, "access_restricted");
         return new Response(
           JSON.stringify({ error: "access_restricted", message: "تم تقييد الوصول لهذا المحتوى من قبل الجهة المالكة" }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -195,7 +276,6 @@ Deno.serve(async (req) => {
           .eq("id", resourceId)
           .single();
         if (data) {
-          // Get org name
           const { data: org } = await adminClient
             .from("organizations")
             .select("name, logo_url, city, organization_type")
@@ -280,11 +360,14 @@ Deno.serve(async (req) => {
       .update({ view_count: (link.view_count || 0) + 1 })
       .eq("id", link.id);
 
-    // Log view
-    await adminClient.from("shared_link_views").insert({
-      shared_link_id: link.id,
-      viewer_user_id: userId,
-    });
+    // Log successful view + access attempt
+    await Promise.all([
+      adminClient.from("shared_link_views").insert({
+        shared_link_id: link.id,
+        viewer_user_id: userId,
+      }),
+      logAttempt(adminClient, link.id, clientIp, userAgent, userId, "view", true, null),
+    ]);
 
     return new Response(
       JSON.stringify({
@@ -304,3 +387,31 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+async function logAttempt(
+  client: any,
+  linkId: string | null,
+  ip: string,
+  userAgent: string,
+  userId: string | null,
+  attemptType: string,
+  success: boolean,
+  failureReason: string | null,
+  pinAttempted = false
+) {
+  if (!linkId) return;
+  try {
+    await client.from("shared_link_access_attempts").insert({
+      shared_link_id: linkId,
+      ip_address: ip,
+      user_agent: userAgent,
+      viewer_user_id: userId,
+      attempt_type: attemptType,
+      success,
+      failure_reason: failureReason,
+      pin_attempted: pinAttempted,
+    });
+  } catch {
+    // Don't fail the main request if logging fails
+  }
+}
