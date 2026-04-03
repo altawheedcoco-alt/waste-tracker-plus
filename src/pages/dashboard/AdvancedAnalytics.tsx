@@ -135,6 +135,21 @@ const AdvancedAnalytics = () => {
         <Suspense fallback={<ChartSkeleton />}>
           <PerformanceAnalyticsDashboard />
         </Suspense>
+
+        {/* Customer Retention + Waste Composition */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <CustomerRetentionAnalysis />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <WasteCompositionChart />
+          </Suspense>
+        </div>
+
+        {/* Geographic Distribution */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <GeographicDistribution />
+        </Suspense>
       </div>
     </DashboardLayout>
   );
