@@ -257,7 +257,7 @@ const Notifications = () => {
   const filteredNotifications = useMemo(() => {
     return notifications.filter((n) => {
       const matchesCat = activeCategory === 'all' || categorizeNotification(n.type) === activeCategory;
-      const matchesSub = activeSubCategory === 'all' || getSubCategory(n.type) === activeSubCategory;
+      const matchesSub = true; // Sub-categories removed — flat category filtering
       const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !n.is_read : n.is_read);
       const matchesSearch = !searchQuery ||
         n.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
