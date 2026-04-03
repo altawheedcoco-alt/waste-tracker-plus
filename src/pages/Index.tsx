@@ -225,14 +225,22 @@ const HomepageContent = () => {
   const blocksAfterSection = (sectionId: string) =>
     (customBlocks || []).filter(b => b.position === 'custom' && b.custom_position_after === sectionId);
 
+  const showNativePushTest =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('native-push-test');
+
   return (
     <Suspense fallback={null}>
       <LandingWrapper>
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           <EnableNotificationsButton />
-          <div className="fixed bottom-20 left-4 right-4 z-50 max-w-md mx-auto">
-            <NativePushTestButton />
-          </div>
+          {showNativePushTest && (
+            <div className="fixed bottom-20 left-4 right-4 z-50 mx-auto max-w-md pointer-events-none">
+              <div className="pointer-events-auto">
+                <NativePushTestButton />
+              </div>
+            </div>
+          )}
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
