@@ -223,5 +223,6 @@ export default function HRShifts() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

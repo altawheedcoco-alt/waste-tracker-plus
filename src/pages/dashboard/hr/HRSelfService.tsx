@@ -319,5 +319,6 @@ export default function HRSelfService() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardLayout>
   );
 }

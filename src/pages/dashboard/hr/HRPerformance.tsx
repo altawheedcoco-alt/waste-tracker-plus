@@ -278,5 +278,6 @@ export default function HRPerformance() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

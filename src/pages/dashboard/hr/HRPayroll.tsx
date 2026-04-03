@@ -320,5 +320,6 @@ export default function HRPayroll() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

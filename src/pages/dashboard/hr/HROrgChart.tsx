@@ -177,5 +177,6 @@ export default function HROrgChart() {
         </CardContent>
       </Card>
     </div>
+    </DashboardLayout>
   );
 }

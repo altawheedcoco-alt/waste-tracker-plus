@@ -219,5 +219,6 @@ export default function HREndOfService() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }
