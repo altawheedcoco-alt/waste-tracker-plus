@@ -2,7 +2,7 @@ import { startTransition, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MessageCircle, Bell, FileText, CircleDot, Video, Send, 
+  MessageCircle, Bell, FileText, CircleDot, Video, Send, Phone, 
   Hash, BarChart3, Bot, PenTool, Radio, 
   TrendingUp, Eye, X, ArrowLeft, ExternalLink
 } from 'lucide-react';
@@ -36,6 +36,7 @@ export default function CommunicationHubWidget() {
     { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'note' },
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },
+    { icon: Phone, labelAr: 'سجل المكالمات', path: '/dashboard/call-history', color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'work_order' },
     { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'signature' },
     { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-primary', bgColor: 'bg-primary/10' },
