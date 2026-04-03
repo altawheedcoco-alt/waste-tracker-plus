@@ -664,13 +664,14 @@ export function usePrivateChat() {
   const sendFileMessage = useCallback(async (conversationId: string, file: File) => {
     if (!user) return;
 
-    const { smartChunkedUpload } = await import('@/utils/chunkedUpload');
+    const { uploadFile } = await import('@/utils/optimizedUpload');
     const ext = file.name.split('.').pop() || 'bin';
     const filePath = `chat/${conversationId}/${crypto.randomUUID()}.${ext}`;
 
-    const result = await smartChunkedUpload(file, {
+    const result = await uploadFile(file, {
       bucket: 'organization-documents',
       path: filePath,
+      compress: true,
     });
 
     let messageType = 'file';

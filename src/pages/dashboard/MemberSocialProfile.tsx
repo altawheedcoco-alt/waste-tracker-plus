@@ -190,13 +190,17 @@ export default function MemberSocialProfile() {
 
   const initials = (targetProfile?.full_name || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2);
 
-  // Upload helper
+  // Upload helper (with auto compression for images & videos)
   const uploadFile = async (file: File, folder: string) => {
     if (!user?.id) throw new Error('Not authenticated');
-    const { smartChunkedUpload } = await import('@/utils/chunkedUpload');
+    const { uploadFile: optimizedUpload } = await import('@/utils/optimizedUpload');
     const ext = file.name.split('.').pop() || 'jpg';
     const path = `${user.id}/${folder}/${Date.now()}.${ext}`;
-    const result = await smartChunkedUpload(file, { bucket: 'profile-media', path });
+    const result = await optimizedUpload(file, {
+      bucket: 'profile-media',
+      path,
+      compress: true,
+    });
     return result.publicUrl;
   };
 

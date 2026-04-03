@@ -3,8 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { smartChunkedUpload } from '@/utils/chunkedUpload';
-import { needsCompression, quickCompressVideo } from '@/utils/quickVideoCompress';
 
 export interface Story {
   id: string;
@@ -188,28 +186,15 @@ export const useStories = () => {
       let mediaType = 'text';
 
       if (file) {
-        let fileToUpload = file;
-
-        // ضغط الفيديو تلقائياً
-        if (needsCompression(file)) {
-          try {
-            toast.info('جاري ضغط الفيديو...');
-            const compressed = await quickCompressVideo(file);
-            fileToUpload = compressed.file;
-            if (compressed.compressionRatio > 0) {
-              toast.success(`تم ضغط الفيديو ${compressed.compressionRatio}%`);
-            }
-          } catch {
-            console.warn('⚠️ فشل ضغط الفيديو');
-          }
-        }
-
-        const ext = fileToUpload.name.split('.').pop();
+        const { uploadFile } = await import('@/utils/optimizedUpload');
+        const ext = file.name.split('.').pop() || 'mp4';
         const path = `${user!.id}/${Date.now()}.${ext}`;
 
-        const result = await smartChunkedUpload(fileToUpload, {
+        const result = await uploadFile(file, {
           bucket: 'stories',
           path,
+          compress: true,
+          compressionOptions: { maxWidth: 720, quality: 0.8 },
         });
 
         mediaUrl = result.publicUrl;

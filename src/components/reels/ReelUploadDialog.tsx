@@ -10,8 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MusicPicker from '@/components/media/MusicPicker';
 import VideoUploadProgress, { UploadStage } from '@/components/upload/VideoUploadProgress';
-import { ffmpegCompressVideo, isFFmpegSupported, generateThumbnail } from '@/utils/ffmpegCompress';
-import { needsCompression } from '@/utils/quickVideoCompress';
+import { isFFmpegSupported, generateThumbnail } from '@/utils/ffmpegCompress';
+import { smartVideoUpload } from '@/utils/smartVideoUpload';
+import { uploadFile as optimizedUploadFile } from '@/utils/optimizedUpload';
 import type { MusicTrack } from '@/lib/musicLibrary';
 
 interface Props {
@@ -67,47 +68,35 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
     setProgress(0);
 
     try {
-      let fileToUpload = file;
+      // ضغط + رفع ذكي موحد
+      setStage('compressing');
+      const uploadResult = await smartVideoUpload(file, {
+        bucket: 'media',
+        pathPrefix: `reels/${user.id}`,
+        contentType: 'reel',
+        onProgress: (p) => setProgress(p),
+        onStage: (s) => {
+          if (s === 'analyzing') setStage('compressing');
+          else if (s === 'compressing') setStage('compressing');
+          else if (s === 'uploading') setStage('uploading');
+          else if (s === 'done') setStage('done');
+        },
+      });
 
-      // المرحلة 1: ضغط الفيديو
-      if (needsCompression(file)) {
-        setStage('compressing');
-        if (isFFmpegSupported()) {
-          const result = await ffmpegCompressVideo(file, {
-            maxWidth: 1080,
-            crf: 26,
-            onProgress: (p) => setProgress(p * 0.5), // 0-50%
-            onStage: (s) => { if (s === 'compressing') setStage('compressing'); },
-          });
-          fileToUpload = result.file;
-          setCompressedSize(result.compressedSize);
-        }
-      }
+      setCompressedSize(uploadResult.compressedSize);
+      const videoPublicUrl = uploadResult.url;
 
-      // المرحلة 2: رفع الفيديو
-      setStage('uploading');
-      const ext = fileToUpload.name.split('.').pop();
-      const path = `reels/${user.id}/${Date.now()}.${ext}`;
-
-      setProgress(55);
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(path, fileToUpload, { contentType: fileToUpload.type, upsert: false });
-
-      if (uploadError) throw uploadError;
-      setProgress(85);
-
-      const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-
-      // رفع الصورة المصغرة
+      // رفع الصورة المصغرة مع ضغط
       let thumbPublicUrl: string | undefined;
       if (thumbnailUrl) {
         try {
           const thumbBlob = await fetch(thumbnailUrl).then(r => r.blob());
-          const thumbPath = `reels/${user.id}/${Date.now()}_thumb.jpg`;
-          await supabase.storage.from('media').upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
-          const { data: tData } = supabase.storage.from('media').getPublicUrl(thumbPath);
-          thumbPublicUrl = tData.publicUrl;
+          const thumbFile = new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' });
+          const thumbResult = await optimizedUploadFile(thumbFile, {
+            bucket: 'media',
+            path: `reels/${user.id}/${Date.now()}_thumb.jpg`,
+          });
+          thumbPublicUrl = thumbResult.publicUrl;
         } catch { /* thumbnail upload optional */ }
       }
 
@@ -117,7 +106,7 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
         .filter(Boolean);
 
       await createReel.mutateAsync({
-        video_url: urlData.publicUrl,
+        video_url: videoPublicUrl,
         caption: caption || undefined,
         hashtags: tags.length > 0 ? tags : undefined,
         organization_id: organization?.id || undefined,
