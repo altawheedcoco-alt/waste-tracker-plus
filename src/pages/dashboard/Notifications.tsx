@@ -200,6 +200,7 @@ const Notifications = () => {
   const [readFilter, setReadFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
+  const [activeStatFilter, setActiveStatFilter] = useState<string | null>(null);
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   // Get unique shipment IDs
