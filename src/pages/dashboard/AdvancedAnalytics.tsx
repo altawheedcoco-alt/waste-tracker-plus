@@ -16,6 +16,9 @@ const PDFReportGenerator = lazy(() => import('@/components/reports/PDFReportGene
 const PartnerPerformanceMatrix = lazy(() => import('@/components/analytics/PartnerPerformanceMatrix'));
 const GoalTrackingDashboard = lazy(() => import('@/components/analytics/GoalTrackingDashboard'));
 const WasteFlowSankey = lazy(() => import('@/components/analytics/WasteFlowSankey'));
+const ActivityHeatmap = lazy(() => import('@/components/analytics/ActivityHeatmap'));
+const CostOptimizationEngine = lazy(() => import('@/components/analytics/CostOptimizationEngine'));
+const ComplianceTracker = lazy(() => import('@/components/analytics/ComplianceTracker'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
@@ -69,6 +72,21 @@ const AdvancedAnalytics = () => {
         <Suspense fallback={<ChartSkeleton />}>
           <GoalTrackingDashboard />
         </Suspense>
+
+        {/* Activity Heatmap */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <ActivityHeatmap />
+        </Suspense>
+
+        {/* Cost Optimization + Compliance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <CostOptimizationEngine />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ComplianceTracker />
+          </Suspense>
+        </div>
 
         {/* Performance Comparison */}
         <Suspense fallback={<ChartSkeleton />}>
