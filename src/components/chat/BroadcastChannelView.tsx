@@ -855,9 +855,9 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
       <button
         type="button"
         onClick={() => setMuted((m) => !m)}
-        className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2.5"
+        className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white transition-opacity text-[10px] px-2.5"
       >
-        {muted ? '🔇 كتم' : '🔊 صوت'}
+        {muted ? '🔇 اضغط لتشغيل الصوت' : '🔊 صوت'}
       </button>
     </div>
   );
