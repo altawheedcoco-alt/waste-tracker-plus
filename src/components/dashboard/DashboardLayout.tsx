@@ -39,6 +39,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import { useUserActivityPresence } from '@/hooks/useUserActivityPresence';
+import { useServiceWorkerNavigation } from '@/hooks/useServiceWorkerNavigation';
 
 // Extracted components
 import DashboardHeader from './DashboardHeader';
@@ -58,6 +59,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   useDashboardRealtime();
   // Smart presence — tracks online/away/offline for notification delivery
   useUserActivityPresence();
+  // Listen for push notification clicks from service worker → navigate in SPA
+  useServiceWorkerNavigation();
   
   const { fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

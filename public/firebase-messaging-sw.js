@@ -2,6 +2,8 @@
 /**
  * Firebase Cloud Messaging Service Worker
  * Handles background push notifications from FCM
+ * 
+ * CRITICAL: notificationclick focuses existing tab instead of opening new one
  */
 importScripts('https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.8.1/firebase-messaging-compat.js');
@@ -29,21 +31,51 @@ messaging.onBackgroundMessage((payload) => {
     lang: 'ar',
     data: payload.data || {},
     tag: payload.data?.tag || 'fcm-' + Date.now(),
+    // Show action buttons for quick access
+    actions: [
+      { action: 'open', title: 'فتح' },
+      { action: 'dismiss', title: 'تجاهل' },
+    ],
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || '/';
+
+  // If user clicked "dismiss" action, do nothing
+  if (event.action === 'dismiss') return;
+
+  // Get the target URL from notification data
+  const targetPath = event.notification.data?.url || '/dashboard';
+
   event.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // 1. Try to find an existing tab with our app open
       for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          return client.focus();
+        try {
+          const clientUrl = new URL(client.url);
+          const swUrl = new URL(self.location.origin);
+
+          // Check if this tab belongs to our app (same origin)
+          if (clientUrl.origin === swUrl.origin) {
+            // Focus the existing tab and navigate it to the target path
+            return client.focus().then((focusedClient) => {
+              // Use postMessage to navigate within the SPA (no page reload)
+              focusedClient.postMessage({
+                type: 'NOTIFICATION_CLICK',
+                url: targetPath,
+              });
+              return focusedClient;
+            });
+          }
+        } catch (e) {
+          // URL parsing failed, skip this client
         }
       }
-      return self.clients.openWindow(url);
+
+      // 2. No existing tab found → open a new one with full URL
+      return self.clients.openWindow(self.location.origin + targetPath);
     })
   );
 });
