@@ -102,5 +102,6 @@ export const commonRoutes = (
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
     <Route path="/dashboard/partner-reviews" element={<PartnerReviews />} />
     <Route path="/dashboard/system-status" element={<SystemStatus />} />
+    <Route path="/dashboard/shared-links" element={<SharedLinksPage />} />
   </>
 );
