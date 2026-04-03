@@ -106,7 +106,7 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
         .filter(Boolean);
 
       await createReel.mutateAsync({
-        video_url: urlData.publicUrl,
+        video_url: videoPublicUrl,
         caption: caption || undefined,
         hashtags: tags.length > 0 ? tags : undefined,
         organization_id: organization?.id || undefined,
