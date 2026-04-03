@@ -25,9 +25,21 @@ function isStandalonePwa() {
   return window.matchMedia('(display-mode: standalone)').matches || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
+function isInIframe(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
 async function detectPushSupport(): Promise<PushSupportState> {
   if (typeof window === 'undefined') {
     return { checked: true, supported: false, reason: 'المتصفح غير متاح حالياً' };
+  }
+
+  if (isInIframe()) {
+    return { checked: true, supported: false, reason: 'الإشعارات لا تعمل داخل المعاينة — جرّب من الموقع المنشور' };
   }
 
   if (!window.isSecureContext) {
