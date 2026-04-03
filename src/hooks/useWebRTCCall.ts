@@ -587,7 +587,37 @@ export function useWebRTCCall() {
     });
   }, [callInfo?.callId, user]);
 
-  // Listen for incoming calls
+  // Handle incoming call record
+  const handleIncomingCall = useCallback(async (record: any) => {
+    if (record.status !== 'ringing') return;
+    // Don't answer own calls
+    if (record.caller_id === user?.id) return;
+    if (callInfo) {
+      await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
+      return;
+    }
+
+    callRecordIdRef.current = record.id;
+    
+    playRingtone();
+    setCallInfo({
+      callId: record.id,
+      callType: record.call_type,
+      state: 'ringing',
+      isIncoming: true,
+      partnerName: record.caller_name || 'مستخدم',
+      partnerLogo: record.caller_avatar_url,
+      partnerOrgId: record.caller_org_id,
+      duration: 0,
+      isMuted: false,
+      isSpeaker: false,
+      isVideoEnabled: record.call_type === 'video',
+      isScreenSharing: false,
+      isRecording: false,
+    });
+  }, [user?.id, callInfo, playRingtone]);
+
+  // Listen for incoming calls - org level
   useEffect(() => {
     if (!organization?.id) return;
 
@@ -598,36 +628,30 @@ export function useWebRTCCall() {
         table: 'call_records',
         filter: `receiver_org_id=eq.${organization.id}`,
       }, async (payload) => {
-        const record = payload.new as any;
-        if (record.status !== 'ringing') return;
-        if (callInfo) {
-          await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
-          return;
-        }
-
-        callRecordIdRef.current = record.id;
-        
-        playRingtone();
-        setCallInfo({
-          callId: record.id,
-          callType: record.call_type,
-          state: 'ringing',
-          isIncoming: true,
-          partnerName: record.caller_name || 'مستخدم',
-          partnerLogo: record.caller_avatar_url,
-          partnerOrgId: record.caller_org_id,
-          duration: 0,
-          isMuted: false,
-          isSpeaker: false,
-          isVideoEnabled: record.call_type === 'video',
-          isScreenSharing: false,
-          isRecording: false,
-        });
+        await handleIncomingCall(payload.new);
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [organization?.id, callInfo, playRingtone]);
+  }, [organization?.id, handleIncomingCall]);
+
+  // Listen for incoming calls - user level (1-to-1)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase.channel(`incoming-calls-user:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'call_records',
+        filter: `receiver_user_id=eq.${user.id}`,
+      }, async (payload) => {
+        await handleIncomingCall(payload.new);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, handleIncomingCall]);
 
   return {
     callInfo,
