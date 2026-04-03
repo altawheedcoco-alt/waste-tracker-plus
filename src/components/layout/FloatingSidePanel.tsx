@@ -106,7 +106,7 @@ const FloatingSidePanel = memo(() => {
       icon: <MessageCircle size={iconSize} />,
       label: 'محادثات الفريق',
       gradient: 'from-primary to-primary/80',
-      onClick: () => handleWidgetOpen('team-chat'),
+      onClick: () => handleNavigate('/dashboard/chat'),
       visible: true,
       category: 'operations',
       badgeKey: 'chat',
