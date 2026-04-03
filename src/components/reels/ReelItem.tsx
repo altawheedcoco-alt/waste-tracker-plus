@@ -36,7 +36,8 @@ interface ReelItemProps {
 const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare, onDelete, onDuet }: ReelItemProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay policy
+  const [userInteracted, setUserInteracted] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -52,13 +53,21 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
     const video = videoRef.current;
     if (!video) return;
     if (isActive) {
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
+      video.muted = true; // Ensure muted for autoplay
+      video.play().then(() => {
+        setIsPlaying(true);
+        // Try to unmute after successful play if user already interacted
+        if (userInteracted) {
+          video.muted = false;
+          setIsMuted(false);
+        }
+      }).catch(() => {});
     } else {
       video.pause();
       video.currentTime = 0;
       setIsPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, userInteracted]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -73,9 +82,15 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
+    // User interacted — unmute on first interaction
+    if (!userInteracted) {
+      setUserInteracted(true);
+      video.muted = false;
+      setIsMuted(false);
+    }
     if (video.paused) { video.play(); setIsPlaying(true); }
     else { video.pause(); setIsPlaying(false); }
-  }, []);
+  }, [userInteracted]);
 
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
@@ -360,7 +375,12 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
 
       {/* Mute toggle */}
       <button
-        onClick={() => setIsMuted(!isMuted)}
+        onClick={() => {
+          if (!userInteracted) setUserInteracted(true);
+          const next = !isMuted;
+          setIsMuted(next);
+          if (videoRef.current) videoRef.current.muted = next;
+        }}
         className="absolute top-14 right-4 z-20 w-9 h-9 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-95 transition-transform"
       >
         {isMuted ? <VolumeX className="w-4 h-4 text-white/80" /> : <Volume2 className="w-4 h-4 text-white/80" />}

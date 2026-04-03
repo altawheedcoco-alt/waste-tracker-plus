@@ -26,7 +26,8 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
   const [showViewers, setShowViewers] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay policy
+  const [userInteracted, setUserInteracted] = useState(false);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [showDoubleTapHeart, setShowDoubleTapHeart] = useState(false);
@@ -153,6 +154,12 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
 
   // Double tap to like
   const handleContentTap = () => {
+    // Unmute on first user interaction (browser autoplay policy)
+    if (!userInteracted) {
+      setUserInteracted(true);
+      setIsMuted(false);
+      if (videoRef.current) videoRef.current.muted = false;
+    }
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
       if (!liked) handleLike();
@@ -271,7 +278,12 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
               </button>
               {story.media_type === 'video' && (
                 <button
-                  onClick={() => setIsMuted(m => !m)}
+                  onClick={() => {
+                    if (!userInteracted) setUserInteracted(true);
+                    const next = !isMuted;
+                    setIsMuted(next);
+                    if (videoRef.current) videoRef.current.muted = next;
+                  }}
                   className="w-7 h-7 rounded-full bg-black/25 backdrop-blur-md flex items-center justify-center text-white/80 active:scale-90 transition-transform"
                 >
                   {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
