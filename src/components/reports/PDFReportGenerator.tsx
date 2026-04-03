@@ -76,7 +76,7 @@ export default function PDFReportGenerator() {
         .eq('organization_id', orgId)
         .gte('created_at', fromDate),
       supabase.from('external_partners')
-        .select('id, status')
+        .select('id, is_active')
         .eq('organization_id', orgId),
     ]);
 
