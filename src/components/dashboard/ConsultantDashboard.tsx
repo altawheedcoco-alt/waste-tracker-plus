@@ -40,7 +40,7 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
-
+const ClientPortfolioWidget = lazy(() => import('./shared/ClientPortfolioWidget'));
 
 import ConsultantActiveProjects from '@/components/consultant/ConsultantActiveProjects';
 
@@ -404,6 +404,9 @@ const ConsultantDashboard = memo(() => {
               onNavigate={setActiveTab}
             />
           </Suspense>
+
+          {/* ودجة محفظة العملاء */}
+          <Suspense fallback={null}><ClientPortfolioWidget /></Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ConsultantActiveProjects

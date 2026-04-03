@@ -24,7 +24,9 @@ const DisposalInputIntelligence = lazy(() => import('@/components/dashboard/disp
 const DisposalScorecard = lazy(() => import('@/components/dashboard/disposal/DisposalScorecard'));
 const DisposalSiteStatus = lazy(() => import('@/components/dashboard/disposal/DisposalSiteStatus'));
 const DisposalEnvironmentalMonitor = lazy(() => import('@/components/dashboard/disposal/DisposalEnvironmentalMonitor'));
-
+const LandfillCapacityMonitor = lazy(() => import('@/components/dashboard/disposal/LandfillCapacityMonitor'));
+const SafetyComplianceWidget = lazy(() => import('@/components/dashboard/disposal/SafetyComplianceWidget'));
+const DisposalDailySnapshot = lazy(() => import('@/components/dashboard/disposal/DisposalDailySnapshot'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
@@ -318,7 +320,14 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         </ErrorBoundary>
       </div>
 
-      {/* 2. الإجراءات السريعة */}
+      {/* 2. ودجات متخصصة لجهة التخلص */}
+      <Suspense fallback={null}><DisposalDailySnapshot /></Suspense>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Suspense fallback={null}><LandfillCapacityMonitor /></Suspense>
+        <Suspense fallback={null}><SafetyComplianceWidget /></Suspense>
+      </div>
+
+      {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid
         actions={quickActions}
         title="الإجراءات السريعة"

@@ -80,6 +80,8 @@ const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab')
 const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
 const ShipmentStatusPipeline = lazy(() => import('./generator/ShipmentStatusPipeline'));
 const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
+const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
+const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
 
 
 interface RecentShipment {
@@ -497,6 +499,11 @@ const GeneratorDashboard = () => {
         {/* ── العمليات ── */}
         <TabsContent value="operations" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
+            {/* ── ودجات متخصصة للمولد ── */}
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <WasteSourceTracker />
+              <CollectionCalendarMini />
+            </div>
             <ErrorBoundary fallbackTitle="خطأ في التتبع">
               <GeneratorTrackingWidget />
             </ErrorBoundary>

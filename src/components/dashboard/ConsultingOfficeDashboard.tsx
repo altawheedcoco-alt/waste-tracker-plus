@@ -33,7 +33,7 @@ const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/Cons
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
-
+const ClientPortfolioWidget = lazy(() => import('./shared/ClientPortfolioWidget'));
 
 import OfficeWorkloadBalance from '@/components/consulting-office/OfficeWorkloadBalance';
 
@@ -368,6 +368,8 @@ const ConsultingOfficeDashboard = memo(() => {
             />
           </Suspense>
 
+          {/* ودجة محفظة العملاء */}
+          <Suspense fallback={null}><ClientPortfolioWidget /></Suspense>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <TeamPerformance members={members} clients={clients} />
             <OfficeWorkloadBalance members={members} clients={clients} />

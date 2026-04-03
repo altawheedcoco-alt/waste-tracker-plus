@@ -38,7 +38,8 @@ const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidg
 const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
 const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQuality'));
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
-
+const MaterialRecoveryRate = lazy(() => import('./recycler/MaterialRecoveryRate'));
+const QualityControlPanel = lazy(() => import('./recycler/QualityControlPanel'));
 
 interface RecentShipment {
   id: string;
@@ -292,6 +293,12 @@ const RecyclerDashboard = () => {
             <RecyclerProductionOutput />
           </Suspense>
         </ErrorBoundary>
+      </div>
+
+      {/* ★ ودجات متخصصة للمدور */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Suspense fallback={null}><MaterialRecoveryRate /></Suspense>
+        <Suspense fallback={null}><QualityControlPanel /></Suspense>
       </div>
 
       {/* 3. الإجراءات السريعة */}
