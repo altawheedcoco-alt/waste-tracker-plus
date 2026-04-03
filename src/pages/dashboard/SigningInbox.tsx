@@ -509,6 +509,7 @@ export default function SigningInbox() {
   }
 
   return (
+    <DashboardLayout>
     <div className="space-y-6 p-4 md:p-6" dir="rtl">
       <BackButton />
       {/* Header */}
