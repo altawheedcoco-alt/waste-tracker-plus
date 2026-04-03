@@ -234,13 +234,6 @@ const HomepageContent = () => {
       <LandingWrapper>
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           <EnableNotificationsButton />
-          {showNativePushTest && (
-            <div className="fixed bottom-20 left-4 right-4 z-50 mx-auto max-w-md pointer-events-none">
-              <div className="pointer-events-auto">
-                <NativePushTestButton />
-              </div>
-            </div>
-          )}
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
