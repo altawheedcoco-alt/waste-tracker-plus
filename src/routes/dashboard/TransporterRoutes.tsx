@@ -106,6 +106,7 @@ export const transporterRoutes = (
     <Route path="/dashboard/authorized-signatories" element={<AuthorizedSignatories />} />
     <Route path="/dashboard/white-label-portal" element={<WhiteLabelPortal />} />
     <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
+    <Route path="/dashboard/b2c-collection" element={<B2CCollectionFeed />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
     <Route path="/dashboard/driver-data" element={<DriverData />} />
     {/* ERP routes for transporter */}
