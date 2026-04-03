@@ -1124,6 +1124,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Headphones, labelAr: 'الدعم', labelEn: 'Support', path: '/dashboard/support', key: 'support', bindingType: 'internal' as const },
+      { icon: Brain, labelAr: 'مركز المساعدة الذكي', labelEn: 'Smart Help Center', path: '/dashboard/help-center', key: 'help-center', bindingType: 'internal' as const },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'Status', path: '/dashboard/system-status', key: 'all-system-status', bindingType: 'internal' as const },
       { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform', bindingType: 'internal' as const },
     ],
