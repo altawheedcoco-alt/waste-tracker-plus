@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import BackButton from '@/components/ui/back-button';
@@ -21,7 +22,8 @@ const ShipmentRoutesMap = () => {
   }, []);
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-3">
         <BackButton />
         <div>

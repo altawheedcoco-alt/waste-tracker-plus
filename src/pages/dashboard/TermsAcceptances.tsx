@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -281,7 +282,8 @@ const TermsAcceptances = () => {
   ];
 
   return (
-    <motion.div
+    <DashboardLayout>
+      <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"

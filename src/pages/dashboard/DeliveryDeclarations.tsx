@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '@/components/ui/back-button';
@@ -78,7 +79,8 @@ const DeliveryDeclarations = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
           <ArrowRight className="w-4 h-4" />

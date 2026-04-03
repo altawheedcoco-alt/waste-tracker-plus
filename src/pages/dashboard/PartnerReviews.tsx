@@ -1,6 +1,7 @@
 /**
  * PartnerReviews — Star ratings + written reviews between organizations
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +22,8 @@ import { ar } from 'date-fns/locale';
 const StarRating = ({ value, onChange, readonly = false, size = 'md' }: { value: number; onChange?: (v: number) => void; readonly?: boolean; size?: string }) => {
   const sizeClass = size === 'sm' ? 'w-3.5 h-3.5' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
   return (
-    <div className="flex gap-0.5" dir="ltr">
+    <DashboardLayout>
+      <div className="flex gap-0.5" dir="ltr">
       {[1, 2, 3, 4, 5].map(i => (
         <Star
           key={i}

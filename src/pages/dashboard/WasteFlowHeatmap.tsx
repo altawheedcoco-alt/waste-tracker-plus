@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -132,7 +133,8 @@ const WasteFlowHeatmap = () => {
   const PIE_COLORS = ['#22c55e', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#f59e0b'];
 
   return (
-    <div className={`space-y-6 p-4 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <DashboardLayout>
+      <div className={`space-y-6 p-4 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <BackButton />

@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import BackButton from '@/components/ui/back-button';
@@ -254,7 +255,8 @@ const CamerasPage = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
           <ArrowRight className="w-5 h-5" />

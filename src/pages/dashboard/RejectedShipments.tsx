@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -123,7 +124,8 @@ const RejectedShipments = () => {
   const sidelinedCount = rejections.filter((r: any) => r.is_sidelined).length;
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">

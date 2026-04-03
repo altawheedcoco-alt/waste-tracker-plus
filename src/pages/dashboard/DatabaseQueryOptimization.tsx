@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -374,7 +375,8 @@ const DatabaseQueryOptimization = () => {
   const filteredPatterns = activeTab === 'all' ? patterns : patterns.filter(p => p.categoryAr === activeTab);
 
   return (
-    <motion.div
+    <DashboardLayout>
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="space-y-6 p-4 md:p-6"

@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -290,7 +291,8 @@ const SigningStatus = () => {
 
   // === RENDER ===
   return (
-    <div className="space-y-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">

@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BackButton from '@/components/ui/back-button';
@@ -31,7 +32,8 @@ const Permits = () => {
   });
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6">
       <BackButton />
       <div className="flex items-center justify-between">
         <div>

@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -111,7 +112,8 @@ const CVBuilder = () => {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6 max-w-4xl mx-auto" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6 max-w-4xl mx-auto" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

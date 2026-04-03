@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { useNavigate } from 'react-router-dom';
@@ -99,7 +100,8 @@ const OrgStructure = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );

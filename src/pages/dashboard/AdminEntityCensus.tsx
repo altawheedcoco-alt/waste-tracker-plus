@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { memo, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from '@/components/ui/back-button';
@@ -238,7 +239,8 @@ const AdminEntityCensus = memo(() => {
   const hasError = orgsError || profilesError;
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <DashboardLayout>
+      <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

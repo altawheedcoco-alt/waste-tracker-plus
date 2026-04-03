@@ -1,6 +1,7 @@
 /**
  * لوحة الأثر المركزية — تعرض كل الآثار المتقاطعة بين الجهات
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useMemo } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -76,7 +77,8 @@ export default function CrossImpactDashboard() {
   }, [impacts]);
 
   return (
-    <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <DashboardLayout>
+      <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
       <div className="flex flex-col gap-2">

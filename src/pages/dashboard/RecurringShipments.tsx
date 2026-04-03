@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,7 +109,8 @@ const RecurringShipments = () => {
   const getFreqLabel = (f: string) => FREQUENCIES.find(fr => fr.value === f)?.label || f;
 
   return (
-    <div className="space-y-6 p-4 md:p-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 md:p-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

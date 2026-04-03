@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -282,7 +283,8 @@ export default function AIDocumentStudioPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
+    <DashboardLayout>
+      <div className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
         <div className="flex items-center gap-3">

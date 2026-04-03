@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
@@ -158,7 +159,8 @@ export default function DisposalFacilities() {
   };
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <BackButton />
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

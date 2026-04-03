@@ -1,6 +1,7 @@
 /**
  * StationeryPlans — Pricing page for stationery subscription tiers
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,7 +74,8 @@ const StationeryPlans = () => {
   };
 
   return (
-    <div className="space-y-8 p-4 max-w-6xl mx-auto" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-8 p-4 max-w-6xl mx-auto" dir="rtl">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-foreground">باقات المطبوعات الرسمية المؤمّنة</h1>
         <p className="text-muted-foreground mt-2">

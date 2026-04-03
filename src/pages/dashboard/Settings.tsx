@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -106,7 +107,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-10">
+    <DashboardLayout>
+      <div className="space-y-4 sm:space-y-6 pb-10">
       {/* Header */}
       <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-3 sm:p-5">
         <div className="flex items-center gap-2 sm:gap-0 sm:justify-between relative z-10">

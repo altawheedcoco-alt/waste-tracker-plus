@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '@/components/ui/back-button';
@@ -70,7 +71,8 @@ function SignedDocumentView({ request }: { request: SigningRequest }) {
   if (request.status !== 'signed' || isLoading || !signatures?.length) return null;
 
   return (
-    <div className="mt-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20">
+    <DashboardLayout>
+      <div className="mt-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20">
       <div className="flex items-center gap-2 mb-2 text-sm font-medium text-green-800 dark:text-green-300">
         <CheckCircle2 className="w-4 h-4" />
         <span>تم التوقيع والختم</span>

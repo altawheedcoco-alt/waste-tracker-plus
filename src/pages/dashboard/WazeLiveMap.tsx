@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useCallback } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +66,8 @@ const WazeLiveMap = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 space-y-4" dir="rtl">
+    <DashboardLayout>
+      <div className="min-h-screen bg-background p-4 md:p-6 space-y-4" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

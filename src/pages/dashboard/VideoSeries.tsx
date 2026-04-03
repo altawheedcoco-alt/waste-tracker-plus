@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Clock, Film, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, SkipBack, SkipForward, Pause, Volume2, VolumeX, Maximize, X, Search, Eye, CheckCircle2, Trophy, Sparkles, Tv, ListVideo } from 'lucide-react';
@@ -221,7 +222,8 @@ const CountdownTimer = ({ seconds, onComplete, onCancel }: { seconds: number; on
   const progress = ((seconds - remaining) / seconds) * 100;
 
   return (
-    <div className="relative w-20 h-20">
+    <DashboardLayout>
+      <div className="relative w-20 h-20">
       <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
         <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="3" className="text-white/20" />
         <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary" strokeDasharray={`${2 * Math.PI * 36}`} strokeDashoffset={`${2 * Math.PI * 36 * (1 - progress / 100)}`} strokeLinecap="round" />

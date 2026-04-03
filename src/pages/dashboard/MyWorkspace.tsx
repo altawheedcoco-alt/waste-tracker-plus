@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { lazy, Suspense, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
@@ -105,7 +106,8 @@ const MyWorkspace = () => {
   const greeting = hour < 12 ? 'صباح الخير' : hour < 17 ? 'مساء الخير' : 'مساء النور';
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6" dir="rtl">
       {/* ─── Hero Header ─── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}

@@ -179,6 +179,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Shield, labelAr: 'الحوكمة والرقابة', labelEn: 'Governance', path: '/dashboard/governance', key: 'governance', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: Brain, labelAr: 'الأمن السيبراني', labelEn: 'Cyber Security', path: '/dashboard/cyber-security', key: 'cyber-security', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
+      { icon: LinkIcon, labelAr: 'روابطي المشاركة', labelEn: 'Shared Links', path: '/dashboard/shared-links', key: 'shared-links', bindingType: 'internal' as const },
     ],
   },
 

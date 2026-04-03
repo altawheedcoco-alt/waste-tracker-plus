@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
@@ -88,7 +89,8 @@ const AdminHomepageManager = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );

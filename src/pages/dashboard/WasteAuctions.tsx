@@ -2,6 +2,7 @@
  * WasteAuctions — Full auction system for waste materials
  * Generators list waste → Recyclers bid → Platform earns commission
  */
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -142,7 +143,8 @@ const WasteAuctions = () => {
   };
 
   return (
-    <div className="space-y-4 p-3 md:p-4" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-4 p-3 md:p-4" dir="rtl">
       <BackButton />
       <div className="space-y-2">
         <div className="min-w-0">

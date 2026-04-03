@@ -1,3 +1,4 @@
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -205,7 +206,8 @@ const AdminDocumentStamping = () => {
   const qrValue = `${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=admin-stamped&code=${encodeURIComponent(docCode)}&date=${stampDate.toISOString()}`;
 
   return (
-    <div className="space-y-6 p-4 max-w-5xl mx-auto" dir="rtl">
+    <DashboardLayout>
+      <div className="space-y-6 p-4 max-w-5xl mx-auto" dir="rtl">
       <BackButton />
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
