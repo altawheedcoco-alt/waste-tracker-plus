@@ -8,6 +8,7 @@ const PerformanceAnalyticsDashboard = lazy(() => import('@/components/analytics/
 const PerformanceComparisonDashboard = lazy(() => import('@/components/analytics/PerformanceComparisonDashboard'));
 const OperationalHealthScore = lazy(() => import('@/components/analytics/OperationalHealthScore'));
 const EntityRankingWidget = lazy(() => import('@/components/analytics/EntityRankingWidget'));
+const CircularEconomyIndex = lazy(() => import('@/components/analytics/CircularEconomyIndex'));
 
 const AdvancedAnalytics = () => {
   return (
@@ -16,10 +17,13 @@ const AdvancedAnalytics = () => {
         <BackButton />
         <AnalyticsDashboard />
         
-        {/* New: Health Score + Ranking side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Health Score + Ranking + Circular Economy */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Suspense fallback={<ChartSkeleton />}>
             <OperationalHealthScore />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <CircularEconomyIndex />
           </Suspense>
           <Suspense fallback={<ChartSkeleton />}>
             <EntityRankingWidget />
