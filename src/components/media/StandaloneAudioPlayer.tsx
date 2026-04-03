@@ -51,7 +51,11 @@ const StandaloneAudioPlayer = ({ url, title, className }: StandaloneAudioPlayerP
       audioRef.current.pause();
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     } else {
-      audioRef.current.play();
+      audioRef.current.volume = 1.0;
+      audioRef.current.muted = false;
+      audioRef.current.play().catch((err) => {
+        console.warn('Audio play failed:', err);
+      });
       animationRef.current = requestAnimationFrame(updateProgress);
     }
     setIsPlaying(!isPlaying);
