@@ -37062,6 +37062,53 @@ export type Database = {
           },
         ]
       }
+      shared_link_access_attempts: {
+        Row: {
+          attempt_type: string
+          created_at: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          pin_attempted: boolean | null
+          shared_link_id: string
+          success: boolean
+          user_agent: string | null
+          viewer_user_id: string | null
+        }
+        Insert: {
+          attempt_type?: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          pin_attempted?: boolean | null
+          shared_link_id: string
+          success?: boolean
+          user_agent?: string | null
+          viewer_user_id?: string | null
+        }
+        Update: {
+          attempt_type?: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          pin_attempted?: boolean | null
+          shared_link_id?: string
+          success?: boolean
+          user_agent?: string | null
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_link_access_attempts_shared_link_id_fkey"
+            columns: ["shared_link_id"]
+            isOneToOne: false
+            referencedRelation: "shared_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_link_views: {
         Row: {
           id: string
@@ -37105,8 +37152,10 @@ export type Database = {
           created_by: string | null
           description: string | null
           expires_at: string | null
+          failed_pin_attempts: number | null
           id: string
           is_active: boolean | null
+          locked_until: string | null
           max_views: number | null
           organization_id: string | null
           pin_hash: string | null
@@ -37125,8 +37174,10 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           expires_at?: string | null
+          failed_pin_attempts?: number | null
           id?: string
           is_active?: boolean | null
+          locked_until?: string | null
           max_views?: number | null
           organization_id?: string | null
           pin_hash?: string | null
@@ -37145,8 +37196,10 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           expires_at?: string | null
+          failed_pin_attempts?: number | null
           id?: string
           is_active?: boolean | null
+          locked_until?: string | null
           max_views?: number | null
           organization_id?: string | null
           pin_hash?: string | null
