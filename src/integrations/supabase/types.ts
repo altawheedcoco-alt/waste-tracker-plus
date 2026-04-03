@@ -9647,6 +9647,96 @@ export type Database = {
           },
         ]
       }
+      data_claim_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string
+          external_partner_id: string
+          id: string
+          notes: string | null
+          owner_org_id: string
+          records_count: number | null
+          rejection_reason: string | null
+          requested_by: string | null
+          requesting_org_id: string
+          status: string
+          tables_migrated: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          external_partner_id: string
+          id?: string
+          notes?: string | null
+          owner_org_id: string
+          records_count?: number | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          requesting_org_id: string
+          status?: string
+          tables_migrated?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          external_partner_id?: string
+          id?: string
+          notes?: string | null
+          owner_org_id?: string
+          records_count?: number | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          requesting_org_id?: string
+          status?: string
+          tables_migrated?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_claim_requests_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_claim_requests_owner_org_id_fkey"
+            columns: ["owner_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "data_claim_requests_owner_org_id_fkey"
+            columns: ["owner_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_claim_requests_requesting_org_id_fkey"
+            columns: ["requesting_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "data_claim_requests_requesting_org_id_fkey"
+            columns: ["requesting_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_confirmations: {
         Row: {
           condition_notes: string | null
@@ -46928,6 +47018,10 @@ export type Database = {
       driver_belongs_to_user_org: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
+      }
+      execute_data_claim: {
+        Args: { p_approver_id: string; p_claim_id: string }
+        Returns: Json
       }
       generate_attestation_number: { Args: never; Returns: string }
       generate_compliance_cert_number: { Args: never; Returns: string }
