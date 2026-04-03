@@ -370,6 +370,23 @@ export function useWebRTCCall() {
       };
       if (receiverUserId) insertData.receiver_user_id = receiverUserId;
 
+      // Check receiver online status
+      let receiverOnline = true;
+      if (receiverUserId) {
+        const { data: presence } = await (supabase.from('user_presence') as any)
+          .select('status, updated_at')
+          .eq('user_id', receiverUserId)
+          .maybeSingle();
+        
+        if (presence) {
+          const lastActive = new Date(presence.updated_at).getTime();
+          const twoMinAgo = Date.now() - 2 * 60 * 1000;
+          receiverOnline = presence.status === 'online' && lastActive > twoMinAgo;
+        } else {
+          receiverOnline = false;
+        }
+      }
+
       const { data: record } = await supabase.from('call_records').insert(insertData).select('id').single();
 
       const callId = record?.id || crypto.randomUUID();
@@ -410,9 +427,16 @@ export function useWebRTCCall() {
         isVideoEnabled: type === 'video',
         isScreenSharing: false,
         isRecording: false,
+        isReceiverOnline: receiverOnline,
       });
 
-      playRingtone();
+      // Play appropriate ringtone based on receiver status
+      if (receiverOnline) {
+        playRingtone();
+      } else {
+        playOfflineRingtone();
+      }
+
       const pc = setupPeerConnection(stream);
       const channel = setupSignaling(callId, true);
 
