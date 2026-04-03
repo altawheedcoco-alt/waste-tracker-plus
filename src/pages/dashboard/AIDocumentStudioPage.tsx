@@ -669,5 +669,6 @@ export default function AIDocumentStudioPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }
