@@ -1,7 +1,7 @@
 /**
  * Centralized Notification Triggers — مركز إطلاق الإشعارات
  * 
- * Helper functions to fire notifications for all ~188 event types.
+ * Helper functions to fire notifications for all ~304 event types.
  * Each function determines recipients and sends via notifyAction/notifyMultiple.
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,32 @@ async function getAdminUserIds(): Promise<string[]> {
 async function getOrgName(orgId: string): Promise<string> {
   const { data } = await supabase.from('organizations').select('name').eq('id', orgId).single();
   return data?.name || 'جهة';
+}
+
+/**
+ * Helper: get linked partner org IDs for a given org
+ */
+async function getLinkedPartnerOrgIds(orgId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from('partner_links')
+    .select('organization_id, partner_organization_id')
+    .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`)
+    .eq('status', 'active');
+  if (!data) return [];
+  const ids = data.map(link =>
+    link.organization_id === orgId ? link.partner_organization_id : link.organization_id
+  ).filter(Boolean) as string[];
+  return [...new Set(ids)];
+}
+
+/**
+ * Helper: get member IDs from multiple orgs
+ */
+async function getMultiOrgMemberIds(orgIds: string[], excludeUserId?: string): Promise<string[]> {
+  const promises = orgIds.map(oid => getOrgMemberIds(oid, excludeUserId));
+  const results = await Promise.all(promises);
+  const allIds = results.flat();
+  return [...new Set(allIds)];
 }
 
 // ══════════════════════════════════════════
