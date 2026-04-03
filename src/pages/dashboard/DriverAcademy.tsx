@@ -1,15 +1,15 @@
 import React from 'react';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import DriverAcademyPanel from '@/components/academy/DriverAcademyPanel';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const DriverAcademy = () => (
-    <DashboardLayout>
+  <DashboardLayout>
     <div className="space-y-4">
       <BackButton />
       <DriverAcademyPanel />
     </div>
-)</DashboardLayout>
-));
+  </DashboardLayout>
+);
 
 export default DriverAcademy;

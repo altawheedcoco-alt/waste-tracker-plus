@@ -1,15 +1,15 @@
 import React from 'react';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import TransportFuturesPanel from '@/components/futures/TransportFuturesPanel';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const FuturesMarket = () => (
-    <DashboardLayout>
+  <DashboardLayout>
     <div className="space-y-4">
       <BackButton />
       <TransportFuturesPanel />
     </div>
-)</DashboardLayout>
-));
+  </DashboardLayout>
+);
 
 export default FuturesMarket;
