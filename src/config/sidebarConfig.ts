@@ -591,6 +591,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Gauge, labelAr: 'لوحة العمليات', labelEn: 'Operations', path: '/dashboard/operations', key: 'operations', bindingType: 'internal' as const },
       { icon: CheckSquare, labelAr: 'المهام', labelEn: 'Tasks', path: '/dashboard/task-board', key: 'task-board', bindingType: 'internal' as const },
+      { icon: ClipboardCheck, labelAr: 'مراقبة الجودة', labelEn: 'Quality Control', path: '/dashboard/quality-control', key: 'quality-control', bindingType: 'internal' as const },
+      { icon: Repeat, labelAr: 'الخدمات الدورية', labelEn: 'Recurring Services', path: '/dashboard/recurring-services', key: 'recurring-services', bindingType: 'internal' as const },
       { icon: ClipboardList, labelAr: 'سجل الأنشطة', labelEn: 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records', bindingType: 'hybrid' as const },
     ],
