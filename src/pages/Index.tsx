@@ -234,13 +234,6 @@ const HomepageContent = () => {
       <LandingWrapper>
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           <EnableNotificationsButton />
-          {showNativePushTest && (
-            <div className="fixed bottom-20 left-4 right-4 z-50 mx-auto max-w-md pointer-events-none">
-              <div className="pointer-events-auto">
-                <NativePushTestButton />
-              </div>
-            </div>
-          )}
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
@@ -253,7 +246,11 @@ const HomepageContent = () => {
             </ErrorBoundary>
           )}
 
-          {/* v5.2 — How It Works (highest conversion impact — priority load) */}
+          {/* صندوق اختبار الإشعارات الأصلية — مؤقت للتجربة */}
+          <div className="max-w-md mx-auto px-4 py-4">
+            <NativePushTestButton />
+          </div>
+
           <div id="how-it-works">
             <LazySection minH={350} priority>
               <HowItWorksSection />
