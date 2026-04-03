@@ -303,8 +303,9 @@ export function getQuickActionsByType(
     case 'disposal':
       return disposalQuickActions;
     case 'consultant':
+      return consultantQuickActions;
     case 'consulting_office':
-      return generatorQuickActions; // Consultants use generator actions as baseline
+      return consultingOfficeQuickActions;
     default:
       return generatorQuickActions;
   }
