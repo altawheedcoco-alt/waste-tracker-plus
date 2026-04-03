@@ -36,7 +36,7 @@ export default function ResourceUtilizationWidget() {
         totalMembers: membersRes.count || 0,
         activeDrivers,
         monthlyShipments: shipmentsRes.count || 0,
-        totalVehicles: vehiclesRes.count || 0,
+        totalVehicles: positionsRes.count || 0,
       };
     },
   });
