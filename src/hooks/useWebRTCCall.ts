@@ -179,7 +179,7 @@ export function useWebRTCCall() {
   }, [startDurationTimer, stopRingtone]);
 
   // Setup signaling channel
-  const setupSignaling = useCallback((callId: string) => {
+  const setupSignaling = useCallback((callId: string, isInitiator = false) => {
     const channel = supabase.channel(`call:${callId}`)
       .on('broadcast', { event: 'offer' }, async ({ payload }) => {
         if (!pcRef.current) return;
@@ -201,6 +201,12 @@ export function useWebRTCCall() {
       .on('broadcast', { event: 'hangup' }, () => {
         endCall('partner_ended');
       })
+      .on('broadcast', { event: 'ready' }, async () => {
+        // Receiver joined - re-send offer if we're the caller
+        if (isInitiator && pcRef.current?.localDescription) {
+          channel.send({ type: 'broadcast', event: 'offer', payload: { sdp: pcRef.current.localDescription } });
+        }
+      })
       .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
         setCallMessages(prev => [...prev, {
           id: crypto.randomUUID(),
@@ -210,7 +216,12 @@ export function useWebRTCCall() {
           senderName: payload.senderName,
         }]);
       })
-      .subscribe();
+      .subscribe((status) => {
+        // When receiver subscribes, signal ready to caller
+        if (status === 'SUBSCRIBED' && !isInitiator) {
+          channel.send({ type: 'broadcast', event: 'ready', payload: {} });
+        }
+      });
 
     channelRef.current = channel;
     return channel;
