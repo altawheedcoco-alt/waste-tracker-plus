@@ -97,7 +97,7 @@ const EnhancedChatWidget = () => {
     toggleScreenShare,
     toggleRecording,
     sendCallMessage,
-  } = useWebRTCCall();
+  } = useGlobalCall();
 
   const handleStartCall = async (type: 'voice' | 'video') => {
     if (!selectedPartner) return;
