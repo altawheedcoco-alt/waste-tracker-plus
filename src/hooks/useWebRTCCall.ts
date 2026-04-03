@@ -22,6 +22,7 @@ export interface CallInfo {
   isScreenSharing: boolean;
   isRecording: boolean;
   isReceiverOnline?: boolean;
+  isRestored?: boolean;
 }
 
 export interface CallMessage {
