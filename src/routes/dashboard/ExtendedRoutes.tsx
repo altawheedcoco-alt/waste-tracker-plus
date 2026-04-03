@@ -31,6 +31,10 @@ const OmalunaJobDetails = lazyRetry(() => import('@/pages/dashboard/OmalunaJobDe
 const OmalunaMyJobs = lazyRetry(() => import('@/pages/dashboard/OmalunaMyJobs'));
 const OmalunaMyApplications = lazyRetry(() => import('@/pages/dashboard/OmalunaMyApplications'));
 const OmalunaJobApplications = lazyRetry(() => import('@/pages/dashboard/OmalunaJobApplications'));
+const SecondaryMaterials = lazyRetry(() => import('@/pages/dashboard/SecondaryMaterials'));
+const MarketIntelligence = lazyRetry(() => import('@/pages/dashboard/MarketIntelligence'));
+const Webhooks = lazyRetry(() => import('@/pages/dashboard/Webhooks'));
+const CommunityRewards = lazyRetry(() => import('@/pages/dashboard/CommunityRewards'));
 
 export const extendedRoutes = (
   <>
@@ -64,5 +68,9 @@ export const extendedRoutes = (
     <Route path="/dashboard/omaluna/my-jobs" element={<OmalunaMyJobs />} />
     <Route path="/dashboard/omaluna/my-applications" element={<OmalunaMyApplications />} />
     <Route path="/dashboard/omaluna/job/:jobId/applications" element={<OmalunaJobApplications />} />
+    <Route path="/dashboard/secondary-materials" element={<SecondaryMaterials />} />
+    <Route path="/dashboard/market-intelligence" element={<MarketIntelligence />} />
+    <Route path="/dashboard/webhooks" element={<Webhooks />} />
+    <Route path="/dashboard/community-rewards" element={<CommunityRewards />} />
   </>
 );
