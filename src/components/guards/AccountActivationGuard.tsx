@@ -39,8 +39,8 @@ const AccountActivationGuard = ({ children }: Props) => {
     return <>{children}</>;
   }
 
-  // Check if organization is active
-  if (organization && organization.status !== 'active' && organization.status !== 'approved') {
+  // Check if organization is activated
+  if (organization && organization.is_active === false) {
     return <Navigate to="/dashboard/pending-activation" replace />;
   }
 
