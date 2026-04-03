@@ -22,6 +22,7 @@ export interface CallInfo {
   isScreenSharing: boolean;
   isRecording: boolean;
   isReceiverOnline?: boolean;
+  isRestored?: boolean;
 }
 
 export interface CallMessage {
@@ -728,7 +729,7 @@ export function useWebRTCCall() {
   }, [callInfo?.callId, user]);
 
   // Handle incoming call record
-  const handleIncomingCall = useCallback(async (record: any) => {
+  const handleIncomingCall = useCallback(async (record: any, restored = false) => {
     if (record.status !== 'ringing') return;
     if (record.caller_id === user?.id) return;
     if (record.receiver_user_id && record.receiver_user_id !== user?.id) return;
@@ -757,6 +758,7 @@ export function useWebRTCCall() {
       isVideoEnabled: record.call_type === 'video',
       isScreenSharing: false,
       isRecording: false,
+      isRestored: restored,
     });
   }, [user?.id, organization?.id, callInfo, playRingtone, setupSignaling]);
 
@@ -842,7 +844,7 @@ export function useWebRTCCall() {
 
       if (!record) return;
 
-      await handleIncomingCall(record);
+      await handleIncomingCall(record, true);
 
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);

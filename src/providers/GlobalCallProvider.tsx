@@ -1,7 +1,9 @@
-import { createContext, useContext, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useCallback, useState, type ReactNode } from 'react';
 import { useWebRTCCall, type CallInfo, type CallType, type CallMessage } from '@/hooks/useWebRTCCall';
 import IncomingCallOverlay from '@/components/chat/IncomingCallOverlay';
+import MiniIncomingCallBanner from '@/components/chat/MiniIncomingCallBanner';
 import CallScreen from '@/components/chat/CallScreen';
+import { AnimatePresence } from 'framer-motion';
 
 interface GlobalCallContextType {
   callInfo: CallInfo | null;
@@ -30,9 +32,9 @@ export function useGlobalCall() {
 
 export default function GlobalCallProvider({ children }: { children: ReactNode }) {
   const webrtc = useWebRTCCall();
+  const [expandedRestored, setExpandedRestored] = useState(false);
 
   const rejectWithMessage = useCallback((message: string) => {
-    // End the call with busy reason and pass the message
     webrtc.endCall('busy', message);
   }, [webrtc.endCall]);
 
@@ -41,22 +43,48 @@ export default function GlobalCallProvider({ children }: { children: ReactNode }
     rejectWithMessage,
   };
 
+  const isIncomingRinging = webrtc.callInfo?.isIncoming && webrtc.callInfo.state === 'ringing';
+  const isRestored = webrtc.callInfo?.isRestored && !expandedRestored;
+
+  // When call ends, reset expanded state
+  const handleExpand = useCallback(() => {
+    setExpandedRestored(true);
+  }, []);
+
+  // Reset expanded when call ends
+  if (!webrtc.callInfo && expandedRestored) {
+    setExpandedRestored(false);
+  }
+
   return (
     <GlobalCallContext.Provider value={value}>
       {children}
 
-      {/* Incoming call overlay — shows when ringing and incoming */}
-      {webrtc.callInfo?.isIncoming && webrtc.callInfo.state === 'ringing' && (
+      <AnimatePresence>
+        {/* Restored call → mini banner (unless expanded) */}
+        {isIncomingRinging && isRestored && (
+          <MiniIncomingCallBanner
+            key="mini-banner"
+            callInfo={webrtc.callInfo!}
+            onAccept={webrtc.answerCall}
+            onReject={() => webrtc.endCall('user_ended')}
+            onExpand={handleExpand}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Live call or expanded restored → full overlay */}
+      {isIncomingRinging && !isRestored && (
         <IncomingCallOverlay
-          callInfo={webrtc.callInfo}
+          callInfo={webrtc.callInfo!}
           onAccept={webrtc.answerCall}
           onReject={() => webrtc.endCall('user_ended')}
           onBusy={rejectWithMessage}
         />
       )}
 
-      {/* Active call screen — shows when call is active (not ringing incoming) */}
-      {webrtc.callInfo && !(webrtc.callInfo.isIncoming && webrtc.callInfo.state === 'ringing') && (
+      {/* Active call screen */}
+      {webrtc.callInfo && !isIncomingRinging && (
         <CallScreen
           callInfo={webrtc.callInfo}
           localStream={webrtc.localStream}
