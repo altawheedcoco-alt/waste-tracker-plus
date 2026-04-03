@@ -48,12 +48,7 @@ const UserPublicProfile = () => {
           <div>
             <h2 className="text-xl font-bold">{profile?.full_name || 'مستخدم'}</h2>
             <p className="text-sm text-muted-foreground">{organization?.name || ''}</p>
-            {profile?.created_at && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <Calendar className="h-3 w-3" />
-                عضو منذ {new Date(profile.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' })}
-              </p>
-            )}
+            
           </div>
           <Badge className="text-sm gap-1" variant="outline">
             <Shield className="h-3.5 w-3.5" />

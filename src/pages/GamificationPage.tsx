@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Skeleton } from '@/components/ui/skeleton';
 
