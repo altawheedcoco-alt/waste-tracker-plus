@@ -73,6 +73,21 @@ const AdvancedAnalytics = () => {
           <GoalTrackingDashboard />
         </Suspense>
 
+        {/* Activity Heatmap */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <ActivityHeatmap />
+        </Suspense>
+
+        {/* Cost Optimization + Compliance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <CostOptimizationEngine />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <ComplianceTracker />
+          </Suspense>
+        </div>
+
         {/* Performance Comparison */}
         <Suspense fallback={<ChartSkeleton />}>
           <PerformanceComparisonDashboard />
