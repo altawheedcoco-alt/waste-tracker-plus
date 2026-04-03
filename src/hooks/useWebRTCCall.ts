@@ -843,7 +843,7 @@ export function useWebRTCCall() {
 
       if (!record) return;
 
-      await handleIncomingCall(record);
+      await handleIncomingCall(record, true);
 
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
