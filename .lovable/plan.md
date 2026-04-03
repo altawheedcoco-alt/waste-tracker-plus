@@ -1,47 +1,123 @@
 
 
-# خطة استبدال نظام Jitsi بنظام WebRTC الداخلي
+# خطة بناء منظومة الاتصال الكاملة (WhatsApp-Style)
 
-## ملخص
+## المشكلة الحالية
 
-حذف منظومة Jitsi Meet القديمة بالكامل واستبدالها بنظام WebRTC الداخلي الموجود (`useWebRTCCall` + `CallScreen`). النظام الجديد يعمل P2P بدون أي خدمة خارجية.
+النظام الموجود فيه الأجزاء التالية تعمل:
+- WebRTC hook (`useWebRTCCall`) يدعم الاتصال P2P + تسجيل + دردشة
+- `CallScreen` يعرض شاشة المكالمة النشطة (WhatsApp style)
+- Listener للمكالمات الواردة (postgres_changes على `call_records`)
+- `CallScreen` يظهر كـ overlay فوق الدردشة
 
----
-
-## ما سيتم حذفه
-
-- **`src/components/meetings/JitsiMeetingRoom.tsx`** — المكون الذي يفتح نافذة Jitsi خارجية
-
-## ما سيتم تعديله
-
-### 1. `MeetingsPanel.tsx` — استبدال JitsiMeetingRoom بـ WebRTC
-- إزالة استيراد `JitsiMeetingRoom`
-- عند الانضمام لاجتماع نشط، استخدام `useWebRTCCall` hook لبدء المكالمة
-- عرض `CallScreen` بدلاً من `JitsiMeetingRoom` أثناء الاجتماع
-- الحفاظ على كل الوظائف الحالية (قائمة الاجتماعات، الجدولة، الملخصات)
-
-### 2. `ChatVideoCallButton.tsx` — استبدال Jitsi بـ WebRTC
-- إزالة استيراد `JitsiMeetingRoom`
-- استخدام `useWebRTCCall` hook بدلاً من فتح Dialog مع Jitsi
-- عند الضغط على زر المكالمة: بدء مكالمة WebRTC مباشرة عبر `startCall`
-- عرض `CallScreen` ملء الشاشة أثناء المكالمة
-- الاحتفاظ بإنشاء سجل `video_meetings` + إرسال إشعار للطرف الآخر
-
-### 3. إنشاء `WebRTCMeetingRoom.tsx` — بديل Jitsi للاجتماعات
-- مكون جديد يغلف `useWebRTCCall` + `CallScreen`
-- يقبل نفس props القديمة (`roomId`, `meetingId`, `displayName`, `isHost`, `meetingType`, `onLeave`)
-- يبدأ المكالمة تلقائياً عند التحميل
-- يدعم: كتم الصوت، إيقاف الفيديو، مشاركة الشاشة، التسجيل، الدردشة أثناء المكالمة
+**ما ينقص:**
+1. لا توجد شاشة مكالمة واردة مستقلة (fullscreen popup) تظهر في أي مكان بالتطبيق
+2. لا يوجد زر "مشغول" مع رسائل جاهزة عند رفض المكالمة
+3. لا يوجد سجل مكالمات (واردة/صادرة/فائتة) داخل المحادثة أو كصفحة مركزية
+4. المكالمات تعمل فقط جهة-لجهة، لا مستخدم-لمستخدم
+5. الإشعار يوجه للدردشة فقط بدون فتح شاشة القبول/الرفض
 
 ---
 
-## النتيجة
+## الخطة
 
-| قبل | بعد |
-|------|------|
-| نافذة خارجية meet.jit.si | شاشة مكالمة داخلية بالكامل |
-| يعتمد على سيرفر Jitsi | P2P مباشر بـ WebRTC |
-| لا تحكم في التصميم | تصميم موحد مع المنصة |
-| لا تسجيل داخلي | تسجيل + حفظ في Storage |
-| لا دردشة متكاملة | دردشة أثناء المكالمة |
+### 1. مكون شاشة المكالمة الواردة العالمي (`IncomingCallOverlay`)
+**ملف جديد:** `src/components/chat/IncomingCallOverlay.tsx`
+- شاشة fullscreen z-[200] تظهر فوق كل شيء عند وصول مكالمة واردة
+- تعرض: اسم المتصل + صورته + نوع المكالمة (صوت/فيديو)
+- أزرار: **قبول** (أخضر)، **رفض** (أحمر)، **مشغول** (رسالة جاهزة)
+- زر "مشغول" يفتح قائمة رسائل: "مشغول الآن"، "سأتصل بك لاحقاً"، "في اجتماع"
+- الرفض مع رسالة يرسل رسالة مباشرة للمتصل عبر `direct_messages`
+- انيميشن pulse + صوت رنين
+
+### 2. نقل Listener المكالمات الواردة لمستوى عالمي (`GlobalCallProvider`)
+**ملف جديد:** `src/providers/GlobalCallProvider.tsx`
+- Context provider يغلف التطبيق بالكامل (في `App.tsx` أو `Dashboard`)
+- يستخدم `useWebRTCCall` hook داخلياً
+- يستمع للمكالمات الواردة من أي مكان (ليس فقط داخل الدردشة)
+- يعرض `IncomingCallOverlay` عند ورود مكالمة
+- يعرض `CallScreen` عند قبول المكالمة
+- يوفر `startCall()` عبر Context لأي مكون يحتاجه
+
+### 3. تعديل `EnhancedChatWidget` و `ChatVideoCallButton`
+- إزالة `useWebRTCCall` المحلي من `EnhancedChatWidget`
+- استخدام `GlobalCallProvider` context بدلاً منه
+- `ChatVideoCallButton` يستخدم نفس الـ context
+
+### 4. دعم المكالمات مستخدم-لمستخدم (بالإضافة لجهة-لجهة)
+**تعديل `useWebRTCCall`:**
+- إضافة حقل `receiver_user_id` اختياري في `startCall`
+- الـ listener يراقب أيضاً `call_records` حيث `receiver_user_id = user.id`
+
+**Migration:** إضافة عمود `receiver_user_id` (nullable) لجدول `call_records`
+
+### 5. سجل المكالمات داخل المحادثة
+**ملف جديد:** `src/components/chat/CallHistoryPanel.tsx`
+- يظهر كـ panel داخل المحادثة (زر في ChatHeader → dropdown)
+- يعرض: صادرة ↗️ / واردة ↙️ / فائتة ❌ مع الوقت والمدة
+- استعلام `call_records` مفلتر بالجهة الحالية
+
+### 6. صفحة سجل المكالمات المركزية
+**ملف جديد:** `src/pages/dashboard/CallHistory.tsx`
+- صفحة مستقلة `/dashboard/call-history`
+- تبويبات: الكل | صادرة | واردة | فائتة
+- كل سجل يعرض: الاسم، النوع (صوت/فيديو)، الحالة، المدة، التاريخ
+- زر إعادة الاتصال
+- إضافة رابط في sidebar
+
+### 7. تحديث توجيه الإشعارات
+**تعديل `notificationRouting.ts`:**
+- `video_call_incoming` و `call_missed` يوجهان بشكل صحيح
+- الإشعار الوارد يفتح `IncomingCallOverlay` مباشرة عبر الـ context
+
+---
+
+## الملفات المتأثرة
+
+| ملف | عملية |
+|------|--------|
+| `src/providers/GlobalCallProvider.tsx` | جديد |
+| `src/components/chat/IncomingCallOverlay.tsx` | جديد |
+| `src/components/chat/CallHistoryPanel.tsx` | جديد |
+| `src/pages/dashboard/CallHistory.tsx` | جديد |
+| `src/hooks/useWebRTCCall.ts` | تعديل (receiver_user_id) |
+| `src/components/chat/EnhancedChatWidget.tsx` | تعديل (استخدام context) |
+| `src/components/meetings/ChatVideoCallButton.tsx` | تعديل (استخدام context) |
+| `src/pages/Dashboard.tsx` | تعديل (إضافة GlobalCallProvider) |
+| `supabase/migrations/` | جديد (receiver_user_id column) |
+
+---
+
+## التفاصيل التقنية
+
+**شاشة المكالمة الواردة:**
+```text
+┌─────────────────────────────┐
+│      [pulse animations]      │
+│                              │
+│         👤 صورة المتصل        │
+│       "عبدالله المولد"        │
+│     📞 مكالمة صوتية واردة     │
+│                              │
+│  ┌─────┐  ┌─────┐  ┌──────┐ │
+│  │ رفض │  │مشغول│  │ قبول │ │
+│  │  🔴  │  │  💬  │  │  🟢  │ │
+│  └─────┘  └─────┘  └──────┘ │
+└─────────────────────────────┘
+```
+
+**رسائل "مشغول" الجاهزة:**
+- مشغول الآن
+- سأتصل بك لاحقاً
+- في اجتماع
+- أرسل لي رسالة
+
+**Migration SQL:**
+```sql
+ALTER TABLE call_records
+ADD COLUMN receiver_user_id uuid REFERENCES auth.users(id);
+
+CREATE INDEX idx_call_records_receiver_user
+ON call_records(receiver_user_id) WHERE receiver_user_id IS NOT NULL;
+```
 
