@@ -253,8 +253,10 @@ export async function notifySocialEvent(params: {
   entityTitle?: string;
   entityId?: string;
   organizationId?: string;
+  /** Also notify linked partner organizations */
+  includePartners?: boolean;
 }) {
-  const { type, actorName, actorUserId, targetUserId, targetOrgId, entityTitle, entityId, organizationId } = params;
+  const { type, actorName, actorUserId, targetUserId, targetOrgId, entityTitle, entityId, organizationId, includePartners } = params;
 
   const labels: Record<string, string> = {
     new_post: '📝 منشور جديد',
@@ -263,12 +265,16 @@ export async function notifySocialEvent(params: {
     post_shared: '🔄 مشاركة منشورك',
     story_posted: '📷 قصة جديدة',
     story_reaction: '😊 تفاعل مع قصتك',
+    reel_posted: '🎬 ريل جديد',
+    reel_liked: '❤️ إعجاب بالريل',
+    reel_commented: '💬 تعليق على الريل',
     profile_photo_updated: '📸 تحديث صورة شخصية',
     cover_photo_updated: '🖼️ تحديث صورة الغلاف',
     broadcast_new_post: '📢 منشور بث جديد',
     new_follower: '👤 متابع جديد',
     announcement: '📣 إعلان جديد',
     news_published: '📰 خبر جديد',
+    member_post: '📝 منشور عضو جديد',
   };
 
   const title = labels[type] || '📱 إشعار اجتماعي';
@@ -284,7 +290,16 @@ export async function notifySocialEvent(params: {
       organizationId,
     });
   } else if (targetOrgId) {
-    const memberIds = await getOrgMemberIds(targetOrgId, actorUserId);
+    // Get org members
+    let allOrgIds = [targetOrgId];
+
+    // Also notify linked partner orgs if requested
+    if (includePartners) {
+      const partnerOrgIds = await getLinkedPartnerOrgIds(targetOrgId);
+      allOrgIds = [...allOrgIds, ...partnerOrgIds];
+    }
+
+    const memberIds = await getMultiOrgMemberIds(allOrgIds, actorUserId);
     if (memberIds.length > 0) {
       await notifyMultiple(memberIds, {
         title,
