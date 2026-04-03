@@ -172,6 +172,7 @@ const Dashboard = () => {
           organizationType={organizationType}
         />
       )}
+    <GlobalCallProvider>
     <SubscriptionGuard>
         <PinVerificationGate>
           <>
