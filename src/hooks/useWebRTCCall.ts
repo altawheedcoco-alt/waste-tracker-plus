@@ -315,24 +315,37 @@ export function useWebRTCCall() {
   }, [callInfo, getMediaStream, setupPeerConnection, setupSignaling, stopRingtone, cleanup]);
 
   // End/reject call
-  const endCall = useCallback((reason = 'user_ended') => {
+  const endCall = useCallback((reason = 'user_ended', busyMessage?: string) => {
     channelRef.current?.send({ type: 'broadcast', event: 'hangup', payload: { reason } });
     
     const duration = callInfo?.duration || 0;
     if (callRecordIdRef.current) {
-      const status = callInfo?.state === 'connected' ? 'ended' : reason === 'user_ended' && callInfo?.isIncoming ? 'rejected' : 'missed';
-      supabase.from('call_records').update({ 
+      const status = reason === 'busy' ? 'busy' : callInfo?.state === 'connected' ? 'ended' : reason === 'user_ended' && callInfo?.isIncoming ? 'rejected' : 'missed';
+      const updateData: any = { 
         status, 
         ended_at: new Date().toISOString(), 
         duration_seconds: duration,
         end_reason: reason,
-      }).eq('id', callRecordIdRef.current).then(() => {});
+      };
+      if (busyMessage) updateData.busy_message = busyMessage;
+      supabase.from('call_records').update(updateData).eq('id', callRecordIdRef.current).then(() => {});
+      
+      // Send busy message via direct_messages if applicable
+      if (busyMessage && callInfo?.isIncoming && callInfo?.partnerOrgId) {
+        supabase.from('direct_messages').insert({
+          sender_id: user?.id,
+          sender_organization_id: organization?.id,
+          receiver_organization_id: callInfo.partnerOrgId,
+          content: `📞 ${busyMessage}`,
+          message_type: 'text',
+        }).then(() => {});
+      }
     }
     
     cleanup();
     setCallInfo(null);
     callRecordIdRef.current = null;
-  }, [callInfo, cleanup]);
+  }, [callInfo, cleanup, user, organization]);
 
   // Toggle controls
   const toggleMute = useCallback(() => {
