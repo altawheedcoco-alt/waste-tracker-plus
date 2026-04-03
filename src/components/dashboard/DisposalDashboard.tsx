@@ -24,7 +24,9 @@ const DisposalInputIntelligence = lazy(() => import('@/components/dashboard/disp
 const DisposalScorecard = lazy(() => import('@/components/dashboard/disposal/DisposalScorecard'));
 const DisposalSiteStatus = lazy(() => import('@/components/dashboard/disposal/DisposalSiteStatus'));
 const DisposalEnvironmentalMonitor = lazy(() => import('@/components/dashboard/disposal/DisposalEnvironmentalMonitor'));
-
+const LandfillCapacityMonitor = lazy(() => import('@/components/dashboard/disposal/LandfillCapacityMonitor'));
+const SafetyComplianceWidget = lazy(() => import('@/components/dashboard/disposal/SafetyComplianceWidget'));
+const DisposalDailySnapshot = lazy(() => import('@/components/dashboard/disposal/DisposalDailySnapshot'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
