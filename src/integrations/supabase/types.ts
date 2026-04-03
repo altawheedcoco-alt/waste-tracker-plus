@@ -4776,43 +4776,61 @@ export type Database = {
       call_records: {
         Row: {
           answered_at: string | null
+          busy_message: string | null
           call_type: string
+          caller_avatar_url: string | null
           caller_id: string
+          caller_name: string | null
           caller_org_id: string
           created_at: string
           duration_seconds: number | null
           end_reason: string | null
           ended_at: string | null
           id: string
+          receiver_avatar_url: string | null
+          receiver_name: string | null
           receiver_org_id: string
+          receiver_user_id: string | null
           started_at: string
           status: string
         }
         Insert: {
           answered_at?: string | null
+          busy_message?: string | null
           call_type?: string
+          caller_avatar_url?: string | null
           caller_id: string
+          caller_name?: string | null
           caller_org_id: string
           created_at?: string
           duration_seconds?: number | null
           end_reason?: string | null
           ended_at?: string | null
           id?: string
+          receiver_avatar_url?: string | null
+          receiver_name?: string | null
           receiver_org_id: string
+          receiver_user_id?: string | null
           started_at?: string
           status?: string
         }
         Update: {
           answered_at?: string | null
+          busy_message?: string | null
           call_type?: string
+          caller_avatar_url?: string | null
           caller_id?: string
+          caller_name?: string | null
           caller_org_id?: string
           created_at?: string
           duration_seconds?: number | null
           end_reason?: string | null
           ended_at?: string | null
           id?: string
+          receiver_avatar_url?: string | null
+          receiver_name?: string | null
           receiver_org_id?: string
+          receiver_user_id?: string | null
           started_at?: string
           status?: string
         }
