@@ -21,6 +21,7 @@ export interface CallInfo {
   isVideoEnabled: boolean;
   isScreenSharing: boolean;
   isRecording: boolean;
+  isReceiverOnline?: boolean;
 }
 
 export interface CallMessage {
