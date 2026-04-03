@@ -86,15 +86,17 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
       setCompressedSize(uploadResult.compressedSize);
       const videoPublicUrl = uploadResult.url;
 
-      // رفع الصورة المصغرة
+      // رفع الصورة المصغرة مع ضغط
       let thumbPublicUrl: string | undefined;
       if (thumbnailUrl) {
         try {
           const thumbBlob = await fetch(thumbnailUrl).then(r => r.blob());
-          const thumbPath = `reels/${user.id}/${Date.now()}_thumb.jpg`;
-          await supabase.storage.from('media').upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
-          const { data: tData } = supabase.storage.from('media').getPublicUrl(thumbPath);
-          thumbPublicUrl = tData.publicUrl;
+          const thumbFile = new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' });
+          const thumbResult = await optimizedUploadFile(thumbFile, {
+            bucket: 'media',
+            path: `reels/${user.id}/${Date.now()}_thumb.jpg`,
+          });
+          thumbPublicUrl = thumbResult.publicUrl;
         } catch { /* thumbnail upload optional */ }
       }
 
