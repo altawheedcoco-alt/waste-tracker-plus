@@ -848,6 +848,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Megaphone, labelAr: 'الطلبات', labelEn: 'Demand', path: '/dashboard/b2b-marketplace?tab=demand', key: 'b2b-demand', bindingType: 'hybrid' as const },
       { icon: Package, labelAr: 'عروضي', labelEn: 'My Listings', path: '/dashboard/b2b-marketplace?tab=my-listings', key: 'b2b-listings', bindingType: 'hybrid' as const },
       { icon: Handshake, labelAr: 'صفقاتي', labelEn: 'Deals', path: '/dashboard/b2b-marketplace?tab=deals', key: 'b2b-deals', bindingType: 'hybrid' as const },
+      { icon: Crown, labelAr: 'برنامج ولاء B2B', labelEn: 'B2B Loyalty', path: '/dashboard/b2b-loyalty', key: 'b2b-loyalty', bindingType: 'hybrid' as const },
+      { icon: TrendingUp, labelAr: 'التسعير الديناميكي', labelEn: 'Dynamic Pricing', path: '/dashboard/dynamic-pricing', key: 'dynamic-pricing', bindingType: 'hybrid' as const },
       { icon: ArrowLeftRight, labelAr: 'قواعد الرؤية', labelEn: 'Visibility Rules', path: '/dashboard/b2b-marketplace?tab=rules', key: 'b2b-rules', bindingType: 'hybrid' as const },
     ],
   },
