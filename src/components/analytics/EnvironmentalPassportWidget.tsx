@@ -39,7 +39,7 @@ export default function EnvironmentalPassportWidget() {
         .from('shipments')
         .select('actual_weight, status, disposal_type')
         .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
-        .in('status', ['delivered', 'completed', 'recycled']);
+        .in('status', ['delivered']);
 
       let totalRecycledKg = 0;
       (shipments || []).forEach(s => {

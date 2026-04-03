@@ -26,7 +26,7 @@ export default function WasteRecoveryRate() {
         .select('actual_weight, weight_at_source, weight_at_destination, status, disposal_type')
         .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
         .gte('created_at', sixMonthsAgo.toISOString())
-        .in('status', ['delivered', 'completed', 'recycled']);
+        .in('status', ['delivered']);
 
       let totalCollected = 0;
       let totalRecovered = 0;
