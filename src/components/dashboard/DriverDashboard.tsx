@@ -278,6 +278,16 @@ const DriverDashboard = () => {
         </div>
       </div>
 
+      {/* Location Toggle — All Driver Types */}
+      {driverInfo && (
+        <DriverLocationToggle
+          status={smartLocation}
+          shouldShare={smartLocation.shouldShare}
+          manualOn={smartLocation.manualOn}
+          onToggle={smartLocation.toggleSharing}
+        />
+      )}
+
       {/* Performance Strip */}
       {driverInfo && (
         <DriverPerformanceStrip
