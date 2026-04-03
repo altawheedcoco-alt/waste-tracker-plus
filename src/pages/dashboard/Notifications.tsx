@@ -258,14 +258,22 @@ const Notifications = () => {
   const filteredNotifications = useMemo(() => {
     return notifications.filter((n) => {
       const matchesCat = activeCategory === 'all' || categorizeNotification(n.type) === activeCategory;
-      const matchesSub = true; // Sub-categories removed — flat category filtering
+      const matchesSub = true;
       const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !n.is_read : n.is_read);
       const matchesSearch = !searchQuery ||
         n.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.message?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCat && matchesSub && matchesRead && matchesSearch;
+      
+      // Stat filter
+      let matchesStat = true;
+      if (activeStatFilter === 'unread') matchesStat = !n.is_read;
+      else if (activeStatFilter === 'today') matchesStat = isToday(new Date(n.created_at));
+      else if (activeStatFilter === 'urgent') matchesStat = getPriorityLevel(n) === 'urgent';
+      else if (activeStatFilter === 'high') matchesStat = getPriorityLevel(n) === 'high';
+
+      return matchesCat && matchesSub && matchesRead && matchesSearch && matchesStat;
     });
-  }, [notifications, activeCategory, activeSubCategory, readFilter, searchQuery]);
+  }, [notifications, activeCategory, activeSubCategory, readFilter, searchQuery, activeStatFilter]);
 
   const getCategoryCount = (id: string) => {
     if (id === 'all') return notifications.length;
