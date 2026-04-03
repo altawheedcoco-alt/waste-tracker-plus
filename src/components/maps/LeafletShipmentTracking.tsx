@@ -110,7 +110,15 @@ const LeafletShipmentTracking = memo(({
 
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [30, 30] });
 
-    return () => { if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; } };
+    // Fix grey tiles inside dialogs
+    const t1 = setTimeout(() => map.invalidateSize(), 150);
+    const t2 = setTimeout(() => map.invalidateSize(), 400);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
+    };
   }, [pickup, delivery, driver, routeCoords]);
 
   return (

@@ -91,7 +91,7 @@ const LeafletMultiDriverMap = memo(({
 
     const mapCenter = center ? [center.lat, center.lng] as [number, number] : EGYPT_CENTER;
     const mapZoom = zoom || DEFAULT_ZOOM;
-    const map = L.map(mapRef.current).setView(mapCenter, mapZoom);
+    const map = L.map(mapRef.current, { zoomControl: true }).setView(mapCenter, mapZoom);
     L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
     mapInstanceRef.current = map;
 
@@ -136,10 +136,31 @@ const LeafletMultiDriverMap = memo(({
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
 
+    // Fix grey tiles inside dialogs/tabs - force recalculation
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 300);
+    setTimeout(() => map.invalidateSize(), 600);
+
     setLastRefresh(new Date());
   }, [filteredDrivers, markers, center, zoom, onDriverClick]);
 
-  useEffect(() => { renderMap(); }, [renderMap]);
+  useEffect(() => {
+    renderMap();
+
+    // ResizeObserver to handle container size changes
+    const observer = new ResizeObserver(() => {
+      mapInstanceRef.current?.invalidateSize();
+    });
+    if (mapRef.current) observer.observe(mapRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [renderMap]);
 
   // Auto-refresh
   useEffect(() => {
