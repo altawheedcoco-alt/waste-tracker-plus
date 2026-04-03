@@ -39,6 +39,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import { useUserActivityPresence } from '@/hooks/useUserActivityPresence';
+import { useServiceWorkerNavigation } from '@/hooks/useServiceWorkerNavigation';
 
 // Extracted components
 import DashboardHeader from './DashboardHeader';
