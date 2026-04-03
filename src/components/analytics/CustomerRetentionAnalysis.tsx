@@ -1,15 +1,16 @@
 /**
  * CustomerRetentionAnalysis — تحليل ولاء الشركاء
- * يعرض معدلات الاحتفاظ بالعملاء والشركاء
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, TrendingUp, TrendingDown, UserCheck, UserX, Repeat } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+
+const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 export default function CustomerRetentionAnalysis() {
   const { organization } = useAuth();
@@ -24,84 +25,56 @@ export default function CustomerRetentionAnalysis() {
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
       const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
 
-      // Get all shipments in last 6 months grouped by partner
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('destination_id, source_id, created_at, status')
-        .or(`source_id.eq.${orgId},destination_id.eq.${orgId}`)
+        .select('generator_id, recycler_id, transporter_id, created_at, status')
+        .eq('transporter_id', orgId)
         .gte('created_at', sixMonthsAgo.toISOString());
 
       const partnerMap = new Map<string, { first: Date; last: Date; count: number; recent: boolean }>();
 
       (shipments || []).forEach(s => {
-        const partnerId = s.source_id === orgId ? s.destination_id : s.source_id;
-        if (!partnerId) return;
-        const date = new Date(s.created_at);
-        const existing = partnerMap.get(partnerId);
-        if (existing) {
-          existing.count++;
-          if (date < existing.first) existing.first = date;
-          if (date > existing.last) existing.last = date;
-          if (date >= threeMonthsAgo) existing.recent = true;
-        } else {
-          partnerMap.set(partnerId, {
-            first: date,
-            last: date,
-            count: 1,
-            recent: date >= threeMonthsAgo,
-          });
-        }
+        const partnerIds = [s.generator_id, s.recycler_id].filter(Boolean);
+        const date = new Date(s.created_at!);
+        partnerIds.forEach(pid => {
+          if (!pid || pid === orgId) return;
+          const existing = partnerMap.get(pid);
+          if (existing) {
+            existing.count++;
+            if (date < existing.first) existing.first = date;
+            if (date > existing.last) existing.last = date;
+            if (date >= threeMonthsAgo) existing.recent = true;
+          } else {
+            partnerMap.set(pid, { first: date, last: date, count: 1, recent: date >= threeMonthsAgo });
+          }
+        });
       });
 
       const totalPartners = partnerMap.size;
-      let active = 0;
-      let returning = 0;
-      let churned = 0;
-      let newPartners = 0;
+      let active = 0, returning = 0, churned = 0, newPartners = 0;
 
       partnerMap.forEach(p => {
         if (p.recent) {
           active++;
-          if (p.first < threeMonthsAgo) returning++;
-          else newPartners++;
-        } else {
-          churned++;
-        }
+          if (p.first < threeMonthsAgo) returning++; else newPartners++;
+        } else { churned++; }
       });
 
       const retentionRate = totalPartners > 0 ? Math.round((active / totalPartners) * 100) : 0;
-      const churnRate = totalPartners > 0 ? Math.round((churned / totalPartners) * 100) : 0;
 
-      // Monthly partner activity for chart
       const monthlyData: Array<{ month: string; active: number; new: number }> = [];
-      const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-        let monthActive = 0;
-        let monthNew = 0;
+        let mActive = 0, mNew = 0;
         partnerMap.forEach(p => {
-          if (p.first <= monthEnd && p.last >= d) monthActive++;
-          if (p.first >= d && p.first <= monthEnd) monthNew++;
+          if (p.first <= monthEnd && p.last >= d) mActive++;
+          if (p.first >= d && p.first <= monthEnd) mNew++;
         });
-        monthlyData.push({
-          month: MONTHS_AR[d.getMonth()],
-          active: monthActive,
-          new: monthNew,
-        });
+        monthlyData.push({ month: MONTHS_AR[d.getMonth()], active: mActive, new: mNew });
       }
 
-      return {
-        totalPartners,
-        active,
-        returning,
-        churned,
-        newPartners,
-        retentionRate,
-        churnRate,
-        monthlyData,
-      };
+      return { totalPartners, active, returning, churned, newPartners, retentionRate, monthlyData };
     },
     enabled: !!orgId,
     staleTime: 30 * 60 * 1000,
@@ -126,12 +99,10 @@ export default function CustomerRetentionAnalysis() {
             تحليل ولاء الشركاء
           </CardTitle>
           {data && (
-            <div className="flex items-center gap-2">
-              <Badge variant={data.retentionRate >= 70 ? 'default' : 'destructive'} className="gap-1">
-                {data.retentionRate >= 70 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                احتفاظ: {data.retentionRate}%
-              </Badge>
-            </div>
+            <Badge variant={data.retentionRate >= 70 ? 'default' : 'destructive'} className="gap-1">
+              {data.retentionRate >= 70 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              احتفاظ: {data.retentionRate}%
+            </Badge>
           )}
         </div>
       </CardHeader>
@@ -140,7 +111,6 @@ export default function CustomerRetentionAnalysis() {
           <div className="h-[200px] bg-muted/20 rounded animate-pulse" />
         ) : (
           <>
-            {/* Stats row */}
             <div className="grid grid-cols-4 gap-2">
               {stats.map(s => (
                 <div key={s.label} className="text-center p-2 rounded-lg bg-muted/30">
@@ -150,8 +120,6 @@ export default function CustomerRetentionAnalysis() {
                 </div>
               ))}
             </div>
-
-            {/* Chart */}
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={data?.monthlyData || []} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />

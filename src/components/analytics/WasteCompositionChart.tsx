@@ -1,8 +1,6 @@
 /**
  * WasteCompositionChart — تحليل تركيبة المخلفات
- * مخطط دائري يعرض توزيع أنواع المخلفات بالوزن
  */
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -11,34 +9,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 const COLORS = [
-  'hsl(var(--primary))',
-  'hsl(142, 76%, 36%)',
-  'hsl(48, 96%, 53%)',
-  'hsl(262, 83%, 58%)',
-  'hsl(346, 87%, 50%)',
-  'hsl(199, 89%, 48%)',
-  'hsl(24, 94%, 50%)',
-  'hsl(173, 80%, 40%)',
+  'hsl(var(--primary))', 'hsl(142, 76%, 36%)', 'hsl(48, 96%, 53%)',
+  'hsl(262, 83%, 58%)', 'hsl(346, 87%, 50%)', 'hsl(199, 89%, 48%)',
+  'hsl(24, 94%, 50%)', 'hsl(173, 80%, 40%)',
 ];
 
 const WASTE_LABELS: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  organic: 'عضوي',
-  electronic: 'إلكتروني',
-  hazardous: 'خطر',
-  mixed: 'مختلط',
-  construction: 'إنشائي',
-  textile: 'نسيج',
-  wood: 'خشب',
-  rubber: 'مطاط',
-  oil: 'زيوت',
-  chemical: 'كيميائي',
-  medical: 'طبي',
-  food: 'غذائي',
-  other: 'أخرى',
+  plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
+  organic: 'عضوي', electronic: 'إلكتروني', hazardous: 'خطر', mixed: 'مختلط',
+  construction: 'إنشائي', textile: 'نسيج', wood: 'خشب', rubber: 'مطاط',
+  oil: 'زيوت', chemical: 'كيميائي', medical: 'طبي', food: 'غذائي', other: 'أخرى',
 };
 
 export default function WasteCompositionChart() {
@@ -53,26 +33,17 @@ export default function WasteCompositionChart() {
       const threeMonthsAgo = new Date();
       threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-      const { data: items } = await supabase
-        .from('shipment_items')
-        .select('waste_type, actual_weight, estimated_weight, shipment_id')
-        .not('waste_type', 'is', null);
-
-      // Filter by org's shipments
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('id')
-        .or(`source_id.eq.${orgId},destination_id.eq.${orgId}`)
+        .select('waste_type, actual_weight, quantity')
+        .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
         .gte('created_at', threeMonthsAgo.toISOString());
-
-      const shipmentIds = new Set((shipments || []).map(s => s.id));
 
       const typeMap = new Map<string, number>();
       let totalWeight = 0;
 
-      (items || []).forEach(item => {
-        if (!shipmentIds.has(item.shipment_id)) return;
-        const weight = item.actual_weight || item.estimated_weight || 0;
+      (shipments || []).forEach(item => {
+        const weight = item.actual_weight || item.quantity || 0;
         const type = (item.waste_type || 'other').toLowerCase();
         typeMap.set(type, (typeMap.get(type) || 0) + weight);
         totalWeight += weight;
@@ -119,29 +90,15 @@ export default function WasteCompositionChart() {
         ) : data?.chartData.length ? (
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie
-                data={data.chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={90}
-                paddingAngle={2}
-                dataKey="value"
-                label={renderLabel}
-                labelLine={{ strokeWidth: 1 }}
-              >
+              <Pie data={data.chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={90}
+                paddingAngle={2} dataKey="value" label={renderLabel} labelLine={{ strokeWidth: 1 }}>
                 {data.chartData.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{ borderRadius: 8, fontSize: 12, direction: 'rtl' }}
-                formatter={(val: number) => [`${val.toLocaleString()} كجم`, 'الوزن']}
-              />
-              <Legend
-                iconSize={8}
-                wrapperStyle={{ fontSize: 10, direction: 'rtl' }}
-              />
+              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, direction: 'rtl' }}
+                formatter={(val: number) => [`${val.toLocaleString()} كجم`, 'الوزن']} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: 10, direction: 'rtl' }} />
             </PieChart>
           </ResponsiveContainer>
         ) : (
