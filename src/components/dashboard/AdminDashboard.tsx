@@ -36,7 +36,7 @@ import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdminExecutiveSummary from './admin/AdminExecutiveSummary';
 import AdminStatsGridEnhanced from './admin/AdminStatsGridEnhanced';
-import AdminMobileQuickBar from './admin/AdminMobileQuickBar';
+
 import SystemHealthIndicator from './admin/SystemHealthIndicator';
 
 import {
