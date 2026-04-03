@@ -176,6 +176,7 @@ const GlobalCommodityExchange = () => {
   const fallers = allSubtypes.filter(s => s.trend === 'falling').length;
 
   return (
+    <DashboardLayout>
     <div className={`space-y-6 p-4 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
