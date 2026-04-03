@@ -50,6 +50,7 @@ const ScopedAccessLinks = lazyRetry(() => import('@/pages/dashboard/ScopedAccess
 const AuthorizedSignatories = lazyRetry(() => import('@/pages/dashboard/AuthorizedSignatories'));
 const WhiteLabelPortal = lazyRetry(() => import('@/pages/dashboard/WhiteLabelPortal'));
 const CollectionRequests = lazyRetry(() => import('@/pages/dashboard/CollectionRequests'));
+const B2CCollectionFeed = lazyRetry(() => import('@/pages/dashboard/B2CCollectionFeed'));
 const DriverProfile = lazyRetry(() => import('@/pages/dashboard/DriverProfile'));
 const DriverData = lazyRetry(() => import('@/pages/dashboard/DriverData'));
 
@@ -105,6 +106,7 @@ export const transporterRoutes = (
     <Route path="/dashboard/authorized-signatories" element={<AuthorizedSignatories />} />
     <Route path="/dashboard/white-label-portal" element={<WhiteLabelPortal />} />
     <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
+    <Route path="/dashboard/b2c-collection" element={<B2CCollectionFeed />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
     <Route path="/dashboard/driver-data" element={<DriverData />} />
     {/* ERP routes for transporter */}
