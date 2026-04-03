@@ -179,14 +179,8 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
 
   // Photos are optional - no blocking
 
-  const isDeliveryBlocked = (() => {
-    if (!selectedStatus) return false;
-    const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
-    const isDeliveryStatus = ['delivered', 'confirmed'].includes(dbStatus);
-    const isTransporter = organizationType === 'transporter';
-    if (!isDeliveryStatus || !isTransporter || !hasDeliveryCoords) return false;
-    return geofenceCheck.checking || geofenceCheck.isInside === false;
-  })();
+  // Geofence delivery blocking removed — users have full freedom to change status
+  const isDeliveryBlocked = false;
 
   // Show recycler weight input for recycler confirming delivery
   const showRecyclerWeightInput = (() => {

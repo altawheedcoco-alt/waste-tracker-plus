@@ -386,25 +386,19 @@ export const getStatusesForOrgType = (orgType: OrgTypeForStatus): StatusConfig[]
 export const getAvailableNextStatuses = (
   currentStatus: string,
   organizationType: OrgTypeForStatus,
-  options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
+  _options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
 ): StatusConfig[] => {
-  const currentConfig = getStatusConfig(currentStatus);
-  if (!currentConfig) {
-    // Unknown status — still respect org type isolation
-    return getStatusesForOrgType(organizationType);
-  }
+  // All organization types can freely change to any status relevant to their phase
+  // The user/organization has full freedom to choose the appropriate status
 
   // Admin can change to any status
   if (organizationType === 'admin') {
     return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Generator can only hand over (mark as picked_up)
+  // Generator: can access transporter statuses (hand over)
   if (organizationType === 'generator') {
-    const generatorAllowed = transporterStatuses
-      .filter(s => ['picked_up'].includes(s.key))
-      .map(s => ({ ...s, labelAr: 'تم التسليم' }));
-    return generatorAllowed.filter(s => s.key !== currentStatus);
+    return transporterStatuses.filter(s => s.key !== currentStatus);
   }
 
   // Driver: full freedom on all transporter phase statuses
@@ -412,43 +406,19 @@ export const getAvailableNextStatuses = (
     return transporterStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Transporter: can change transporter phase statuses
-  // Rule: allowed if no driver assigned OR driver belongs to this transporter
+  // Transporter: full freedom on transporter phase statuses
   if (organizationType === 'transporter') {
-    const hasDriver = options?.hasAssignedDriver ?? false;
-    const driverIsOwn = options?.driverBelongsToTransporter ?? true;
-
-    // If there's an external driver (not belonging to transporter), transporter cannot change status
-    if (hasDriver && !driverIsOwn) {
-      return [];
-    }
-
-    if (currentConfig.phase === 'transporter') {
-      return transporterStatuses.filter(s => s.key !== currentStatus);
-    }
-    return transporterStatuses;
+    return transporterStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Recycler can change all recycler phase statuses
+  // Recycler: full freedom on recycler phase statuses
   if (organizationType === 'recycler') {
-    if (currentConfig.key === 'delivering' || currentConfig.phase === 'recycler') {
-      return recyclerStatuses.filter(s => s.key !== currentStatus);
-    }
-    if (currentConfig.phase === 'transporter') {
-      return recyclerStatuses;
-    }
-    return recyclerStatuses;
+    return recyclerStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Disposal can change all disposal phase statuses
+  // Disposal: full freedom on disposal phase statuses
   if (organizationType === 'disposal') {
-    if (currentConfig.key === 'delivering' || currentConfig.phase === 'disposal') {
-      return disposalStatuses.filter(s => s.key !== currentStatus);
-    }
-    if (currentConfig.phase === 'transporter') {
-      return disposalStatuses;
-    }
-    return disposalStatuses;
+    return disposalStatuses.filter(s => s.key !== currentStatus);
   }
 
   return [];
