@@ -18,11 +18,11 @@ const RouteOptimizationWidget: React.FC = () => {
       if (!organization?.id) return null;
 
       // Get active shipments with driver assigned
-      const { data: activeShipments } = await supabase
-        .from('shipments')
+      const { data: activeShipments } = await (supabase
+        .from('shipments' as any)
         .select('id, driver_id, status, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude')
         .eq('organization_id', organization.id)
-        .in('status', ['approved', 'collecting', 'in_transit'])
+        .in('status', ['approved', 'collecting', 'in_transit']) as any)
         .not('driver_id', 'is', null)
         .limit(100);
 
