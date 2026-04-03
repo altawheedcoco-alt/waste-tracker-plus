@@ -254,7 +254,7 @@ export function useWebRTCCall() {
 
     try {
       const stream = await getMediaStream(type);
-      
+
       const callerProfile = await getCachedProfile(user.id);
       const insertData: any = {
         caller_id: user.id,
@@ -268,7 +268,7 @@ export function useWebRTCCall() {
         receiver_avatar_url: partnerLogo,
       };
       if (receiverUserId) insertData.receiver_user_id = receiverUserId;
-      
+
       const { data: record } = await supabase.from('call_records').insert(insertData).select('id').single();
 
       const callId = record?.id || crypto.randomUUID();
@@ -284,14 +284,15 @@ export function useWebRTCCall() {
             body: `${insertData.caller_name} يتصل بك`,
             tag: `call-${callId}`,
             data: {
-              url: '/dashboard/chat',
+              url: `/dashboard/chat?incoming_call=1&call_id=${callId}`,
               type: 'incoming_call',
               call_id: callId,
               call_type: type,
               caller_name: insertData.caller_name,
+              caller_org_id: organization.id,
             },
           },
-        }).catch(() => {/* non-blocking */});
+        }).catch(() => { /* non-blocking */ });
       }
 
       setCallInfo({
@@ -314,14 +315,12 @@ export function useWebRTCCall() {
       const pc = setupPeerConnection(stream);
       const channel = setupSignaling(callId, true);
 
-      // Create and send offer after channel is ready
       const createAndSendOffer = async () => {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         channel.send({ type: 'broadcast', event: 'offer', payload: { sdp: offer } });
       };
-      
-      // Send initial offer after a brief delay, and re-send when receiver joins (handled by 'ready' event)
+
       setTimeout(createAndSendOffer, 1500);
 
       setTimeout(() => {
@@ -333,7 +332,6 @@ export function useWebRTCCall() {
           return prev;
         });
       }, 45000);
-
     } catch (err: any) {
       cleanup();
       setCallInfo(null);
@@ -360,20 +358,25 @@ export function useWebRTCCall() {
   // End/reject call
   const endCall = useCallback((reason = 'user_ended', busyMessage?: string) => {
     channelRef.current?.send({ type: 'broadcast', event: 'hangup', payload: { reason } });
-    
+
     const duration = callInfo?.duration || 0;
     if (callRecordIdRef.current) {
-      const status = reason === 'busy' ? 'busy' : callInfo?.state === 'connected' ? 'ended' : reason === 'user_ended' && callInfo?.isIncoming ? 'rejected' : 'missed';
-      const updateData: any = { 
-        status, 
-        ended_at: new Date().toISOString(), 
+      const status = reason === 'busy'
+        ? 'busy'
+        : callInfo?.state === 'connected'
+          ? 'ended'
+          : reason === 'user_ended' && callInfo?.isIncoming
+            ? 'rejected'
+            : 'missed';
+      const updateData: any = {
+        status,
+        ended_at: new Date().toISOString(),
         duration_seconds: duration,
         end_reason: reason,
       };
       if (busyMessage) updateData.busy_message = busyMessage;
       supabase.from('call_records').update(updateData).eq('id', callRecordIdRef.current).then(() => {});
-      
-      // Send busy message via direct_messages if applicable
+
       if (busyMessage && callInfo?.isIncoming && callInfo?.partnerOrgId) {
         supabase.from('direct_messages').insert({
           sender_id: user?.id,
@@ -384,7 +387,7 @@ export function useWebRTCCall() {
         }).then(() => {});
       }
     }
-    
+
     cleanup();
     setCallInfo(null);
     callRecordIdRef.current = null;
@@ -410,7 +413,6 @@ export function useWebRTCCall() {
     if (!pcRef.current || !localStream) return;
 
     if (callInfo?.isScreenSharing) {
-      // Stop screen share, restore camera
       screenStreamRef.current?.getTracks().forEach(t => t.stop());
       screenStreamRef.current = null;
 
@@ -419,7 +421,6 @@ export function useWebRTCCall() {
         if (sender) {
           await sender.replaceTrack(originalVideoTrackRef.current);
         }
-        // Update local stream
         const newStream = new MediaStream([
           ...localStream.getAudioTracks(),
           originalVideoTrackRef.current,
@@ -429,7 +430,6 @@ export function useWebRTCCall() {
       }
       setCallInfo(prev => prev ? { ...prev, isScreenSharing: false } : null);
     } else {
-      // Start screen share
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -443,7 +443,6 @@ export function useWebRTCCall() {
           originalVideoTrackRef.current = currentVideoTrack;
         }
 
-        // Replace video track in peer connection
         const sender = pcRef.current.getSenders().find(s => s.track?.kind === 'video');
         if (sender) {
           await sender.replaceTrack(screenTrack);
@@ -451,21 +450,18 @@ export function useWebRTCCall() {
           pcRef.current.addTrack(screenTrack, localStream);
         }
 
-        // Update local stream for preview
         const newStream = new MediaStream([
           ...localStream.getAudioTracks(),
           screenTrack,
         ]);
         setLocalStream(newStream);
 
-        // When user stops screen share via browser UI
         screenTrack.onended = () => {
           toggleScreenShare();
         };
 
         setCallInfo(prev => prev ? { ...prev, isScreenSharing: true } : null);
 
-        // Notify partner
         channelRef.current?.send({
           type: 'broadcast',
           event: 'chat-message',
@@ -486,13 +482,11 @@ export function useWebRTCCall() {
     if (!remoteStream && !localStream) return;
 
     if (callInfo?.isRecording) {
-      // Stop recording
       if (recorderRef.current && recorderRef.current.state !== 'inactive') {
         recorderRef.current.stop();
       }
       setCallInfo(prev => prev ? { ...prev, isRecording: false } : null);
     } else {
-      // Start recording - combine local and remote audio
       try {
         const ctx = new AudioContext();
         const dest = ctx.createMediaStreamDestination();
@@ -506,7 +500,6 @@ export function useWebRTCCall() {
           remoteSource.connect(dest);
         }
 
-        // If video call, add video track
         const tracks = [...dest.stream.getTracks()];
         if (callInfo?.callType === 'video' && remoteStream) {
           const videoTrack = remoteStream.getVideoTracks()[0];
@@ -514,7 +507,7 @@ export function useWebRTCCall() {
         }
 
         const combinedStream = new MediaStream(tracks);
-        const mimeType = callInfo?.callType === 'video' 
+        const mimeType = callInfo?.callType === 'video'
           ? (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm')
           : (MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm');
 
@@ -530,7 +523,6 @@ export function useWebRTCCall() {
           const ext = callInfo?.callType === 'video' ? 'webm' : 'webm';
           const fileName = `call-recording-${callRecordIdRef.current || Date.now()}.${ext}`;
 
-          // Upload to storage
           const { data: uploadData, error } = await supabase.storage
             .from('call-recordings')
             .upload(fileName, blob, { contentType: mimeType });
@@ -542,7 +534,6 @@ export function useWebRTCCall() {
             }).eq('id', callRecordIdRef.current);
           }
 
-          // Also offer download
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -552,11 +543,10 @@ export function useWebRTCCall() {
           ctx.close();
         };
 
-        recorder.start(1000); // Collect data every second
+        recorder.start(1000);
         recorderRef.current = recorder;
         setCallInfo(prev => prev ? { ...prev, isRecording: true } : null);
 
-        // Notify partner
         channelRef.current?.send({
           type: 'broadcast',
           event: 'chat-message',
@@ -579,7 +569,6 @@ export function useWebRTCCall() {
     const profile = await getCachedProfile(user.id);
     const senderName = profile?.full_name || 'أنا';
 
-    // Broadcast via realtime channel (instant)
     channelRef.current?.send({
       type: 'broadcast',
       event: 'chat-message',
@@ -590,7 +579,6 @@ export function useWebRTCCall() {
       },
     });
 
-    // Add locally
     setCallMessages(prev => [...prev, {
       id: crypto.randomUUID(),
       sender_id: user.id,
@@ -599,7 +587,6 @@ export function useWebRTCCall() {
       senderName,
     }]);
 
-    // Persist to DB
     await supabase.from('call_messages').insert({
       call_id: callInfo.callId,
       sender_id: user.id,
@@ -610,7 +597,6 @@ export function useWebRTCCall() {
   // Handle incoming call record
   const handleIncomingCall = useCallback(async (record: any) => {
     if (record.status !== 'ringing') return;
-    // Don't answer own calls
     if (record.caller_id === user?.id) return;
     if (callInfo) {
       await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
@@ -618,7 +604,7 @@ export function useWebRTCCall() {
     }
 
     callRecordIdRef.current = record.id;
-    
+
     playRingtone();
     setCallInfo({
       callId: record.id,
@@ -636,6 +622,72 @@ export function useWebRTCCall() {
       isRecording: false,
     });
   }, [user?.id, callInfo, playRingtone]);
+
+  const restorePendingIncomingCall = useCallback(async (preferredCallId?: string | null) => {
+    if (!user?.id || !organization?.id || callInfo) return;
+
+    try {
+      let record: any | null = null;
+
+      if (preferredCallId) {
+        const { data } = await supabase
+          .from('call_records')
+          .select('*')
+          .eq('id', preferredCallId)
+          .eq('status', 'ringing')
+          .maybeSingle();
+
+        if (data && data.caller_id !== user.id) {
+          const isDirectCall = !!data.receiver_user_id;
+          const belongsToCurrentUser = isDirectCall
+            ? data.receiver_user_id === user.id
+            : data.receiver_org_id === organization.id;
+          if (belongsToCurrentUser) record = data;
+        }
+      }
+
+      if (!record) {
+        const { data } = await supabase
+          .from('call_records')
+          .select('*')
+          .eq('receiver_user_id', user.id)
+          .eq('status', 'ringing')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        record = data;
+      }
+
+      if (!record) {
+        const { data } = await supabase
+          .from('call_records')
+          .select('*')
+          .eq('receiver_org_id', organization.id)
+          .is('receiver_user_id', null)
+          .eq('status', 'ringing')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        record = data;
+      }
+
+      if (!record) return;
+
+      await handleIncomingCall(record);
+
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('call_id') === record.id) {
+          params.delete('call_id');
+          params.delete('incoming_call');
+          const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`;
+          window.history.replaceState({}, '', nextUrl);
+        }
+      }
+    } catch (error) {
+      console.error('[Call] Failed to restore pending incoming call:', error);
+    }
+  }, [user?.id, organization?.id, callInfo, handleIncomingCall]);
 
   // Listen for incoming calls - org level
   useEffect(() => {
@@ -672,6 +724,45 @@ export function useWebRTCCall() {
 
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, handleIncomingCall]);
+
+  // Restore pending call after notification click / app resume / fresh open
+  useEffect(() => {
+    if (!user?.id || !organization?.id) return;
+
+    const getCurrentCallId = () => {
+      if (typeof window === 'undefined') return null;
+      return new URLSearchParams(window.location.search).get('call_id');
+    };
+
+    void restorePendingIncomingCall(getCurrentCallId());
+
+    const handleFocus = () => {
+      void restorePendingIncomingCall(getCurrentCallId());
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void restorePendingIncomingCall(getCurrentCallId());
+      }
+    };
+
+    const handleNotificationClick = (event: Event) => {
+      const detail = (event as CustomEvent<{ data?: { call_id?: string; type?: string } }>).detail;
+      if (detail?.data?.type === 'incoming_call' || detail?.data?.call_id) {
+        void restorePendingIncomingCall(detail.data?.call_id || null);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('irecycle-notification-click', handleNotificationClick as EventListener);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('irecycle-notification-click', handleNotificationClick as EventListener);
+    };
+  }, [user?.id, organization?.id, restorePendingIncomingCall]);
 
   return {
     callInfo,

@@ -43,39 +43,50 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // If user clicked "dismiss" action, do nothing
   if (event.action === 'dismiss') return;
 
-  // Get the target URL from notification data
   const targetPath = event.notification.data?.url || '/dashboard';
+  const targetUrl = new URL(targetPath, self.location.origin).toString();
+  const payload = {
+    type: 'NOTIFICATION_CLICK',
+    url: targetPath,
+    data: event.notification.data || {},
+  };
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // 1. Try to find an existing tab with our app open
       for (const client of clientList) {
         try {
           const clientUrl = new URL(client.url);
           const swUrl = new URL(self.location.origin);
 
-          // Check if this tab belongs to our app (same origin)
           if (clientUrl.origin === swUrl.origin) {
-            // Focus the existing tab and navigate it to the target path
-            return client.focus().then((focusedClient) => {
-              // Use postMessage to navigate within the SPA (no page reload)
-              focusedClient.postMessage({
-                type: 'NOTIFICATION_CLICK',
-                url: targetPath,
-              });
+            const shouldHardNavigate = !clientUrl.pathname.startsWith('/dashboard');
+
+            return client.focus().then(async (focusedClient) => {
+              try {
+                focusedClient.postMessage(payload);
+              } catch (e) {
+                // ignore postMessage failure
+              }
+
+              if (shouldHardNavigate && 'navigate' in focusedClient) {
+                try {
+                  return await focusedClient.navigate(targetUrl);
+                } catch (e) {
+                  // ignore navigation failure and fall back to focused tab
+                }
+              }
+
               return focusedClient;
             });
           }
         } catch (e) {
-          // URL parsing failed, skip this client
+          // skip invalid clients
         }
       }
 
-      // 2. No existing tab found → open a new one with full URL
-      return self.clients.openWindow(self.location.origin + targetPath);
+      return self.clients.openWindow(targetUrl);
     })
   );
 });

@@ -1,5 +1,5 @@
 /**
- * useServiceWorkerNavigation — Listens for NOTIFICATION_CLICK messages from 
+ * useServiceWorkerNavigation — Listens for NOTIFICATION_CLICK messages from
  * the Firebase service worker and navigates within the SPA without page reload.
  */
 import { useEffect } from 'react';
@@ -12,8 +12,15 @@ export function useServiceWorkerNavigation() {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'NOTIFICATION_CLICK' && event.data?.url) {
         const url = event.data.url;
-        console.log('[SW-Nav] Navigating to:', url);
-        // Navigate within the SPA
+        console.log('[SW-Nav] Navigating to:', url, event.data?.data || {});
+
+        window.dispatchEvent(new CustomEvent('irecycle-notification-click', {
+          detail: {
+            url,
+            data: event.data?.data || {},
+          },
+        }));
+
         navigate(url);
       }
     };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Video, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalCall } from '@/providers/GlobalCallProvider';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ChatVideoCallButtonProps {
@@ -15,14 +16,37 @@ const ChatVideoCallButton = ({ partnerName, partnerUserId, partnerOrgId, partner
   const { startCall } = useGlobalCall();
   const [starting, setStarting] = useState(false);
 
+  const resolvePartnerOrgId = async () => {
+    if (partnerOrgId) return partnerOrgId;
+    if (!partnerUserId) return null;
+
+    const { data: byUserId } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('user_id', partnerUserId)
+      .maybeSingle();
+
+    if (byUserId?.organization_id) return byUserId.organization_id;
+
+    const { data: byProfileId } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', partnerUserId)
+      .maybeSingle();
+
+    return byProfileId?.organization_id || null;
+  };
+
   const handleCall = async (type: 'voice' | 'video') => {
-    if (!partnerOrgId) {
-      toast.error('لا يمكن تحديد الطرف الآخر');
-      return;
-    }
     setStarting(true);
     try {
-      await startCall(partnerOrgId, type, partnerName, partnerLogo, partnerUserId);
+      const resolvedOrgId = await resolvePartnerOrgId();
+      if (!resolvedOrgId) {
+        toast.error('لا يمكن تحديد الطرف الآخر');
+        return;
+      }
+
+      await startCall(resolvedOrgId, type, partnerName, partnerLogo, partnerUserId);
     } catch (err: any) {
       toast.error(err.message || 'فشل بدء المكالمة');
     } finally {
