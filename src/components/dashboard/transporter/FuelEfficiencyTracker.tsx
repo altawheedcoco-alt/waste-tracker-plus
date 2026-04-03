@@ -20,7 +20,7 @@ const FuelEfficiencyTracker = () => {
       // جلب الشحنات المكتملة لحساب المسافات
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('id, actual_weight, estimated_weight, distance_km')
+        .select('id, actual_weight, quantity')
         .eq('transporter_id', organization.id)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
