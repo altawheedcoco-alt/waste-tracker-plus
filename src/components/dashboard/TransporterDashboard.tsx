@@ -359,7 +359,13 @@ const TransporterDashboard = () => {
         <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
       </div>
 
-      {/* 7. التوثيق والبحث */}
+      {/* ★ ودجات التميز والتنبيهات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
+
       <div id="section-docs">
         <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
         <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>

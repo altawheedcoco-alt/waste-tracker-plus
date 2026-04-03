@@ -347,6 +347,13 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       {/* 4. التواصل */}
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
 
+      {/* ★ ودجات التميز والتنبيهات */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><GamificationWidget /></Suspense>
+        <Suspense fallback={null}><SmartAlertsWidget /></Suspense>
+        <Suspense fallback={null}><WeeklyActivityChart /></Suspense>
+      </div>
+
       {/* 5. المنشأة */}
       {facility && <FacilityCapacityCard facility={facility} />}
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
