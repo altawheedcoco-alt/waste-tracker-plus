@@ -328,6 +328,11 @@ const SidebarNavContent = memo(({
         )}
       </nav>
 
+      {/* Gamification Level Badge */}
+      <div className={`${isMobile ? 'px-4 py-2' : 'px-2.5 py-1.5'} border-t border-sidebar-border shrink-0`}>
+        <SidebarLevelBadge />
+      </div>
+
       {/* Bottom: Sound Control + Logout */}
       <div className={`${isMobile ? 'px-4 py-3' : 'p-2.5'} border-t border-sidebar-border space-y-1 shrink-0`}>
         <SidebarSoundControl isCollapsed={false} />
