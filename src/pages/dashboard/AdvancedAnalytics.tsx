@@ -45,6 +45,18 @@ const TopClientsWidget = lazy(() => import('@/components/analytics/TopClientsWid
 const PaymentStatusWidget = lazy(() => import('@/components/analytics/PaymentStatusWidget'));
 const PeakHoursWidget = lazy(() => import('@/components/analytics/PeakHoursWidget'));
 const SLAComplianceWidget = lazy(() => import('@/components/analytics/SLAComplianceWidget'));
+const CashFlowWaterfallWidget = lazy(() => import('@/components/analytics/CashFlowWaterfallWidget'));
+const ContractExpiryRadar = lazy(() => import('@/components/analytics/ContractExpiryRadar'));
+const OperationalEfficiencyScore = lazy(() => import('@/components/analytics/OperationalEfficiencyScore'));
+const WeightAccuracyWidget = lazy(() => import('@/components/analytics/WeightAccuracyWidget'));
+const RegionalPerformanceMap = lazy(() => import('@/components/analytics/RegionalPerformanceMap'));
+const DisputeResolutionWidget = lazy(() => import('@/components/analytics/DisputeResolutionWidget'));
+const SeasonalTrendsWidget = lazy(() => import('@/components/analytics/SeasonalTrendsWidget'));
+const PartnerDiversityIndex = lazy(() => import('@/components/analytics/PartnerDiversityIndex'));
+const DemandForecastWidget = lazy(() => import('@/components/analytics/DemandForecastWidget'));
+const ProfitabilityHeatmap = lazy(() => import('@/components/analytics/ProfitabilityHeatmap'));
+const CustomerChurnRisk = lazy(() => import('@/components/analytics/CustomerChurnRisk'));
+const ResourceUtilizationWidget = lazy(() => import('@/components/analytics/ResourceUtilizationWidget'));
 
 const CardSkeleton = () => <Skeleton className="h-[200px] w-full rounded-xl" />;
 
