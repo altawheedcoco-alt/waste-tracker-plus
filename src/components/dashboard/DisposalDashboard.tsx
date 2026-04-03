@@ -320,7 +320,14 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         </ErrorBoundary>
       </div>
 
-      {/* 2. الإجراءات السريعة */}
+      {/* 2. ودجات متخصصة لجهة التخلص */}
+      <Suspense fallback={null}><DisposalDailySnapshot /></Suspense>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Suspense fallback={null}><LandfillCapacityMonitor /></Suspense>
+        <Suspense fallback={null}><SafetyComplianceWidget /></Suspense>
+      </div>
+
+      {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid
         actions={quickActions}
         title="الإجراءات السريعة"

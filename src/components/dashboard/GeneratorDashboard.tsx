@@ -498,6 +498,11 @@ const GeneratorDashboard = () => {
         {/* ── العمليات ── */}
         <TabsContent value="operations" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
+            {/* ── ودجات متخصصة للمولد ── */}
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <WasteSourceTracker />
+              <CollectionCalendarMini />
+            </div>
             <ErrorBoundary fallbackTitle="خطأ في التتبع">
               <GeneratorTrackingWidget />
             </ErrorBoundary>

@@ -343,7 +343,13 @@ const TransporterDashboard = () => {
         </ErrorBoundary>
       </div>
 
-      {/* 6. التواصل */}
+      {/* 6. ودجات متخصصة للناقل */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Suspense fallback={null}><FuelEfficiencyTracker /></Suspense>
+        <Suspense fallback={null}><DriverAvailabilityBoard /></Suspense>
+      </div>
+
+      {/* 7. التواصل */}
       <div id="section-comms">
         <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
       </div>

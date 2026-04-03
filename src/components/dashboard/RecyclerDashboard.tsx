@@ -295,6 +295,12 @@ const RecyclerDashboard = () => {
         </ErrorBoundary>
       </div>
 
+      {/* ★ ودجات متخصصة للمدور */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Suspense fallback={null}><MaterialRecoveryRate /></Suspense>
+        <Suspense fallback={null}><QualityControlPanel /></Suspense>
+      </div>
+
       {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid
         actions={quickActions}
