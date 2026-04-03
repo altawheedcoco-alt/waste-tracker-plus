@@ -213,6 +213,35 @@ const AdvancedAnalytics = () => {
           </Suspense>
         </div>
 
+        {/* Revenue by Waste Type + Payment Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <RevenueByWasteTypeWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PaymentStatusWidget />
+          </Suspense>
+        </div>
+
+        {/* Monthly Growth + Peak Hours */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <MonthlyGrowthWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <PeakHoursWidget />
+          </Suspense>
+        </div>
+
+        {/* Top Clients + SLA Compliance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <TopClientsWidget />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <SLAComplianceWidget />
+          </Suspense>
+
         {/* Inventory Turnover + Export Center */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Suspense fallback={<ChartSkeleton />}>
