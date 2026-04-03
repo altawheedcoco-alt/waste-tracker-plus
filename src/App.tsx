@@ -169,7 +169,7 @@ const AppRoutes = memo(() => {
           {coreRoutes}
           {essentialCommonRoutes}
           {roleRoutes.map((routes, i) => (
-            <React.Fragment key={i}>{routes}</React.Fragment>
+            <Fragment key={i}>{routes}</Fragment>
           ))}
         </Route>
       </Routes>
