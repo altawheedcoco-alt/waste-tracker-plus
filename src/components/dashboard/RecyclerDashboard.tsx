@@ -40,6 +40,8 @@ const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQu
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
 const MaterialRecoveryRate = lazy(() => import('./recycler/MaterialRecoveryRate'));
 const QualityControlPanel = lazy(() => import('./recycler/QualityControlPanel'));
+const InventoryLevelsWidget = lazy(() => import('./recycler/InventoryLevelsWidget'));
+const ProfitabilityAnalysis = lazy(() => import('./recycler/ProfitabilityAnalysis'));
 
 interface RecentShipment {
   id: string;
@@ -299,6 +301,8 @@ const RecyclerDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Suspense fallback={null}><MaterialRecoveryRate /></Suspense>
         <Suspense fallback={null}><QualityControlPanel /></Suspense>
+        <Suspense fallback={null}><InventoryLevelsWidget /></Suspense>
+        <Suspense fallback={null}><ProfitabilityAnalysis /></Suspense>
       </div>
 
       {/* 3. الإجراءات السريعة */}

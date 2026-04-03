@@ -82,6 +82,7 @@ const ShipmentStatusPipeline = lazy(() => import('./generator/ShipmentStatusPipe
 const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
 const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
 const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
+const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
 
 
 interface RecentShipment {
@@ -503,6 +504,7 @@ const GeneratorDashboard = () => {
             <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
               <WasteSourceTracker />
               <CollectionCalendarMini />
+              <CostPerKgWidget />
             </div>
             <ErrorBoundary fallbackTitle="خطأ في التتبع">
               <GeneratorTrackingWidget />
