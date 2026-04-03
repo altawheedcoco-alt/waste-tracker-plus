@@ -706,6 +706,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Package, labelAr: 'المخزون', labelEn: 'Inventory', path: '/dashboard/erp/inventory', key: 'erp-inventory', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
+      { icon: Boxes, labelAr: 'المخزون الذكي', labelEn: 'Smart Inventory', path: '/dashboard/smart-inventory', key: 'smart-inventory', bindingType: 'internal' as const },
       { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'create_deposits'] },
     ],
   },
