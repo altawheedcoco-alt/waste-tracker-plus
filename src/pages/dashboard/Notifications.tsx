@@ -157,70 +157,9 @@ interface CategoryConfig {
   icon: React.ElementType;
   color: string;
   bgColor: string;
-  subCategories?: { id: string; label: string }[];
 }
 
-const getCategories = (): CategoryConfig[] => [
-  { id: 'all', label: 'الكل', icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
-  {
-    id: 'shipments', label: 'الشحنات', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'created', label: 'جديدة' },
-      { id: 'status', label: 'تحديث حالة' },
-      { id: 'assignment', label: 'تعيينات' },
-      { id: 'completed', label: 'مكتملة' },
-    ],
-  },
-  {
-    id: 'documents', label: 'المستندات', icon: FileText, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'upload', label: 'مستندات جديدة' },
-      { id: 'request', label: 'طلبات توقيع' },
-      { id: 'signed', label: 'مُوقعة' },
-    ],
-  },
-  {
-    id: 'approvals', label: 'الموافقات', icon: CheckCircle, color: 'text-amber-500', bgColor: 'bg-amber-500/10',
-  },
-  {
-    id: 'finance', label: 'المالية', icon: Wallet, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'invoice', label: 'فواتير' },
-      { id: 'payment', label: 'مدفوعات' },
-    ],
-  },
-  {
-    id: 'compliance', label: 'الامتثال والتراخيص', icon: Shield, color: 'text-violet-500', bgColor: 'bg-violet-500/10',
-    subCategories: [
-      { id: 'all', label: 'الكل' },
-      { id: 'expiry', label: 'انتهاء صلاحية' },
-      { id: 'warning', label: 'تحذيرات' },
-      { id: 'alert', label: 'مخالفات' },
-      { id: 'update', label: 'تحديثات' },
-    ],
-  },
-  {
-    id: 'fleet', label: 'الأسطول والتتبع', icon: Car, color: 'text-slate-500', bgColor: 'bg-slate-500/10',
-  },
-  {
-    id: 'operations', label: 'أوامر الشغل', icon: ClipboardCheck, color: 'text-sky-500', bgColor: 'bg-sky-500/10',
-  },
-  { id: 'messages', label: 'الرسائل', icon: MessageCircle, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
-  { id: 'notes', label: 'الملاحظات', icon: FileText, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-  { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-  { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
-  { id: 'environmental', label: 'البيئة والكربون', icon: Leaf, color: 'text-lime-600', bgColor: 'bg-lime-500/10' },
-  {
-    id: 'smart', label: 'التنبيهات الذكية', icon: Sparkles, color: 'text-fuchsia-500', bgColor: 'bg-fuchsia-500/10',
-  },
-  { id: 'announcements', label: 'الإعلانات', icon: Megaphone, color: 'text-blue-600', bgColor: 'bg-blue-500/10' },
-  { id: 'identity', label: 'التحقق والهوية', icon: UserCheck, color: 'text-teal-600', bgColor: 'bg-teal-500/10' },
-  { id: 'system', label: 'النظام', icon: Settings, color: 'text-red-500', bgColor: 'bg-red-500/10' },
-  { id: 'other', label: 'أخرى', icon: Info, color: 'text-muted-foreground', bgColor: 'bg-muted' },
-];
+const getCategories = (): CategoryConfig[] => NOTIFICATION_TAB_CATEGORIES;
 
 const getStatusLabel = (status: string | null, t: (key: string) => string) => {
   const statusMap: Record<string, { label: string; color: string }> = {
