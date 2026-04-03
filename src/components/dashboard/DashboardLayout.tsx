@@ -59,6 +59,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   useDashboardRealtime();
   // Smart presence — tracks online/away/offline for notification delivery
   useUserActivityPresence();
+  // Listen for push notification clicks from service worker → navigate in SPA
+  useServiceWorkerNavigation();
   
   const { fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
