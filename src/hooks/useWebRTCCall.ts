@@ -179,7 +179,7 @@ export function useWebRTCCall() {
   }, [startDurationTimer, stopRingtone]);
 
   // Setup signaling channel
-  const setupSignaling = useCallback((callId: string) => {
+  const setupSignaling = useCallback((callId: string, isInitiator = false) => {
     const channel = supabase.channel(`call:${callId}`)
       .on('broadcast', { event: 'offer' }, async ({ payload }) => {
         if (!pcRef.current) return;
@@ -201,6 +201,12 @@ export function useWebRTCCall() {
       .on('broadcast', { event: 'hangup' }, () => {
         endCall('partner_ended');
       })
+      .on('broadcast', { event: 'ready' }, async () => {
+        // Receiver joined - re-send offer if we're the caller
+        if (isInitiator && pcRef.current?.localDescription) {
+          channel.send({ type: 'broadcast', event: 'offer', payload: { sdp: pcRef.current.localDescription } });
+        }
+      })
       .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
         setCallMessages(prev => [...prev, {
           id: crypto.randomUUID(),
@@ -210,7 +216,12 @@ export function useWebRTCCall() {
           senderName: payload.senderName,
         }]);
       })
-      .subscribe();
+      .subscribe((status) => {
+        // When receiver subscribes, signal ready to caller
+        if (status === 'SUBSCRIBED' && !isInitiator) {
+          channel.send({ type: 'broadcast', event: 'ready', payload: {} });
+        }
+      });
 
     channelRef.current = channel;
     return channel;
@@ -281,13 +292,17 @@ export function useWebRTCCall() {
 
       playRingtone();
       const pc = setupPeerConnection(stream);
-      const channel = setupSignaling(callId);
+      const channel = setupSignaling(callId, true);
 
-      setTimeout(async () => {
+      // Create and send offer after channel is ready
+      const createAndSendOffer = async () => {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         channel.send({ type: 'broadcast', event: 'offer', payload: { sdp: offer } });
-      }, 1000);
+      };
+      
+      // Send initial offer after a brief delay, and re-send when receiver joins (handled by 'ready' event)
+      setTimeout(createAndSendOffer, 1500);
 
       setTimeout(() => {
         setCallInfo(prev => {
@@ -315,7 +330,7 @@ export function useWebRTCCall() {
       setCallInfo(prev => prev ? { ...prev, state: 'connecting' } : null);
       const stream = await getMediaStream(callInfo.callType);
       setupPeerConnection(stream);
-      setupSignaling(callInfo.callId);
+      setupSignaling(callInfo.callId, false);
     } catch (err) {
       cleanup();
       setCallInfo(null);
@@ -572,7 +587,37 @@ export function useWebRTCCall() {
     });
   }, [callInfo?.callId, user]);
 
-  // Listen for incoming calls
+  // Handle incoming call record
+  const handleIncomingCall = useCallback(async (record: any) => {
+    if (record.status !== 'ringing') return;
+    // Don't answer own calls
+    if (record.caller_id === user?.id) return;
+    if (callInfo) {
+      await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
+      return;
+    }
+
+    callRecordIdRef.current = record.id;
+    
+    playRingtone();
+    setCallInfo({
+      callId: record.id,
+      callType: record.call_type,
+      state: 'ringing',
+      isIncoming: true,
+      partnerName: record.caller_name || 'مستخدم',
+      partnerLogo: record.caller_avatar_url,
+      partnerOrgId: record.caller_org_id,
+      duration: 0,
+      isMuted: false,
+      isSpeaker: false,
+      isVideoEnabled: record.call_type === 'video',
+      isScreenSharing: false,
+      isRecording: false,
+    });
+  }, [user?.id, callInfo, playRingtone]);
+
+  // Listen for incoming calls - org level
   useEffect(() => {
     if (!organization?.id) return;
 
@@ -583,36 +628,30 @@ export function useWebRTCCall() {
         table: 'call_records',
         filter: `receiver_org_id=eq.${organization.id}`,
       }, async (payload) => {
-        const record = payload.new as any;
-        if (record.status !== 'ringing') return;
-        if (callInfo) {
-          await supabase.from('call_records').update({ status: 'busy' }).eq('id', record.id);
-          return;
-        }
-
-        callRecordIdRef.current = record.id;
-        
-        playRingtone();
-        setCallInfo({
-          callId: record.id,
-          callType: record.call_type,
-          state: 'ringing',
-          isIncoming: true,
-          partnerName: record.caller_name || 'مستخدم',
-          partnerLogo: record.caller_avatar_url,
-          partnerOrgId: record.caller_org_id,
-          duration: 0,
-          isMuted: false,
-          isSpeaker: false,
-          isVideoEnabled: record.call_type === 'video',
-          isScreenSharing: false,
-          isRecording: false,
-        });
+        await handleIncomingCall(payload.new);
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [organization?.id, callInfo, playRingtone]);
+  }, [organization?.id, handleIncomingCall]);
+
+  // Listen for incoming calls - user level (1-to-1)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase.channel(`incoming-calls-user:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'call_records',
+        filter: `receiver_user_id=eq.${user.id}`,
+      }, async (payload) => {
+        await handleIncomingCall(payload.new);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, handleIncomingCall]);
 
   return {
     callInfo,
