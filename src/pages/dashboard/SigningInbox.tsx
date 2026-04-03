@@ -883,5 +883,6 @@ export default function SigningInbox() {
         onSelect={handlePlatformDocSelect}
       />
     </div>
+    </DashboardLayout>
   );
 }
