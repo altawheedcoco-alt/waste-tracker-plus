@@ -292,13 +292,17 @@ export function useWebRTCCall() {
 
       playRingtone();
       const pc = setupPeerConnection(stream);
-      const channel = setupSignaling(callId);
+      const channel = setupSignaling(callId, true);
 
-      setTimeout(async () => {
+      // Create and send offer after channel is ready
+      const createAndSendOffer = async () => {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         channel.send({ type: 'broadcast', event: 'offer', payload: { sdp: offer } });
-      }, 1000);
+      };
+      
+      // Send initial offer after a brief delay, and re-send when receiver joins (handled by 'ready' event)
+      setTimeout(createAndSendOffer, 1500);
 
       setTimeout(() => {
         setCallInfo(prev => {
