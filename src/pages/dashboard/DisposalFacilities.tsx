@@ -159,6 +159,7 @@ export default function DisposalFacilities() {
   };
 
   return (
+    <DashboardLayout>
     <div className="space-y-6">
       <BackButton />
       {/* Header */}
