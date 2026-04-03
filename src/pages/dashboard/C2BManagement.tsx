@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import BackButton from '@/components/ui/back-button';
 
 const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel")
 );
@@ -6,6 +7,7 @@ const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel")
 export default function C2BManagement() {
   return (
     <div className="space-y-6">
+        <BackButton />
       <div>
         <h1 className="text-2xl font-bold text-foreground">صندوق الوارد — طلبات العملاء (C2B)</h1>
         <p className="text-muted-foreground">إدارة الطلبات والرسائل الواردة من الأفراد والجهات الخارجية</p>

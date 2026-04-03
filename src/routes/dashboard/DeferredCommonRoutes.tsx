@@ -43,6 +43,7 @@ const MyDataCenter = lazyRetry(() => import('@/pages/dashboard/MyDataCenter'));
 const EmployeeTaskBoard = lazyRetry(() => import('@/pages/dashboard/EmployeeTaskBoard'));
 const DocumentArchive = lazyRetry(() => import('@/pages/dashboard/DocumentArchive'));
 const PartnerReviews = lazyRetry(() => import('@/pages/dashboard/PartnerReviews'));
+const SharedLinksPage = lazyRetry(() => import('@/pages/dashboard/SharedLinksPage'));
 
 export const deferredCommonRoutes = (
   <>
@@ -84,5 +85,6 @@ export const deferredCommonRoutes = (
     <Route path="/dashboard/task-board" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
     <Route path="/dashboard/partner-reviews" element={<PartnerReviews />} />
+    <Route path="/dashboard/shared-links" element={<SharedLinksPage />} />
   </>
 );

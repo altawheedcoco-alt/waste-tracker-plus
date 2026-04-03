@@ -23,6 +23,7 @@ import {
   DOC_CATEGORY_LABELS, DOC_STATUS_LABELS
 } from '@/hooks/useDocumentRegistry';
 import { motion } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 
 const statusConfig: Record<string, { icon: any; color: string; bg: string }> = {
   draft: { icon: FileText, color: 'text-muted-foreground', bg: 'bg-muted' },
@@ -155,6 +156,7 @@ const CentralDocumentRegistry = () => {
             {/* Document List */}
             <ScrollArea className="h-[500px]">
               <div className="space-y-2">
+        <BackButton />
                 {isLoading ? (
                   <p className="text-center py-12 text-muted-foreground text-sm">جاري التحميل...</p>
                 ) : documents.length === 0 ? (

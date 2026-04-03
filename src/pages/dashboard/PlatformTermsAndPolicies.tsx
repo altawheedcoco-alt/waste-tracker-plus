@@ -14,6 +14,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useReactToPrint } from 'react-to-print';
+import BackButton from '@/components/ui/back-button';
 
 const POLICY_VERSION = '3.0.0';
 const EFFECTIVE_DATE = '2025-01-01';
@@ -419,6 +420,7 @@ const PlatformTermsAndPolicies = () => {
 
         {/* Policy Sections */}
         <div className="space-y-8 print:space-y-6">
+        <BackButton />
           {policySections.map((section, sIdx) => {
             const Icon = section.icon;
             return (

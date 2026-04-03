@@ -12,6 +12,7 @@ import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useGlobalCall } from '@/providers/GlobalCallProvider';
 import { toast } from 'sonner';
+import BackButton from '@/components/ui/back-button';
 
 interface CallRecord {
   id: string;
@@ -126,6 +127,7 @@ const CallHistory = () => {
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">

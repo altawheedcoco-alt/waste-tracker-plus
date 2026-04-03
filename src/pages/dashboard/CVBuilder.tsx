@@ -14,6 +14,7 @@ import {
   GraduationCap, Award, Phone, Mail, MapPin, Globe, Star
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 
 interface Experience {
   id: string; company: string; role: string; from: string; to: string; description: string;
@@ -114,6 +115,7 @@ const CVBuilder = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6 max-w-4xl mx-auto" dir="rtl">
+        <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

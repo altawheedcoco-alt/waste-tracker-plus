@@ -17,6 +17,7 @@ import {
 import { useDocumentAnalyses, useAnalyzeDocument, useDocumentStats, useSmartCollections, DocumentAnalysis } from '@/hooks/useSmartArchive';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import BackButton from '@/components/ui/back-button';
 
 const DOC_TYPE_LABELS: Record<string, { label: string; icon: any }> = {
   contract: { label: 'عقد', icon: FileText },
@@ -108,6 +109,7 @@ const SmartDocumentArchive = () => {
               <DialogTitle className="flex items-center gap-2"><Brain className="w-5 h-5" /> تحليل وثيقة بالذكاء الاصطناعي</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+        <BackButton />
               {/* File Upload */}
               <div className="border-2 border-dashed rounded-xl p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}>

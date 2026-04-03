@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 
 interface LawSection {
   id: string;
@@ -189,6 +190,7 @@ const LawsAndRegulations = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

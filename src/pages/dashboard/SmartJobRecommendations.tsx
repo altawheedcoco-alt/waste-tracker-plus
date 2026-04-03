@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, MapPin, Briefcase, Star, Clock, Building2, Heart } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const SmartJobRecommendations = () => {
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
@@ -45,6 +46,7 @@ const SmartJobRecommendations = () => {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6" dir="rtl">
+        <BackButton />
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Sparkles className="h-7 w-7 text-primary" />
