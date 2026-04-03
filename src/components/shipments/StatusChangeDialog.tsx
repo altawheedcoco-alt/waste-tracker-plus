@@ -460,6 +460,17 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
                 },
               },
             });
+
+            // 3. Push notification
+            await supabase.functions.invoke('send-push', {
+              body: {
+                user_ids: memberIds,
+                title: notifTitle,
+                body: inAppMessage,
+                tag: `shipment-${dbStatus}-${Date.now()}`,
+                data: { url: `/dashboard/shipments/${shipment.id}`, type: 'shipment_status', reference_id: shipment.id },
+              },
+            });
           })
         );
         
