@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -78,6 +79,7 @@ export default function HRShifts() {
   };
 
   return (
+    <DashboardLayout>
     <div className="p-6 space-y-6" dir="rtl">
       <BackButton />
       <div className="flex items-center justify-between">
@@ -221,5 +223,6 @@ export default function HRShifts() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

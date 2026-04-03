@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -536,6 +537,7 @@ const NavigationDemo = () => {
 
   if (loading) {
     return (
+      <DashboardLayout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted" dir="rtl">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
@@ -561,11 +563,13 @@ const NavigationDemo = () => {
           </Card>
         </motion.div>
       </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
+      <DashboardLayout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted" dir="rtl">
         <Card className="p-8 shadow-xl">
           <div className="flex flex-col items-center gap-4">
@@ -578,10 +582,12 @@ const NavigationDemo = () => {
           </div>
         </Card>
       </div>
+      </DashboardLayout>
     );
   }
 
   return (
+    <DashboardLayout>
     <div className={`min-h-screen bg-gradient-to-br from-background to-muted ${showFullscreen ? 'fixed inset-0 z-50' : ''}`} dir="rtl">
       {/* Header */}
       {!showFullscreen && (
@@ -1154,6 +1160,7 @@ const NavigationDemo = () => {
         )}
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 

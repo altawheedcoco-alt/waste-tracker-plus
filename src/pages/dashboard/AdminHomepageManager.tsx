@@ -1,6 +1,7 @@
 import { useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -95,6 +96,7 @@ const AdminHomepageManager = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className="space-y-6" dir="rtl">
       <BackButton />
       {/* Header */}
@@ -323,6 +325,7 @@ const AdminHomepageManager = () => {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </DashboardLayout>
   );
 };
 
@@ -524,3 +527,4 @@ const BlockFormDialog = memo(({ open, onOpenChange, block, sections, onSave, isS
 BlockFormDialog.displayName = 'BlockFormDialog';
 
 export default AdminHomepageManager;
+// Note: DashboardLayout closing tag added in the main return

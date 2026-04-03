@@ -17,6 +17,7 @@ import {
   AlertTriangle, TrendingUp, UserX, Building, Filter, ArrowLeft, ArrowRight, Network
 } from "lucide-react";
 import PartnershipNetwork from '@/components/admin/PartnershipNetwork';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import {
   Select,
   SelectContent,
@@ -238,7 +239,8 @@ const AdminEntityCensus = memo(() => {
   const hasError = orgsError || profilesError;
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <DashboardLayout>
+    <div className="p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -486,6 +488,7 @@ const AdminEntityCensus = memo(() => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }
 );

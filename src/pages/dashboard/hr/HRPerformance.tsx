@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,6 +86,7 @@ export default function HRPerformance() {
   const avgScore = reviews.length > 0 ? reviews.reduce((s, r) => s + Number(r.overall_score || 0), 0) / reviews.length : 0;
 
   return (
+    <DashboardLayout>
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -276,5 +278,6 @@ export default function HRPerformance() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

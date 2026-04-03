@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, GitBranch, Palette, Zap, Link2, ShieldCheck, ArrowLeftRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { motion } from 'framer-motion';
 import { BINDING_DISPLAY } from '@/types/bindingTypes';
 import type { BindingType } from '@/types/bindingTypes';
@@ -24,6 +25,7 @@ const SystemArchitectureGuide = () => {
   const orgChains = getOrgChains(orgType);
 
   return (
+    <DashboardLayout>
           <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -233,6 +235,7 @@ const SystemArchitectureGuide = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 

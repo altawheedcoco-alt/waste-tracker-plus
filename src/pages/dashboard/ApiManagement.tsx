@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,6 +33,7 @@ const ApiManagement = () => {
   const apiBaseUrl = `${window.location.origin.replace('id-preview--', '')}/functions/v1/public-api`;
 
   return (
+    <DashboardLayout>
           <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -322,6 +324,7 @@ const ApiManagement = () => {
 
       <CreateApiKeyDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </motion.div>
+    </DashboardLayout>
   );
 };
 

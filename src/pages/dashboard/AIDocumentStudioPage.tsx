@@ -18,6 +18,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { useDocumentService } from '@/hooks/useDocumentService';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -282,6 +283,7 @@ export default function AIDocumentStudioPage() {
   const hasMessages = messages.length > 0;
 
   return (
+    <DashboardLayout>
     <div className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
@@ -668,5 +670,6 @@ export default function AIDocumentStudioPage() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }

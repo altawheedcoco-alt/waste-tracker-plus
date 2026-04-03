@@ -3,6 +3,7 @@
  */
 import { useState, useMemo } from 'react';
 import BackButton from '@/components/ui/back-button';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,6 +77,7 @@ export default function CrossImpactDashboard() {
   }, [impacts]);
 
   return (
+    <DashboardLayout>
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
@@ -309,5 +311,6 @@ export default function CrossImpactDashboard() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 }

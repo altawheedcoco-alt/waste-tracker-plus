@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -175,6 +176,7 @@ const GlobalCommodityExchange = () => {
   const fallers = allSubtypes.filter(s => s.trend === 'falling').length;
 
   return (
+    <DashboardLayout>
     <div className={`space-y-6 p-4 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
@@ -533,6 +535,7 @@ const GlobalCommodityExchange = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
         );
 };
 
