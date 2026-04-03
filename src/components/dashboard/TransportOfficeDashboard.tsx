@@ -15,6 +15,7 @@ import {
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const TransportOfficeFAB = lazy(() => import('@/components/transport-office/TransportOfficeFAB'));
+const FleetOverviewWidget = lazy(() => import('@/components/dashboard/transport-office/FleetOverviewWidget'));
 
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
