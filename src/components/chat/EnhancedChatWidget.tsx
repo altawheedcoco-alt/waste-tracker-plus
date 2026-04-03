@@ -684,23 +684,7 @@ const EnhancedChatWidget = () => {
         isCreating={isCreatingGroup}
       />
 
-      {/* Call Screen Overlay */}
-      {callInfo && (
-        <CallScreen
-          callInfo={callInfo}
-          localStream={localStream}
-          remoteStream={remoteStream}
-          callMessages={callMessages}
-          onAnswer={answerCall}
-          onEnd={() => endCall()}
-          onToggleMute={toggleMute}
-          onToggleVideo={toggleVideo}
-          onToggleSpeaker={toggleSpeaker}
-          onToggleScreenShare={toggleScreenShare}
-          onToggleRecording={toggleRecording}
-          onSendMessage={sendCallMessage}
-        />
-      )}
+      {/* Call screen is now handled by GlobalCallProvider */}
     </>
   );
 };
