@@ -41,10 +41,10 @@ const PredictiveWasteAnalytics: React.FC = () => {
       const twelveMonthsAgo = new Date();
       twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-      const { data } = await supabase
-        .from('shipments')
+      const { data } = await (supabase
+        .from('shipments' as any)
         .select('quantity, unit, created_at, waste_type')
-        .eq('organization_id', organization.id)
+        .eq('organization_id', organization.id) as any)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', twelveMonthsAgo.toISOString())
         .order('created_at', { ascending: true });

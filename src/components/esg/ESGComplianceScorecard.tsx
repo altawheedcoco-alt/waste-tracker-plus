@@ -46,9 +46,9 @@ const ESGComplianceScorecard: React.FC = () => {
     queryKey: ['esg-licenses', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return { total: 0, expiring: 0, expired: 0 };
-      const { data } = await supabase
-        .from('organization_licenses')
-        .select('id, expiry_date, status')
+      const { data } = await (supabase
+        .from('organization_licenses' as any)
+        .select('id, expiry_date, status') as any)
         .eq('organization_id', organization.id);
       if (!data) return { total: 0, expiring: 0, expired: 0 };
 
@@ -56,12 +56,12 @@ const ESGComplianceScorecard: React.FC = () => {
       const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
       return {
-        total: data.length,
-        expiring: data.filter(l => {
+        total: (data as any[]).length,
+        expiring: (data as any[]).filter((l: any) => {
           const exp = new Date(l.expiry_date);
           return exp > now && exp <= thirtyDays;
         }).length,
-        expired: data.filter(l => new Date(l.expiry_date) < now).length,
+        expired: (data as any[]).filter((l: any) => new Date(l.expiry_date) < now).length,
       };
     },
     enabled: !!organization?.id,
