@@ -38,7 +38,7 @@ const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidg
 const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
 const RecyclerIncomingQuality = lazy(() => import('./recycler/RecyclerIncomingQuality'));
 const RecyclerProductionOutput = lazy(() => import('./recycler/RecyclerProductionOutput'));
-const RecyclerQuickFAB = lazy(() => import('./recycler/RecyclerQuickFAB'));
+
 
 interface RecentShipment {
   id: string;
