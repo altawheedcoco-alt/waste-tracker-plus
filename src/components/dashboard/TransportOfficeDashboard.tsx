@@ -129,8 +129,12 @@ const TransportOfficeDashboard = () => {
       {/* Quick Actions */}
       <QuickActionsGrid actions={quickActions} title="الإجراءات السريعة" subtitle="أدوات مكتب النقل" />
 
-      {/* ★ نظرة عامة على الأسطول */}
-      <Suspense fallback={null}><FleetOverviewWidget /></Suspense>
+      {/* ★ ودجات مكتب النقل المتخصصة */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Suspense fallback={null}><FleetOverviewWidget /></Suspense>
+        <Suspense fallback={null}><DriverPerformanceRanking /></Suspense>
+        <Suspense fallback={null}><RevenueBreakdownWidget /></Suspense>
+      </div>
 
       {/* Alerts for expiring documents */}
       {expiringVehicles.length > 0 && (
