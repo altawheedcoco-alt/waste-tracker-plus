@@ -525,3 +525,4 @@ const BlockFormDialog = memo(({ open, onOpenChange, block, sections, onSave, isS
 BlockFormDialog.displayName = 'BlockFormDialog';
 
 export default AdminHomepageManager;
+// Note: DashboardLayout closing tag added in the main return

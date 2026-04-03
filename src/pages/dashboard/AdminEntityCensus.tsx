@@ -17,6 +17,7 @@ import {
   AlertTriangle, TrendingUp, UserX, Building, Filter, ArrowLeft, ArrowRight, Network
 } from "lucide-react";
 import PartnershipNetwork from '@/components/admin/PartnershipNetwork';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import {
   Select,
   SelectContent,
