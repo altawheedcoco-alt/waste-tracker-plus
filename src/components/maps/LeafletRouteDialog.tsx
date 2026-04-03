@@ -136,6 +136,9 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
         }
 
         if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+        // Fix grey tiles inside dialog
+        setTimeout(() => map.invalidateSize(), 200);
+        setTimeout(() => map.invalidateSize(), 500);
       } catch (err) {
         console.error('Route load error:', err);
       } finally {
