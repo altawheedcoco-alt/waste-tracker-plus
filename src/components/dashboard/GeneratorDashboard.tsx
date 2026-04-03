@@ -79,7 +79,8 @@ const GeneratorPartnersHub = lazy(() => import('./generator/GeneratorPartnersHub
 const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab'));
 const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
 const ShipmentStatusPipeline = lazy(() => import('./generator/ShipmentStatusPipeline'));
-const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
+const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
+const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
 
 
 interface RecentShipment {
