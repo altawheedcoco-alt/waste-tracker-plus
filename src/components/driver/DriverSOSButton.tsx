@@ -360,14 +360,27 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId, driverTy
           : organizationId || relatedOrgs?.[0]?.id;
 
         if (chatOrgId) {
-          await supabase.from('chat_messages').insert({
-            sender_id: user.id,
-            recipient_organization_id: chatOrgId,
-            message_type: 'voice',
-            content: `🚨 نداء طوارئ: ${typeLabel}`,
-            file_url: voiceUrl,
-            file_name: 'emergency_voice.webm',
-          });
+          // Find or create a chat room with the org
+          const { data: existingRoom } = await supabase
+            .from('chat_rooms')
+            .select('id')
+            .eq('organization_id', chatOrgId)
+            .limit(1)
+            .maybeSingle();
+
+          const roomId = existingRoom?.id;
+          if (roomId) {
+            await supabase.from('chat_messages').insert({
+              room_id: roomId,
+              sender_id: user.id,
+              sender_organization_id: chatOrgId,
+              message_type: 'voice',
+              content: `🚨 نداء طوارئ: ${typeLabel}`,
+              file_url: voiceUrl,
+              file_name: 'emergency_voice.webm',
+              file_mime_type: 'audio/webm',
+            });
+          }
         }
       }
 
