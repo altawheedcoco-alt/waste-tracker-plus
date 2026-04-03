@@ -27,8 +27,8 @@ const FuelEfficiencyTracker = () => {
         .limit(200);
 
       const totalTrips = shipments?.length || 0;
-      const totalDistance = shipments?.reduce((a, s) => a + (Number(s.distance_km) || 15), 0) || 0;
-      const totalWeight = shipments?.reduce((a, s) => a + (Number(s.actual_weight || s.estimated_weight) || 0), 0) || 0;
+      const totalDistance = totalTrips * 15; // تقدير متوسط المسافة
+      const totalWeight = shipments?.reduce((a, s: any) => a + (Number(s.actual_weight || s.quantity) || 0), 0) || 0;
       const avgDistancePerTrip = totalTrips > 0 ? totalDistance / totalTrips : 0;
       const efficiencyScore = totalTrips > 0 ? Math.min(100, Math.round((totalWeight / Math.max(totalDistance, 1)) * 10)) : 0;
 

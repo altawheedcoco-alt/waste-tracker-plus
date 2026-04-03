@@ -80,12 +80,12 @@ const CollectionCalendarMini = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">
-                    {item.waste_type || 'شحنة'}
+                    {(item as any).waste_type || 'شحنة'}
                   </p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Truck className="h-2.5 w-2.5 text-muted-foreground" />
                     <span className="text-[10px] text-muted-foreground truncate">
-                      {item.transporter?.name || 'بانتظار ناقل'}
+                      {(item as any).transporter_id ? 'ناقل مُسند' : 'بانتظار ناقل'}
                     </span>
                   </div>
                 </div>

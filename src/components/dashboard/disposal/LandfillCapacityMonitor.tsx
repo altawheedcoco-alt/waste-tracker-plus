@@ -26,7 +26,7 @@ const LandfillCapacityMonitor = () => {
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .limit(500);
 
-      const totalReceived = shipments?.reduce((a, s) => a + (Number(s.actual_weight || s.estimated_weight) || 0), 0) || 0;
+      const totalReceived = shipments?.reduce((a, s: any) => a + (Number(s.actual_weight || s.quantity) || 0), 0) || 0;
       const dailyAvg = totalReceived / 30;
       
       // سعة تقديرية (1000 طن)

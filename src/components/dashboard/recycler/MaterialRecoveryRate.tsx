@@ -27,13 +27,13 @@ const MaterialRecoveryRate = () => {
 
       if (!shipments?.length) return null;
 
-      const totalInput = shipments.reduce((a, s) => a + (Number(s.actual_weight || s.estimated_weight) || 0), 0);
+      const totalInput = shipments.reduce((a, s: any) => a + (Number(s.actual_weight || s.quantity) || 0), 0);
       
       // تصنيف المواد
       const materialMap = new Map<string, number>();
-      shipments.forEach(s => {
+      shipments.forEach((s: any) => {
         const type = s.waste_type || 'أخرى';
-        materialMap.set(type, (materialMap.get(type) || 0) + (Number(s.actual_weight || s.estimated_weight) || 0));
+        materialMap.set(type, (materialMap.get(type) || 0) + (Number(s.actual_weight || s.quantity) || 0));
       });
 
       const materials = Array.from(materialMap.entries())

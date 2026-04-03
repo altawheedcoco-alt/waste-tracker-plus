@@ -43,8 +43,8 @@ const WasteSourceTracker = () => {
     if (!shipments?.length) return [];
     const typeMap = new Map<string, number>();
     shipments.forEach(s => {
-      const type = s.waste_type || 'غير مصنف';
-      typeMap.set(type, (typeMap.get(type) || 0) + (Number(s.estimated_weight) || 1));
+      const type = (s as any).waste_type || 'غير مصنف';
+      typeMap.set(type, (typeMap.get(type) || 0) + (Number((s as any).quantity) || 1));
     });
     const total = Array.from(typeMap.values()).reduce((a, b) => a + b, 0);
     return Array.from(typeMap.entries())

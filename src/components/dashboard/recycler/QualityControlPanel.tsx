@@ -39,10 +39,10 @@ const QualityControlPanel = () => {
         rejected,
         passRate: Math.round((passed / total) * 100),
         recentItems: shipments.slice(0, 5).map((s: any) => ({
-          id: s.id,
-          type: s.waste_type || 'غير مصنف',
-          source: s.generator?.name || '-',
-          weight: Number(s.actual_weight) || 0,
+          id: (s as any).id,
+          type: (s as any).waste_type || 'غير مصنف',
+          source: (s as any).generator_id ? 'مولد مرتبط' : '-',
+          weight: Number((s as any).actual_weight) || 0,
           quality: Math.random() > 0.15 ? 'passed' : Math.random() > 0.5 ? 'warning' : 'rejected',
         })),
       };

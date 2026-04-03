@@ -4,7 +4,7 @@
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Users, Circle, Truck, Coffee, Ban } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,10 +15,8 @@ type DriverStatus = 'available' | 'on_trip' | 'break' | 'offline';
 interface DriverAvailability {
   id: string;
   name: string;
-  avatar?: string;
   status: DriverStatus;
-  currentTask?: string;
-  tripsToday: number;
+  vehiclePlate?: string;
 }
 
 const statusConfig: Record<DriverStatus, { label: string; color: string; icon: typeof Circle }> = {
@@ -37,20 +35,28 @@ const DriverAvailabilityBoard = () => {
       if (!organization?.id) return [];
       const { data } = await supabase
         .from('drivers')
-        .select('id, full_name, avatar_url, status, is_active')
+        .select('id, license_number, vehicle_plate, is_available, profile_id')
         .eq('organization_id', organization.id)
-        .eq('is_active', true)
-        .order('full_name')
         .limit(10);
 
       if (!data) return [];
 
+      // جلب أسماء السائقين من profiles
+      const profileIds = data.map(d => d.profile_id).filter(Boolean);
+      let profileNames: Record<string, string> = {};
+      if (profileIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', profileIds);
+        profiles?.forEach(p => { profileNames[p.id] = p.full_name || ''; });
+      }
+
       return data.map(d => ({
         id: d.id,
-        name: d.full_name || 'سائق',
-        avatar: d.avatar_url || undefined,
-        status: (d.status === 'on_trip' ? 'on_trip' : d.status === 'available' ? 'available' : 'offline') as DriverStatus,
-        tripsToday: 0,
+        name: profileNames[d.profile_id] || `سائق ${d.license_number?.slice(-4) || ''}`,
+        status: (d.is_available ? 'available' : 'offline') as DriverStatus,
+        vehiclePlate: d.vehicle_plate || undefined,
       }));
     },
     enabled: !!organization?.id,
@@ -58,7 +64,7 @@ const DriverAvailabilityBoard = () => {
   });
 
   const availableCount = drivers.filter(d => d.status === 'available').length;
-  const onTripCount = drivers.filter(d => d.status === 'on_trip').length;
+  const offlineCount = drivers.filter(d => d.status === 'offline').length;
 
   return (
     <Card>
@@ -70,8 +76,8 @@ const DriverAvailabilityBoard = () => {
             <Badge className="text-[9px] bg-green-500/10 text-green-700 dark:text-green-300 border-0">
               {availableCount} متاح
             </Badge>
-            <Badge className="text-[9px] bg-blue-500/10 text-blue-700 dark:text-blue-300 border-0">
-              {onTripCount} في رحلة
+            <Badge className="text-[9px] bg-muted text-muted-foreground border-0">
+              {offlineCount} غير متصل
             </Badge>
           </div>
         </CardTitle>
@@ -93,13 +99,15 @@ const DriverAvailabilityBoard = () => {
                   className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/30 transition-colors"
                 >
                   <Avatar className="h-7 w-7">
-                    <AvatarImage src={driver.avatar} />
                     <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
                       {driver.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{driver.name}</p>
+                    {driver.vehiclePlate && (
+                      <p className="text-[10px] text-muted-foreground">{driver.vehiclePlate}</p>
+                    )}
                   </div>
                   <div className={`flex items-center gap-1 ${config.color}`}>
                     <StatusIcon className="h-3 w-3 fill-current" />
