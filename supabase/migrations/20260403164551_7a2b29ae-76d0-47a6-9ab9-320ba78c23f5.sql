@@ -1,0 +1,1 @@
+ALTER FUNCTION public.fn_auto_notify_channels() SET search_path = public;
