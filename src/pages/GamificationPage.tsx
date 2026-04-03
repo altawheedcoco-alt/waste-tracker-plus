@@ -7,6 +7,7 @@ const LevelProgressCard = React.lazy(() => import('@/components/gamification/Lev
 const AchievementsGrid = React.lazy(() => import('@/components/gamification/AchievementsGrid'));
 const PersonalStatsCard = React.lazy(() => import('@/components/gamification/PersonalStatsCard'));
 const UserPublicProfile = React.lazy(() => import('@/components/gamification/UserPublicProfile'));
+const Leaderboard = React.lazy(() => import('@/components/gamification/Leaderboard'));
 
 const Fallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
@@ -28,6 +29,9 @@ const GamificationPage = () => (
           </Suspense>
           <Suspense fallback={<Fallback />}>
             <AchievementsGrid />
+          </Suspense>
+          <Suspense fallback={<Fallback />}>
+            <Leaderboard />
           </Suspense>
         </div>
         <div className="space-y-6">
