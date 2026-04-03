@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
@@ -96,7 +95,6 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   under_maintenance: { label: 'صيانة', color: 'bg-amber-100 text-amber-700' },
   full: { label: 'ممتلئ', color: 'bg-red-100 text-red-700' },
   closed: { label: 'مغلق', color: 'bg-red-200 text-red-800' },
-  </DashboardLayout>
 };
 
 const governorates = [
@@ -160,8 +158,7 @@ export default function DisposalFacilities() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
       <BackButton />
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

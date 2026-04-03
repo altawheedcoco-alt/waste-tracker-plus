@@ -1,7 +1,6 @@
 /**
  * لوحة الأثر المركزية — تعرض كل الآثار المتقاطعة بين الجهات
  */
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useMemo } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -42,7 +41,6 @@ const ORG_TYPE_LABELS: Record<string, { ar: string; en: string }> = {
   employee: { ar: 'موظف', en: 'Employee' },
   regulator: { ar: 'رقابي', en: 'Regulator' },
   admin: { ar: 'مدير', en: 'Admin' },
-  </DashboardLayout>
 };
 
 export default function CrossImpactDashboard() {
@@ -78,8 +76,7 @@ export default function CrossImpactDashboard() {
   }, [impacts]);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       <BackButton />
       {/* Header */}
       <div className="flex flex-col gap-2">

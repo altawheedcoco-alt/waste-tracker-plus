@@ -1,4 +1,3 @@
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -353,12 +352,10 @@ const NavigationDemo = () => {
   // Calculate average speed
   const avgSpeed = elapsedTime > 0 ? (currentDistance / (elapsedTime / 3600)).toFixed(0) : '0';
 
-
   // Mode Selection Screen
   if (navigationMode === 'selection') {
     return (
-      <DashboardLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4" dir="rtl">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1157,7 +1154,6 @@ const NavigationDemo = () => {
         )}
       </div>
     </div>
-      </DashboardLayout>
   );
 };
 
