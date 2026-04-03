@@ -18,6 +18,8 @@ import { Progress } from '@/components/ui/progress';
 
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 const AuditCalendarWidget = lazy(() => import('@/components/dashboard/iso/AuditCalendarWidget'));
+const ComplianceScoreboardWidget = lazy(() => import('@/components/dashboard/iso/ComplianceScoreboardWidget'));
+const NonConformityTracker = lazy(() => import('@/components/dashboard/iso/NonConformityTracker'));
 
 import ISOMonthlyActivity from '@/components/iso/ISOMonthlyActivity';
 
