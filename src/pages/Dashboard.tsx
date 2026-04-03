@@ -181,6 +181,10 @@ const Dashboard = () => {
             <ErrorBoundary fallbackTitle="حدث خطأ في لوحة التحكم">
               <DashboardLayout>
                 <PagePasswordGate>
+                  <Suspense fallback={null}>
+                    <ClaimableBanner />
+                    <IncomingClaimsPanel />
+                  </Suspense>
                   <Suspense fallback={<DashboardLoader />}>
                     {renderDashboard()}
                   </Suspense>
