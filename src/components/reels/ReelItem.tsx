@@ -82,9 +82,15 @@ const ReelItem = memo(({ reel, isActive, onLike, onComment, onBookmark, onShare,
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
+    // User interacted — unmute on first interaction
+    if (!userInteracted) {
+      setUserInteracted(true);
+      video.muted = false;
+      setIsMuted(false);
+    }
     if (video.paused) { video.play(); setIsPlaying(true); }
     else { video.pause(); setIsPlaying(false); }
-  }, []);
+  }, [userInteracted]);
 
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
