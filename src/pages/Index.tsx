@@ -30,6 +30,7 @@ function lazyRetry<T extends React.ComponentType<any>>(
 const Header = lazyRetry(() => import("@/components/Header"));
 const Hero = lazyRetry(() => import("@/components/Hero"));
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
+import NativePushTestButton from "@/components/pwa/NativePushTestButton";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
 const LandingWrapper = lazyRetry(() => import("@/components/LandingWrapper"));
@@ -229,6 +230,9 @@ const HomepageContent = () => {
       <LandingWrapper>
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           <EnableNotificationsButton />
+          <div className="fixed bottom-20 left-4 right-4 z-50 max-w-md mx-auto">
+            <NativePushTestButton />
+          </div>
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
