@@ -25,6 +25,7 @@ const SystemArchitectureGuide = () => {
   const orgChains = getOrgChains(orgType);
 
   return (
+    <DashboardLayout>
           <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex items-center gap-3">
