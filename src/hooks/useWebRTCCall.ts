@@ -21,6 +21,7 @@ export interface CallInfo {
   isVideoEnabled: boolean;
   isScreenSharing: boolean;
   isRecording: boolean;
+  isReceiverOnline?: boolean;
 }
 
 export interface CallMessage {
@@ -67,6 +68,7 @@ export function useWebRTCCall() {
     };
   }, []);
 
+  // Normal ringtone (receiver online)
   const playRingtone = useCallback(() => {
     try {
       const ctx = new AudioContext();
@@ -82,6 +84,27 @@ export function useWebRTCCall() {
       const interval = setInterval(() => {
         gain.gain.value = gain.gain.value > 0 ? 0 : 0.15;
       }, 500);
+      
+      ringtoneRef.current = { pause: () => { osc.stop(); clearInterval(interval); ctx.close(); } } as any;
+    } catch { /* silent */ }
+  }, []);
+
+  // Offline ringtone (receiver offline) — lower pitch, slower rhythm
+  const playOfflineRingtone = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 280; // lower pitch
+      gain.gain.value = 0.1;
+      osc.type = 'triangle'; // softer tone
+      osc.start();
+      
+      const interval = setInterval(() => {
+        gain.gain.value = gain.gain.value > 0 ? 0 : 0.1;
+      }, 1200); // slower rhythm
       
       ringtoneRef.current = { pause: () => { osc.stop(); clearInterval(interval); ctx.close(); } } as any;
     } catch { /* silent */ }
@@ -347,6 +370,23 @@ export function useWebRTCCall() {
       };
       if (receiverUserId) insertData.receiver_user_id = receiverUserId;
 
+      // Check receiver online status
+      let receiverOnline = true;
+      if (receiverUserId) {
+        const { data: presence } = await (supabase.from('user_presence') as any)
+          .select('status, updated_at')
+          .eq('user_id', receiverUserId)
+          .maybeSingle();
+        
+        if (presence) {
+          const lastActive = new Date(presence.updated_at).getTime();
+          const twoMinAgo = Date.now() - 2 * 60 * 1000;
+          receiverOnline = presence.status === 'online' && lastActive > twoMinAgo;
+        } else {
+          receiverOnline = false;
+        }
+      }
+
       const { data: record } = await supabase.from('call_records').insert(insertData).select('id').single();
 
       const callId = record?.id || crypto.randomUUID();
@@ -387,9 +427,16 @@ export function useWebRTCCall() {
         isVideoEnabled: type === 'video',
         isScreenSharing: false,
         isRecording: false,
+        isReceiverOnline: receiverOnline,
       });
 
-      playRingtone();
+      // Play appropriate ringtone based on receiver status
+      if (receiverOnline) {
+        playRingtone();
+      } else {
+        playOfflineRingtone();
+      }
+
       const pc = setupPeerConnection(stream);
       const channel = setupSignaling(callId, true);
 

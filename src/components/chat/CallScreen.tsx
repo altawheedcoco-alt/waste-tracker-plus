@@ -121,7 +121,11 @@ const CallScreen = memo(({
 
   const getStatusText = () => {
     switch (callInfo.state) {
-      case 'calling': return 'جاري الاتصال...';
+      case 'calling': 
+        if (callInfo.isReceiverOnline === false) {
+          return 'المستقبل غير متصل بالإنترنت... سيصله إشعار';
+        }
+        return 'جاري الاتصال...';
       case 'ringing': return 'مكالمة واردة';
       case 'connecting': return 'جاري الربط...';
       case 'connected': return formatDuration(callInfo.duration);
@@ -421,6 +425,18 @@ const CallScreen = memo(({
                       transition={{ duration: 2, repeat: Infinity }}
                       className="absolute inset-0 rounded-full bg-emerald-400/20 blur-xl -z-10 scale-150"
                     />
+                  )}
+
+                  {/* Offline indicator */}
+                  {callInfo.state === 'calling' && callInfo.isReceiverOnline === false && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -left-1 bg-amber-500 text-white text-[9px] font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                      غير متصل
+                    </motion.div>
                   )}
                 </div>
 
