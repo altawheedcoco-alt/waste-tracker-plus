@@ -154,6 +154,12 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
 
   // Double tap to like
   const handleContentTap = () => {
+    // Unmute on first user interaction (browser autoplay policy)
+    if (!userInteracted) {
+      setUserInteracted(true);
+      setIsMuted(false);
+      if (videoRef.current) videoRef.current.muted = false;
+    }
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
       if (!liked) handleLike();
