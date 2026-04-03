@@ -591,7 +591,6 @@ export function useWebRTCCall() {
         }
 
         callRecordIdRef.current = record.id;
-        const profile = await getCachedProfile(record.caller_id);
         
         playRingtone();
         setCallInfo({
@@ -599,7 +598,8 @@ export function useWebRTCCall() {
           callType: record.call_type,
           state: 'ringing',
           isIncoming: true,
-          partnerName: profile?.full_name || 'مستخدم',
+          partnerName: record.caller_name || 'مستخدم',
+          partnerLogo: record.caller_avatar_url,
           partnerOrgId: record.caller_org_id,
           duration: 0,
           isMuted: false,
