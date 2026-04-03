@@ -197,7 +197,7 @@ const Dashboard = () => {
                   {/* Role-specific widgets */}
                   {showAIAssistant && <AIOperationsAssistant />}
                   {!isDriver && <AIChatbot />}
-                  {!isDriver && <EnhancedChatWidget />}
+                  
                   {!isDriver && <AccessibilityPanel />}
                   <FloatingHealthButton />
                 </Suspense>
