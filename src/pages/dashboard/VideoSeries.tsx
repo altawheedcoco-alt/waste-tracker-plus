@@ -222,7 +222,7 @@ const CountdownTimer = ({ seconds, onComplete, onCancel }: { seconds: number; on
   const progress = ((seconds - remaining) / seconds) * 100;
 
   return (
-    <DashboardLayout>
+    <div className="relative w-20 h-20">
       <div className="relative w-20 h-20">
       <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
         <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="3" className="text-white/20" />
