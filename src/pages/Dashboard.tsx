@@ -1,4 +1,6 @@
 import { useEffect, lazy, Suspense, useState } from 'react';
+import { ClaimableBanner } from '@/components/data-claim/ClaimableBanner';
+import { IncomingClaimsPanel } from '@/components/data-claim/IncomingClaimsPanel';
 import GlobalCallProvider from '@/providers/GlobalCallProvider';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
