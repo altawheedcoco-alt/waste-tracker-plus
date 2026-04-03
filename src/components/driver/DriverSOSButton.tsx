@@ -175,7 +175,7 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId, driverTy
       if (currentShipmentId) {
         const { data: shipment } = await supabase
           .from('shipments')
-          .select('generator_id, transporter_id, recycler_id, disposal_id')
+          .select('generator_id, transporter_id, recycler_id')
           .eq('id', currentShipmentId)
           .single();
 
