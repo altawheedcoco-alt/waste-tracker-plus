@@ -82,25 +82,8 @@ const getNotificationIcon = _getIcon;
 const getNotificationColor = _getIconColor;
 const categorizeNotification = _categorize;
 
-// Get sub-category for more granular filtering within a category
-const getSubCategory = (type: string | null): string => {
-  switch (type) {
-    case 'shipment_created': return 'created';
-    case 'shipment_status': case 'status_update': return 'status';
-    case 'shipment_assigned': case 'driver_assignment': return 'assignment';
-    case 'shipment_delivered': case 'shipment_approved': return 'completed';
-    case 'document_uploaded': return 'upload';
-    case 'document_issued': case 'document_signed': case 'stamp_applied': return 'signed';
-    case 'signing_request': case 'signature_request': return 'request';
-    case 'invoice': return 'invoice';
-    case 'payment': case 'deposit': return 'payment';
-    case 'license_expiry': return 'expiry';
-    case 'license_warning': return 'warning';
-    case 'compliance_alert': case 'violation': return 'alert';
-    case 'inspection': case 'compliance_update': return 'update';
-    default: return 'all';
-  }
-};
+// Priority detection — uses registry when available
+import { getNotificationTypeMeta } from '@/lib/notificationTypes';
 
 // Get priority level from notification
 const getPriorityLevel = (notification: Notification): 'urgent' | 'high' | 'normal' | 'low' => {
