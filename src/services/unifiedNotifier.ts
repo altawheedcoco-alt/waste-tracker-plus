@@ -157,6 +157,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
   }
 
   // 1. إشعارات داخلية (دفعة واحدة)
+  // skip_auto_channels = true → يمنع الـ DB Trigger من إرسال push/whatsapp مرة ثانية
   try {
     const rows = notification.user_ids.map(uid => ({
       user_id: uid,
@@ -164,6 +165,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
       message: notification.message,
       type: notification.type || 'general',
       is_read: false,
+      metadata: { skip_auto_channels: true } as any,
     }));
     const { error } = await supabase.from('notifications').insert(rows);
     result.inApp = error ? { success: false, error: error.message } : { success: true };
