@@ -99,10 +99,20 @@ const AdvancedAnalytics = () => {
           <GoalTrackingDashboard />
         </Suspense>
 
-        {/* Activity Heatmap */}
+        {/* Revenue Forecast */}
         <Suspense fallback={<ChartSkeleton />}>
-          <ActivityHeatmap />
+          <RevenueForecast />
         </Suspense>
+
+        {/* Activity Heatmap + Work Patterns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<ChartSkeleton />}>
+            <ActivityHeatmap />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <WorkPatternAnalysis />
+          </Suspense>
+        </div>
 
         {/* Cost Optimization + Compliance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
