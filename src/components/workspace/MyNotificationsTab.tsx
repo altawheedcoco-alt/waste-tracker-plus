@@ -4,13 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Loader2, Inbox, Filter, Settings2 } from 'lucide-react';
+import { Bell, CheckCheck, Loader2, Inbox, Settings2, BellOff, ChevronDown, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
+import NotificationTypePreferences from '@/components/notifications/NotificationTypePreferences';
 import { getNotificationRoute } from '@/lib/notificationRouting';
+import { groupNotifications, type GroupedNotification } from '@/lib/notificationGrouping';
+import { cn } from '@/lib/utils';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
@@ -25,6 +28,9 @@ const MyNotificationsTab = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
+  const [showTypePrefs, setShowTypePrefs] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['my-workspace-notifications', user?.id],
     queryFn: async () => {
@@ -53,24 +59,42 @@ const MyNotificationsTab = () => {
   });
 
   const markOneRead = useMutation({
-    mutationFn: async (id: string) => {
-      await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    mutationFn: async (ids: string[]) => {
+      await supabase.from('notifications').update({ is_read: true }).in('id', ids);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-workspace-notifications'] });
     },
   });
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-  const filtered = filter === 'unread' ? notifications.filter(n => !n.is_read) : notifications;
+  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
+  const filtered = filter === 'unread' ? notifications.filter((n: any) => !n.is_read) : notifications;
+
+  // Apply grouping
+  const grouped = groupNotifications(filtered as any);
 
   // Group by date
-  const grouped = filtered.reduce<Record<string, typeof notifications>>((acc, n) => {
+  const byDate = grouped.reduce<Record<string, GroupedNotification[]>>((acc, n) => {
     const date = new Date(n.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
     if (!acc[date]) acc[date] = [];
     acc[date].push(n);
     return acc;
   }, {});
+
+  const toggleGroupExpand = (id: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleNotificationClick = (n: GroupedNotification) => {
+    if (!n.is_read) markOneRead.mutate(n.ids);
+    const route = getNotificationRoute(n);
+    if (route) navigate(route);
+  };
 
   if (isLoading) {
     return (
@@ -93,7 +117,7 @@ const MyNotificationsTab = () => {
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex rounded-lg border border-border/50 overflow-hidden">
             <button
               onClick={() => setFilter('all')}
@@ -109,42 +133,42 @@ const MyNotificationsTab = () => {
             </button>
           </div>
           {unreadCount > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1 text-xs h-8"
-              onClick={() => markAllRead.mutate()}
-              disabled={markAllRead.isPending}
-            >
+            <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
               <CheckCheck className="w-3 h-3" />
               تعليم الكل
             </Button>
           )}
-          <Button
-            size="sm"
-            variant={showPrefs ? "default" : "outline"}
-            className="gap-1 text-xs h-8"
-            onClick={() => setShowPrefs(!showPrefs)}
-          >
+          <Button size="sm" variant={showPrefs ? "default" : "outline"} className="gap-1 text-xs h-8" onClick={() => { setShowPrefs(!showPrefs); setShowTypePrefs(false); }}>
             <Settings2 className="w-3.5 h-3.5" />
             القنوات
+          </Button>
+          <Button size="sm" variant={showTypePrefs ? "default" : "outline"} className="gap-1 text-xs h-8" onClick={() => { setShowTypePrefs(!showTypePrefs); setShowPrefs(false); }}>
+            <BellOff className="w-3.5 h-3.5" />
+            الأنواع
           </Button>
         </div>
       </div>
 
       {/* Channel Preferences Panel */}
-      {showPrefs && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <NotificationChannelPreferences />
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {showPrefs && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+            <NotificationChannelPreferences />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Type Preferences Panel */}
+      <AnimatePresence>
+        {showTypePrefs && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+            <NotificationTypePreferences />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Notifications grouped by date */}
-      {filtered.length === 0 ? (
+      {grouped.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-14 text-muted-foreground">
             <Inbox className="w-12 h-12 mb-3 opacity-40" />
@@ -153,13 +177,15 @@ const MyNotificationsTab = () => {
         </Card>
       ) : (
         <div className="space-y-5">
-          {Object.entries(grouped).map(([date, items]) => (
+          {Object.entries(byDate).map(([date, items]) => (
             <div key={date}>
               <p className="text-xs text-muted-foreground font-medium mb-2 px-1">{date}</p>
               <div className="space-y-2">
                 <AnimatePresence>
                   {items.map((n, i) => {
                     const priority = priorityConfig[n.priority || 'normal'] || priorityConfig.normal;
+                    const isExpanded = expandedGroups.has(n.id);
+
                     return (
                       <motion.div
                         key={n.id}
@@ -168,14 +194,11 @@ const MyNotificationsTab = () => {
                         transition={{ delay: i * 0.02 }}
                       >
                         <Card
-                          className={`border-border/30 transition-all cursor-pointer hover:shadow-sm ${
+                          className={cn(
+                            "border-border/30 transition-all cursor-pointer hover:shadow-sm",
                             !n.is_read ? 'bg-primary/5 border-primary/20 hover:bg-primary/8' : 'hover:bg-muted/30'
-                          }`}
-                          onClick={() => {
-                            if (!n.is_read) markOneRead.mutate(n.id);
-                            const route = getNotificationRoute(n);
-                            if (route) navigate(route);
-                          }}
+                          )}
+                          onClick={() => handleNotificationClick(n)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
@@ -188,6 +211,17 @@ const MyNotificationsTab = () => {
                                   <Badge className={`text-[9px] px-1.5 py-0 h-4 ${priority.className}`}>
                                     {priority.label}
                                   </Badge>
+                                  {n.isGrouped && n.count > 1 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[9px] px-1.5 py-0 h-4 bg-accent/50 gap-0.5 cursor-pointer"
+                                      onClick={(e) => { e.stopPropagation(); toggleGroupExpand(n.id); }}
+                                    >
+                                      <Layers className="w-2.5 h-2.5" />
+                                      {n.count}
+                                      <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", isExpanded && "rotate-180")} />
+                                    </Badge>
+                                  )}
                                 </div>
                                 <p className="text-xs text-muted-foreground line-clamp-2">{n.message}</p>
                                 <p className="text-[10px] text-muted-foreground/60 mt-1.5">
@@ -196,6 +230,35 @@ const MyNotificationsTab = () => {
                                 </p>
                               </div>
                             </div>
+
+                            {/* Expanded children */}
+                            <AnimatePresence>
+                              {isExpanded && n.isGrouped && n.count > 1 && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="mt-3 mr-5 space-y-1.5 border-r-2 border-primary/20 pr-3"
+                                >
+                                  {n.children.map((child) => (
+                                    <div
+                                      key={child.id}
+                                      className="p-2 rounded-md bg-muted/40 text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const route = getNotificationRoute(child);
+                                        if (route) navigate(route);
+                                      }}
+                                    >
+                                      <p className="text-muted-foreground line-clamp-1">{child.message}</p>
+                                      <p className="text-[10px] text-muted-foreground/50 mt-0.5">
+                                        {new Date(child.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </CardContent>
                         </Card>
                       </motion.div>
