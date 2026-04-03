@@ -1,69 +1,39 @@
 
-
-# خطة: توحيد الإجراءات السريعة في اللوحة الجانبية وحذف جميع الأزرار العائمة
-
-## ملخص
-نقل جميع الإجراءات من 9 أزرار عائمة (FABs) إلى **FloatingSidePanel** الموجود، ورفع موضعه لأعلى، وتحويله ليقرأ الإجراءات ديناميكياً من `quickActions.ts` حسب نوع المستخدم، مع فصل دردشة السائقين عن الدردشة العادية.
+# 🏗️ خطة التدقيق والتطوير الشاملة لمنصة iRecycle
+## 30 مرحلة تفصيلية — نتائج الفحص + خارطة التنفيذ
 
 ---
 
-## الخطوة 1: تطوير FloatingSidePanel ليقرأ من quickActions.ts ديناميكياً
-**ملف:** `src/components/layout/FloatingSidePanel.tsx`
+## 📊 إحصائيات المشروع
 
-- رفع الموضع من `top-1/2 -translate-y-1/2` إلى `top-[30%]`
-- استبدال قائمة الإجراءات الثابتة (actions array) بقراءة ديناميكية من `getQuickActionsByType()` حسب `organization_type` و `roles`
-- تقسيم الإجراءات لـ 4 فئات: **تواصل** (المساعد الذكي، الدعم، المحادثات، محادثات السائقين، سجل المكالمات) / **حرج يومي** (primary من quickActions) / **عمليات** (secondary) / **أدوات** (utility + scroll-top)
-- إضافة فئة **تواصل** منفصلة تحتوي:
-  - محادثات السائقين → `/dashboard/chat?filter=drivers` (تظهر فقط للجهات التي لديها سائقين: ناقل، أدمن)
-  - المحادثات العامة → `/dashboard/chat`
-  - سجل المكالمات → يفتح `CallLogDialog`
-  - المساعد الذكي / الدعم الفني / مساعد العمليات (يبقوا كما هم)
-- عرض أول 6-8 إجراءات من primary مباشرة، والباقي يظهر بزر "المزيد"
-
-## الخطوة 2: حذف UnifiedFloatingMenu من DashboardLayout
-**ملف:** `src/components/dashboard/DashboardLayout.tsx`
-- إزالة lazy import لـ `UnifiedFloatingMenu` (سطر 49)
-- إزالة `<Suspense><UnifiedFloatingMenu /></Suspense>` (سطر 528)
-
-## الخطوة 3: حذف جميع FABs من الداشبوردات (9 ملفات)
-
-| الداشبورد | المكون المحذوف |
-|-----------|---------------|
-| `TransporterDashboard.tsx` | `TransporterQuickFAB` |
-| `RecyclerDashboard.tsx` | `RecyclerQuickFAB` |
-| `DisposalDashboard.tsx` | `DisposalQuickFAB` |
-| `EmployeeDashboard.tsx` | `EmployeeQuickFAB` |
-| `DriverDashboard.tsx` | `DriverQuickFAB` |
-| `AdminDashboard.tsx` | `AdminMobileQuickBar` |
-| `GeneratorDashboard.tsx` | `GeneratorQuickShipmentFAB` |
-| `ConsultantDashboard.tsx` | `ConsultantQuickFAB` |
-| `ConsultingOfficeDashboard.tsx` | `ConsultantQuickFAB` |
-| `RegulatorDashboardNew.tsx` | `RegulatorQuickFAB` |
-
-في كل ملف: إزالة الـ import وإزالة الـ JSX render فقط (الملفات الأصلية للـ FABs تبقى لكن لا تُستخدم).
+| البيان | القيمة |
+|---|---|
+| إجمالي ملفات TS/TSX | 2,173 |
+| الصفحات (Pages) | 328 |
+| المكونات (Components) | 1,336 |
+| الهوكس (Hooks) | 281 |
+| حجم src/ | 42MB |
+| جداول قاعدة البيانات | 541+ |
 
 ---
 
-## التفاصيل التقنية
+## 🔴 مشاكل مكتشفة
 
-```text
-FloatingSidePanel (يسار، top-[30%])
-├── 💬 تواصل
-│   ├── المساعد الذكي (widget)
-│   ├── الدعم الفني (widget)
-│   ├── مساعد العمليات (widget)
-│   ├── المحادثات → /dashboard/chat
-│   ├── محادثات السائقين → /dashboard/chat?filter=drivers [ناقل/أدمن فقط]
-│   └── سجل المكالمات (dialog)
-├── 🔴 حرج يومي (primary actions من quickActions.ts)
-│   └── [ديناميكي حسب نوع المستخدم - أول 6-8]
-├── ⚙ عمليات (secondary actions)
-│   └── [ديناميكي - مع زر "المزيد"]
-└── 🔧 أدوات (utility + scroll-top)
-    └── [ديناميكي]
-```
+| المشكلة | العدد | الخطورة |
+|---|---|---|
+| `as any` type casts | 1,719 | ⚠️ متوسطة |
+| ألوان صلبة (black/white) | 898 | 🔴 عالية |
+| ألوان HEX في المكونات | 1,745 | ⚠️ متوسطة |
+| أسماء مكونات مكررة | 10 | ⚠️ متوسطة |
 
-- القائمة تتغير تلقائياً حسب `organization?.organization_type` و `roles`
-- الإجراءات التي تحتاج `onClick` handler (مثل `openDepositDialog`) تُعرض كأزرار navigate لصفحاتها البديلة
-- الشاشة تصبح نظيفة تماماً بدون أي زر عائم
+---
 
+## حالة المراحل
+
+- ✅ المرحلة 1: البنية التحتية — مكتملة
+- ⏳ المرحلة 2-30: في الانتظار
+
+## الأولويات الفورية
+1. 🔴 الألوان الصلبة → تحويل لـ semantic tokens
+2. 🔴 RLS Policies → فحص أمني
+3. ⚠️ as any casts → تقليل تدريجي
