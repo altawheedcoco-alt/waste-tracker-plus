@@ -165,7 +165,18 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'driver_notification':
     case 'driver_sos':
     case 'driver_license_expiry':
+    case 'driver_alert_admin':
+    case 'driver_online':
+    case 'driver_rating':
+    case 'driver_financial':
+    case 'earning':
       return '/dashboard/transporter-drivers';
+
+    // Driver emergencies → fleet tracking
+    case 'driver_emergency':
+    case 'driver_emergency_admin':
+    case 'transport_incident':
+      return '/dashboard/fleet-tracking';
 
     // Work orders
     case 'work_order':
