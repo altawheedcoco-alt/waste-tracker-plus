@@ -1,15 +1,15 @@
 import React from 'react';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import DigitalWalletPanel from '@/components/wallet/DigitalWalletPanel';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const DigitalWallet = () => (
-    <DashboardLayout>
+  <DashboardLayout>
     <div className="space-y-4">
       <BackButton />
       <DigitalWalletPanel />
     </div>
-)</DashboardLayout>
-));
+  </DashboardLayout>
+);
 
 export default DigitalWallet;
