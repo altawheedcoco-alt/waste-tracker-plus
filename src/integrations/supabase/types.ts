@@ -42895,6 +42895,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_presence: {
+        Row: {
+          last_active_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_active_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_active_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_quick_action_preferences: {
         Row: {
           action_order: string[]

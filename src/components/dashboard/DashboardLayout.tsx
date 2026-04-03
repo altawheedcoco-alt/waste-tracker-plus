@@ -38,6 +38,7 @@ import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
+import { useUserActivityPresence } from '@/hooks/useUserActivityPresence';
 
 // Extracted components
 import DashboardHeader from './DashboardHeader';
@@ -55,6 +56,8 @@ interface DashboardLayoutProps {
 const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
+  // Smart presence — tracks online/away/offline for notification delivery
+  useUserActivityPresence();
   
   const { fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
