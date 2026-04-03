@@ -170,8 +170,8 @@ export function useIncomingClaims() {
       if (!data?.length) return [];
 
       // Enrich with org names
-      const orgIds = [...new Set(data.map((d: any) => d.requesting_org_id))];
-      const extIds = [...new Set(data.map((d: any) => d.external_partner_id))];
+      const orgIds = Array.from(new Set(data.map((d: any) => d.requesting_org_id)));
+      const extIds = Array.from(new Set(data.map((d: any) => d.external_partner_id)));
 
       const [orgsRes, extRes] = await Promise.all([
         supabase.from('organizations').select('id, name, organization_type, logo_url').in('id', orgIds as string[]),
