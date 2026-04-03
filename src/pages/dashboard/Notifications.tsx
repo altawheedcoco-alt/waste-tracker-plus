@@ -686,7 +686,7 @@ const NotificationCard = ({
 }: NotificationCardProps) => {
   const Icon = getNotificationIcon(notification.type);
   const iconColorClass = getNotificationColor(notification.type);
-  const badge = getNotificationBadge(notification.type);
+  const badge = _getBadge(notification.type);
   const priority = getPriorityLevel(notification);
   const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
   const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
