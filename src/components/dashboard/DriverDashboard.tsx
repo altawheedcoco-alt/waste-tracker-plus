@@ -66,6 +66,8 @@ const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverS
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
 const DriverEarningsSummary = lazy(() => import('@/components/dashboard/driver/DriverEarningsSummary'));
+const DriverSafetyScoreWidget = lazy(() => import('@/components/dashboard/driver/DriverSafetyScoreWidget'));
+const DriverTripHistoryWidget = lazy(() => import('@/components/dashboard/driver/DriverTripHistoryWidget'));
 
 
 import DriverPerformanceStrip from '@/components/driver/DriverPerformanceStrip';
@@ -303,7 +305,11 @@ const DriverDashboard = () => {
       <DriverTodayProgress shipments={shipments} />
 
       {/* ★ ملخص أداء السائق */}
-      <Suspense fallback={null}><DriverEarningsSummary /></Suspense>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Suspense fallback={null}><DriverEarningsSummary /></Suspense>
+        <Suspense fallback={null}><DriverSafetyScoreWidget /></Suspense>
+      </div>
+      <Suspense fallback={null}><DriverTripHistoryWidget /></Suspense>
 
       <DriverAssignmentAlert />
 
