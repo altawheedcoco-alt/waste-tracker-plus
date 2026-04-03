@@ -163,7 +163,7 @@ export function useReelActions() {
   });
 
   const addComment = useMutation({
-    mutationFn: async ({ reelId, content }: { reelId: string; content: string }) => {
+    mutationFn: async ({ reelId, content, reelOwnerId }: { reelId: string; content: string; reelOwnerId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase.from('reel_comments').insert({
         reel_id: reelId,
@@ -171,6 +171,21 @@ export function useReelActions() {
         content,
       });
       if (error) throw error;
+
+      // Notify reel owner about the comment
+      if (reelOwnerId && reelOwnerId !== user.id) {
+        try {
+          import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+            notifySocialEvent({
+              type: 'reel_commented',
+              actorName: content.slice(0, 50),
+              actorUserId: user.id,
+              targetUserId: reelOwnerId,
+              entityId: reelId,
+            });
+          });
+        } catch {}
+      }
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['reel-comments', vars.reelId] });
