@@ -21,6 +21,7 @@ interface Props {
 
 const LeafletDriverHistory = memo(({ driverId, driverName, date, path: externalPath, height = '400px', className }: Props) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
   const [path, setPath] = useState<[number, number][]>(externalPath || []);
 
   // Fetch history from DB if no external path provided
@@ -59,8 +60,16 @@ const LeafletDriverHistory = memo(({ driverId, driverName, date, path: externalP
 
   useEffect(() => {
     if (!mapRef.current) return;
-    const map = L.map(mapRef.current).setView(EGYPT_CENTER, DEFAULT_ZOOM);
-    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
+
+    // Clean up previous instance
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
+
+    const map = L.map(mapRef.current, { zoomControl: true }).setView(EGYPT_CENTER, DEFAULT_ZOOM);
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
+    mapInstanceRef.current = map;
 
     if (path.length > 1) {
       const polyline = L.polyline(path, { color: '#8b5cf6', weight: 3, opacity: 0.8 }).addTo(map);
@@ -75,11 +84,27 @@ const LeafletDriverHistory = memo(({ driverId, driverName, date, path: externalP
       L.marker(path[0], { icon: startIcon }).addTo(map).bindPopup(`بداية رحلة ${driverName}`);
       L.marker(path[path.length - 1], { icon: endIcon }).addTo(map).bindPopup(`نهاية رحلة ${driverName}`);
       map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
-    } else if (path.length === 0) {
-      // No data message
     }
 
-    return () => { map.remove(); };
+    // Fix grey tiles: invalidateSize after container is fully rendered (especially inside dialogs)
+    const timers = [
+      setTimeout(() => map.invalidateSize(), 100),
+      setTimeout(() => map.invalidateSize(), 300),
+      setTimeout(() => map.invalidateSize(), 600),
+    ];
+
+    // Also listen for resize
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    if (mapRef.current) resizeObserver.observe(mapRef.current);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      resizeObserver.disconnect();
+      map.remove();
+      mapInstanceRef.current = null;
+    };
   }, [path, driverName]);
 
   return (
@@ -89,7 +114,7 @@ const LeafletDriverHistory = memo(({ driverId, driverName, date, path: externalP
           لا توجد بيانات مسار لهذا اليوم
         </div>
       )}
-      <div ref={mapRef} className={className} style={{ height }} />
+      <div ref={mapRef} className={className} style={{ height, minHeight: '300px' }} />
     </div>
   );
 });
