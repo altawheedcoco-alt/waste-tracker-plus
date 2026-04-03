@@ -17,6 +17,11 @@ const DEMO_PASSWORD = 'Demo@575757';
 const ACCESS_PIN_HASH = '575757';
 const SESSION_WAIT_MS = 15000;
 const SESSION_POLL_MS = 250;
+const UNAVAILABLE_DEMO_EMAILS = new Set([
+  'altawheedco.co@gmail.com',
+  'altawheedforwasteandwoodtrade@gmail.com',
+  'driver940@transport.local',
+]);
 
 interface DemoAccount {
   email: string;
@@ -47,15 +52,15 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     hint: 'المنظمات التشغيلية',
     accounts: [
       { email: 'generator@demo.com', label: 'شركة التوليد', entityLabel: 'شركة التوليد للنفايات', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-      { email: 'demo-generator@irecycle.test', label: 'المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'demo-generator@irecycle.test', label: 'مولد مخلفات تجريبي', entityLabel: 'شركة المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'generator2@demo.com', label: 'الصناعات البلاستيكية', entityLabel: 'مصنع الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'transporter@demo.com', label: 'النقل السريع', entityLabel: 'شركة النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
-      { email: 'demo-transporter@irecycle.test', label: 'النقل التجريبية', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
+      { email: 'demo-transporter@irecycle.test', label: 'ناقل مخلفات تجريبي', entityLabel: 'شركة النقل التجريبية', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
       { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
       { email: 'recycler@demo.com', label: 'التدوير الخضراء', entityLabel: 'شركة إعادة التدوير الخضراء', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
-      { email: 'demo-recycler@irecycle.test', label: 'التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+      { email: 'demo-recycler@irecycle.test', label: 'معيد تدوير تجريبي', entityLabel: 'شركة التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
       { email: 'disposal@demo.com', label: 'الأمان للتخلص', entityLabel: 'شركة الأمان للتخلص الآمن من النفايات الخطرة', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
-      { email: 'demo-disposal@irecycle.test', label: 'التخلص التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+      { email: 'demo-disposal@irecycle.test', label: 'جهة تخلص آمن', entityLabel: 'شركة التخلص الآمن التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
       { email: 'municipal@irecycle.test', label: 'النظافة المتحدة', entityLabel: 'شركة النظافة المتحدة', desc: 'مقاول بلدي 🏗️', icon: HardHat, color: 'from-lime-600 to-green-800' },
     ],
   },
@@ -101,10 +106,10 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: Car,
     hint: 'كيان مستقل — المؤجر يعمل برابط مؤقت فقط بدون حساب',
     accounts: [
-      { email: 'company-driver@irecycle.test', label: 'سائق تابع', entityLabel: 'التوحيد لنقل المخلفات', desc: 'موظف دائم بحساب كامل — صلاحيات تشغيلية 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'company-driver@irecycle.test', label: 'سائق تابع تجريبي', entityLabel: 'التوحيد لنقل المخلفات', desc: 'موظف دائم بحساب كامل — صلاحيات تشغيلية 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
       { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'نموذج Uber — سوق شحنات + محفظة + تحليلات 🟢', icon: Zap, color: 'from-emerald-500 to-green-700' },
       { email: 'hired-driver@irecycle.test', label: 'سائق مؤجر', desc: 'سائق حر مؤجر تجريبي 🔄', icon: User, color: 'from-violet-500 to-purple-700' },
-      { email: 'demo-driver@irecycle.test', label: 'سائق التوحيد', entityLabel: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'سائق تابع لجهة التوحيد 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'demo-driver@irecycle.test', label: 'سائق تجريبي', entityLabel: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'سائق تابع لجهة التوحيد 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'driver@demo.com', label: 'سائق النقل السريع', entityLabel: 'شركة النقل السريع', desc: 'سائق تابع لجهة النقل السريع 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', entityLabel: 'عبدالله الناقل للنقل', desc: 'سائق تابع لجهة عبدالله 🏢', icon: Car, color: 'from-pink-500 to-rose-700' },
       { email: 'driver940@transport.local', label: 'محمد (سائق)', entityLabel: 'عبدالله الناقل للنقل', desc: 'سائق عبدالله الناقل 🚗', icon: Car, color: 'from-amber-500 to-orange-700' },
@@ -126,7 +131,7 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: Landmark,
     hint: 'الجهات الحكومية الرقابية',
     accounts: [
-      { email: 'wmra@irecycle.demo', label: 'WMRA', desc: 'تنظيم المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
+      { email: 'wmra@irecycle.demo', label: 'WMRA', entityLabel: 'جهاز تنظيم إدارة المخلفات (WMRA)', desc: 'تنظيم المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
       { email: 'eeaa@irecycle.demo', label: 'EEAA', entityLabel: 'جهاز شؤون البيئة (EEAA)', desc: 'شؤون البيئة', icon: Leaf, color: 'from-green-600 to-green-800' },
       { email: 'ltra@irecycle.demo', label: 'LTRA', entityLabel: 'جهاز تنظيم النقل البري (LTRA)', desc: 'تنظيم النقل', icon: Truck, color: 'from-blue-600 to-blue-800' },
       { email: 'ida@irecycle.demo', label: 'IDA', entityLabel: 'الهيئة العامة للتنمية الصناعية (IDA)', desc: 'التنمية الصناعية', icon: HardHat, color: 'from-amber-600 to-amber-800' },
@@ -169,7 +174,10 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     return false;
   };
 
-  const handleQuickLogin = async (email: string, label: string) => {
+  const handleQuickLogin = async (account: DemoAccount) => {
+    const email = account.email;
+    const displayName = account.entityLabel || account.label;
+
     setLoading(email);
     onLoginStart?.();
     try {
@@ -179,7 +187,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {
-          toast({ title: 'بيانات الدخول غير صحيحة', description: 'تأكد من أن الحساب مفعل', variant: 'destructive' });
+          toast({ title: 'الحساب التجريبي غير متاح', description: `تم تعطيل حساب ${displayName} مؤقتاً من الدخول السريع.` });
         } else {
           throw error;
         }
@@ -188,12 +196,12 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
 
       const sessionReady = await waitForSession(email);
       if (!sessionReady) {
-        toast({ title: 'تم تسجيل الدخول ✅', description: `جارٍ تجهيز حساب ${label}...` });
+        toast({ title: 'تم تسجيل الدخول ✅', description: `جارٍ تجهيز حساب ${displayName}...` });
         navigate('/dashboard', { replace: true });
         return;
       }
 
-      toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
+      toast({ title: 'تم الدخول ✅', description: `تم الدخول إلى ${displayName}` });
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
@@ -270,7 +278,9 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
-                        {group.accounts.map((account, i) => (
+                        {group.accounts
+                          .filter((account) => !UNAVAILABLE_DEMO_EMAILS.has(account.email))
+                          .map((account, i) => (
                           <motion.button
                             key={account.email}
                             type="button"
@@ -279,7 +289,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                             transition={{ delay: i * 0.04 }}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.97 }}
-                            onClick={() => handleQuickLogin(account.email, account.label)}
+                            onClick={() => handleQuickLogin(account)}
                             disabled={loading !== null}
                             className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/40 bg-card/50 hover:bg-primary/5 transition-all disabled:opacity-50 text-right"
                           >
