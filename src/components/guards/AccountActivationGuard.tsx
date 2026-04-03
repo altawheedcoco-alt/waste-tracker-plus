@@ -11,7 +11,39 @@ interface Props {
 }
 
 const AccountActivationGuard = ({ children }: Props) => {
-  // ⚠️ TEMPORARILY BYPASSED FOR TESTING — re-enable after testing
+  const { organization, loading, user } = useAuth();
+  const location = useLocation();
+
+  // Don't guard non-dashboard routes
+  if (!location.pathname.startsWith('/dashboard')) {
+    return <>{children}</>;
+  }
+
+  // Still loading auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Not logged in — let auth guard handle
+  if (!user) {
+    return <>{children}</>;
+  }
+
+  // Allow access to pending page, settings, profile
+  const allowedPaths = ['/dashboard/pending-activation', '/dashboard/settings', '/dashboard/profile'];
+  if (allowedPaths.some(p => location.pathname.startsWith(p))) {
+    return <>{children}</>;
+  }
+
+  // Check if organization is active
+  if (organization && organization.status !== 'active' && organization.status !== 'approved') {
+    return <Navigate to="/dashboard/pending-activation" replace />;
+  }
+
   return <>{children}</>;
 };
 
