@@ -38,6 +38,7 @@ import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
+import { useUserActivityPresence } from '@/hooks/useUserActivityPresence';
 
 // Extracted components
 import DashboardHeader from './DashboardHeader';
