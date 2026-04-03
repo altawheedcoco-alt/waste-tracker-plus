@@ -66,11 +66,11 @@ export default function BenchmarkIndicator() {
         },
         {
           id: 'completion', label: 'معدل الإنجاز', yourValue: yourCompletionRate,
-          avgValue: avgCompletion, unit: '%', higherIsBetter: true,
+          avgValue: 70, unit: '%', higherIsBetter: true,
         },
         {
           id: 'tonnage', label: 'إجمالي الحمولة', yourValue: Math.round(yourTons * 10) / 10,
-          avgValue: Math.round(avgShipments * 2.5 * 10) / 10, unit: 'طن', higherIsBetter: true,
+          avgValue: avgTons, unit: 'طن', higherIsBetter: true,
         },
         {
           id: 'efficiency', label: 'الكفاءة التشغيلية',
