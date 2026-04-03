@@ -65,7 +65,7 @@ const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard
 const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverStats'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
-const DriverQuickFAB = lazy(() => import('@/components/driver/DriverQuickFAB'));
+
 
 import DriverPerformanceStrip from '@/components/driver/DriverPerformanceStrip';
 import DriverTodayProgress from '@/components/driver/DriverTodayProgress';
