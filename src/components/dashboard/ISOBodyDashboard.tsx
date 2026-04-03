@@ -162,6 +162,9 @@ const ISOBodyDashboard = memo(() => {
           {/* Monthly Activity */}
           <ISOMonthlyActivity audits={allAudits} />
 
+          {/* ★ ودجة تقويم المراجعات */}
+          <Suspense fallback={null}><AuditCalendarWidget /></Suspense>
+
           {/* Completion Rate */}
           <Card>
             <CardContent className="p-6 text-center">

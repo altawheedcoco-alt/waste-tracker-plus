@@ -162,6 +162,9 @@ const EmployeeDashboard = () => {
           {/* Context-aware quick actions */}
           <EmployeeContextWidgets orgType={orgType} />
 
+          {/* ★ ملخص المهام الأسبوعي */}
+          <Suspense fallback={null}><EmployeeTaskSummary /></Suspense>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Leave Balances */}
             {stats && <EmployeeLeaveWidget balances={stats.leaveBalances} />}

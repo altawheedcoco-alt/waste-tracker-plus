@@ -302,6 +302,9 @@ const DriverDashboard = () => {
       {/* Today Progress */}
       <DriverTodayProgress shipments={shipments} />
 
+      {/* ★ ملخص أداء السائق */}
+      <Suspense fallback={null}><DriverEarningsSummary /></Suspense>
+
       <DriverAssignmentAlert />
 
       <DriverDailySummary
