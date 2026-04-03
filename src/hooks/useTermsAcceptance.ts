@@ -21,9 +21,41 @@ export const useTermsAcceptance = () => {
   const [acceptance, setAcceptance] = useState<TermsAcceptance | null>(null);
 
   useEffect(() => {
-    // ⚠️ TEMPORARILY BYPASSED FOR TESTING — re-enable after testing
-    setHasAcceptedTerms(true);
-    setLoading(false);
+    const checkTerms = async () => {
+      if (!user || !organization) {
+        setHasAcceptedTerms(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('terms_acceptances')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('organization_id', organization.id)
+          .eq('terms_version', CURRENT_TERMS_VERSION)
+          .maybeSingle();
+
+        if (error) {
+          console.error('[TermsAcceptance] Check failed:', error.message);
+          // On error, allow access to prevent blocking users
+          setHasAcceptedTerms(true);
+        } else if (data) {
+          setAcceptance(data as TermsAcceptance);
+          setHasAcceptedTerms(true);
+        } else {
+          setHasAcceptedTerms(false);
+        }
+      } catch (err) {
+        console.error('[TermsAcceptance] Unexpected error:', err);
+        setHasAcceptedTerms(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkTerms();
   }, [user, organization]);
 
   const markAsAccepted = () => {
