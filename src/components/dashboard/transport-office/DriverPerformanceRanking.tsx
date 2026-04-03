@@ -18,13 +18,33 @@ const DriverPerformanceRanking = () => {
     queryFn: async () => {
       if (!organization?.id) return [];
 
-      // جلب السائقين المرتبطين بالمكتب
-      const { data: links } = await supabase
-        .from('driver_organization_links')
-        .select('driver_id, profiles!driver_organization_links_driver_id_fkey(id, full_name, avatar_url)')
-        .eq('organization_id', organization.id)
-        .eq('status', 'active')
-        .limit(10);
+      // جلب الشحنات المرتبطة بالمنظمة لتحليل أداء السائقين
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('driver_id, status, created_at')
+        .eq('transporter_id', organization.id)
+        .not('driver_id', 'is', null)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .limit(500);
+
+      if (!shipments?.length) return [];
+
+      // تجميع أداء السائقين
+      const driverMap = new Map<string, { total: number; completed: number }>();
+      shipments.forEach((s: any) => {
+        if (!s.driver_id) return;
+        const d = driverMap.get(s.driver_id) || { total: 0, completed: 0 };
+        d.total++;
+        if (['delivered', 'confirmed'].includes(s.status)) d.completed++;
+        driverMap.set(s.driver_id, d);
+      });
+
+      // جلب أسماء السائقين
+      const driverIds = Array.from(driverMap.keys());
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', driverIds);
 
       if (!links?.length) return [];
 
