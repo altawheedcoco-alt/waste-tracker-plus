@@ -801,6 +801,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
       { icon: BarChart3, labelAr: 'التحليل التفصيلي', labelEn: 'Detailed Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: Activity, labelAr: 'خريطة التدفق', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+      { icon: TrendingUp, labelAr: 'المقارنة المعيارية', labelEn: 'Benchmarking', path: '/dashboard/benchmarking', key: 'benchmarking', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
     ],
   },
