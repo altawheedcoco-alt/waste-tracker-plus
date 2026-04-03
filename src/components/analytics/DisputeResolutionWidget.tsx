@@ -1,5 +1,5 @@
 /**
- * DisputeResolutionWidget — تتبع النزاعات والشكاوى
+ * DisputeResolutionWidget — تتبع النزاعات (من shipment_logs)
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,37 +15,44 @@ export default function DisputeResolutionWidget() {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  const { data: disputes, isLoading } = useQuery({
-    queryKey: ['disputes', orgId],
+  const { data, isLoading } = useQuery({
+    queryKey: ['dispute-resolution', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('disputes')
-        .select('status, priority, created_at, resolved_at')
-        .or(`raised_by_org.eq.${orgId},against_org.eq.${orgId}`)
-        .limit(200);
-      return data || [];
+      // Use shipments with status issues as proxy for disputes
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('status, created_at, delivered_at')
+        .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
+        .limit(500);
+      return shipments || [];
     },
   });
 
   const stats = useMemo(() => {
-    if (!disputes) return { total: 0, resolved: 0, pending: 0, resolutionRate: 0, avgDays: 0 };
-    const resolved = disputes.filter(d => d.status === 'resolved' || d.status === 'closed');
-    const pending = disputes.filter(d => d.status === 'open' || d.status === 'pending');
+    if (!data) return { total: 0, delivered: 0, cancelled: 0, pending: 0, deliveryRate: 0, avgDays: 0 };
+    const delivered = data.filter(s => s.status === 'delivered');
+    const cancelled = data.filter(s => s.status === 'cancelled');
+    const pending = data.filter(s => !['delivered', 'cancelled', 'confirmed'].includes(s.status || ''));
+    
     let totalDays = 0;
-    resolved.forEach(d => {
-      if (d.resolved_at) {
-        totalDays += (new Date(d.resolved_at).getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24);
+    let counted = 0;
+    delivered.forEach(s => {
+      if (s.delivered_at) {
+        totalDays += (new Date(s.delivered_at).getTime() - new Date(s.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        counted++;
       }
     });
+
     return {
-      total: disputes.length,
-      resolved: resolved.length,
+      total: data.length,
+      delivered: delivered.length,
+      cancelled: cancelled.length,
       pending: pending.length,
-      resolutionRate: disputes.length > 0 ? Math.round((resolved.length / disputes.length) * 100) : 0,
-      avgDays: resolved.length > 0 ? Math.round(totalDays / resolved.length) : 0,
+      deliveryRate: data.length > 0 ? Math.round((delivered.length / data.length) * 100) : 0,
+      avgDays: counted > 0 ? Math.round(totalDays / counted) : 0,
     };
-  }, [disputes]);
+  }, [data]);
 
   if (isLoading) return <Skeleton className="h-[240px] w-full rounded-xl" />;
 
@@ -54,32 +61,32 @@ export default function DisputeResolutionWidget() {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <MessageSquareWarning className="h-5 w-5 text-primary" />
-          النزاعات والشكاوى
+          معدل إتمام العمليات
         </CardTitle>
       </CardHeader>
       <CardContent>
         {stats.total === 0 ? (
           <div className="text-center py-6">
-            <CheckCircle2 className="h-8 w-8 mx-auto text-green-500 mb-2" />
-            <p className="text-sm text-muted-foreground">لا توجد نزاعات — أداء ممتاز! 🎉</p>
+            <CheckCircle2 className="h-8 w-8 mx-auto text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">لا توجد عمليات بعد</p>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm">نسبة الحل</span>
-              <Badge variant={stats.resolutionRate >= 80 ? 'default' : 'destructive'}>{stats.resolutionRate}%</Badge>
+              <span className="text-sm">نسبة الإتمام</span>
+              <Badge variant={stats.deliveryRate >= 80 ? 'default' : 'destructive'}>{stats.deliveryRate}%</Badge>
             </div>
-            <Progress value={stats.resolutionRate} className="h-2" />
+            <Progress value={stats.deliveryRate} className="h-2" />
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 rounded-lg bg-muted/50">
-                <AlertCircle className="h-4 w-4 mx-auto text-orange-500 mb-1" />
+                <AlertCircle className="h-4 w-4 mx-auto text-primary mb-1" />
                 <div className="text-lg font-bold">{stats.pending}</div>
-                <div className="text-[10px] text-muted-foreground">معلقة</div>
+                <div className="text-[10px] text-muted-foreground">قيد التنفيذ</div>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
-                <CheckCircle2 className="h-4 w-4 mx-auto text-green-500 mb-1" />
-                <div className="text-lg font-bold">{stats.resolved}</div>
-                <div className="text-[10px] text-muted-foreground">محلولة</div>
+                <CheckCircle2 className="h-4 w-4 mx-auto text-primary mb-1" />
+                <div className="text-lg font-bold">{stats.delivered}</div>
+                <div className="text-[10px] text-muted-foreground">مكتملة</div>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
                 <Clock className="h-4 w-4 mx-auto text-primary mb-1" />

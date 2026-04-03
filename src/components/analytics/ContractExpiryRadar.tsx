@@ -1,5 +1,5 @@
 /**
- * ContractExpiryRadar — رادار انتهاء العقود
+ * ContractExpiryRadar — رادار انتهاء التراخيص
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,9 +20,9 @@ export default function ContractExpiryRadar() {
     queryFn: async () => {
       const { data } = await supabase
         .from('permits')
-        .select('permit_type, expiry_date, status, permit_number')
+        .select('permit_type, valid_until, status, permit_number')
         .eq('organization_id', orgId!)
-        .order('expiry_date', { ascending: true })
+        .order('valid_until', { ascending: true })
         .limit(20);
       return data || [];
     },
@@ -36,15 +36,15 @@ export default function ContractExpiryRadar() {
     const safe: typeof permits = [];
 
     (permits || []).forEach(p => {
-      if (!p.expiry_date) return safe.push(p);
-      const days = Math.ceil((new Date(p.expiry_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (days < 0) expired.push(p);
-      else if (days <= 15) critical.push(p);
-      else if (days <= 45) warning.push(p);
-      else safe.push(p);
+      if (!p.valid_until) return safe!.push(p);
+      const days = Math.ceil((new Date(p.valid_until).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (days < 0) expired!.push(p);
+      else if (days <= 15) critical!.push(p);
+      else if (days <= 45) warning!.push(p);
+      else safe!.push(p);
     });
 
-    return { expired, critical, warning, safe };
+    return { expired: expired!, critical: critical!, warning: warning!, safe: safe! };
   }, [permits]);
 
   if (isLoading) return <Skeleton className="h-[260px] w-full rounded-xl" />;
@@ -76,13 +76,13 @@ export default function ContractExpiryRadar() {
               </div>
             )}
             {categorized.critical.length > 0 && (
-              <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <div className="p-2 rounded-lg border border-orange-500/20" style={{ backgroundColor: 'hsl(var(--chart-4) / 0.1)' }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <Clock className="h-4 w-4 text-orange-500" />
-                  <span className="text-xs font-bold text-orange-500">حرجة - أقل من 15 يوم ({categorized.critical.length})</span>
+                  <Clock className="h-4 w-4" style={{ color: 'hsl(var(--chart-4))' }} />
+                  <span className="text-xs font-bold" style={{ color: 'hsl(var(--chart-4))' }}>حرجة - أقل من 15 يوم ({categorized.critical.length})</span>
                 </div>
                 {categorized.critical.slice(0, 3).map((p, i) => (
-                  <div key={i} className="text-[11px] text-muted-foreground">{p.permit_type} - ينتهي {p.expiry_date}</div>
+                  <div key={i} className="text-[11px] text-muted-foreground">{p.permit_type} - ينتهي {p.valid_until}</div>
                 ))}
               </div>
             )}
@@ -91,12 +91,12 @@ export default function ContractExpiryRadar() {
                 <div className="text-lg font-bold text-destructive">{categorized.expired.length}</div>
                 <div className="text-[10px] text-muted-foreground">منتهية</div>
               </div>
-              <div className="p-2 rounded-lg bg-orange-500/10">
-                <div className="text-lg font-bold text-orange-500">{categorized.critical.length + categorized.warning.length}</div>
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'hsl(var(--chart-4) / 0.1)' }}>
+                <div className="text-lg font-bold" style={{ color: 'hsl(var(--chart-4))' }}>{categorized.critical.length + categorized.warning.length}</div>
                 <div className="text-[10px] text-muted-foreground">تحذير</div>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
-                <div className="text-lg font-bold text-green-500">{categorized.safe.length}</div>
+                <div className="text-lg font-bold text-primary">{categorized.safe.length}</div>
                 <div className="text-[10px] text-muted-foreground">سارية</div>
               </div>
             </div>
