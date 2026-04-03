@@ -12,18 +12,15 @@ const EntityRankingWidget = () => {
     queryKey: ['entity-ranking', organization?.id],
     enabled: !!organization?.id,
     queryFn: async () => {
-      // Get gamification profiles ordered by points
       const { data } = await supabase
-        .from('gamification_profiles')
-        .select('total_points, level, current_streak, organization_id')
+        .from('user_points')
+        .select('total_points, organization_id')
         .order('total_points', { ascending: false })
         .limit(10);
 
       return (data || []).map((item, idx) => ({
         rank: idx + 1,
         points: item.total_points || 0,
-        level: item.level || 1,
-        streak: item.current_streak || 0,
         isMe: item.organization_id === organization?.id,
       }));
     },
@@ -33,9 +30,9 @@ const EntityRankingWidget = () => {
   const myRank = rankings.find(r => r.isMe);
 
   const RankIcon = ({ rank }: { rank: number }) => {
-    if (rank === 1) return <Crown className="h-4 w-4 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;
-    if (rank === 3) return <Trophy className="h-4 w-4 text-amber-600" />;
+    if (rank === 1) return <Crown className="h-4 w-4 text-primary" />;
+    if (rank === 2) return <Medal className="h-4 w-4 text-muted-foreground" />;
+    if (rank === 3) return <Trophy className="h-4 w-4 text-accent-foreground" />;
     return <span className="text-xs font-bold text-muted-foreground w-4 text-center">{rank}</span>;
   };
 
@@ -44,7 +41,7 @@ const EntityRankingWidget = () => {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
-            <Star className="h-4 w-4 text-yellow-500" />
+            <Star className="h-4 w-4 text-primary" />
             ترتيب الجهات
           </CardTitle>
           {myRank && (
@@ -70,9 +67,6 @@ const EntityRankingWidget = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Lv.{r.level}
-                </Badge>
                 <span className="text-xs font-medium">{r.points.toLocaleString('ar-EG')} نقطة</span>
               </div>
             </div>

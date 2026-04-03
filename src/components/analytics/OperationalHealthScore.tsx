@@ -31,10 +31,10 @@ const OperationalHealthScore = () => {
           .gte('created_at', thirtyDaysAgo.toISOString()),
         supabase.from('shipments').select('id', { count: 'exact', head: true })
           .eq('generator_id', organization!.id)
-          .eq('status', 'pending'),
+          .eq('status', 'new'),
         supabase.from('shipments').select('id', { count: 'exact', head: true })
           .eq('generator_id', organization!.id)
-          .eq('status', 'pending')
+          .eq('status', 'new')
           .lt('created_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()),
       ]);
 
