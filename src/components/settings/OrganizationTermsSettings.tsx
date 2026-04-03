@@ -309,17 +309,19 @@ const OrganizationTermsSettings = () => {
             </div>
           </div>
 
-          {/* View Full Document Button */}
-          <div className="pt-4 border-t">
-            <Button 
-              onClick={() => setShowTermsDialog(true)}
-              className="gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              عرض وثيقة الموافقة الكاملة
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2">
-              يمكنك طباعة أو تحميل الوثيقة كملف PDF من نافذة العرض
+          {/* View Full Document & Download PDF */}
+          <div className="pt-4 border-t space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                onClick={() => setShowTermsDialog(true)}
+                className="gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                عرض وثيقة الهوية والشروط
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              مستند PDF يتضمن: بيانات الموقّع — صور إثبات الهوية — الشروط والأحكام — التوقيع الإلكتروني
             </p>
           </div>
         </CardContent>
