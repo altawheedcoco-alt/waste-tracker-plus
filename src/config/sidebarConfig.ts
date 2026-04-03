@@ -268,6 +268,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Containers', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassign', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Zap, labelAr: 'التنبؤ بالأعطال', labelEn: 'Predictive Failure', path: '/dashboard/predictive-failure', key: 'predictive-failure', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: Fuel, labelAr: 'إدارة الوقود', labelEn: 'Fuel Management', path: '/dashboard/fuel-management', key: 'fuel-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
@@ -591,6 +592,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Gauge, labelAr: 'لوحة العمليات', labelEn: 'Operations', path: '/dashboard/operations', key: 'operations', bindingType: 'internal' as const },
       { icon: CheckSquare, labelAr: 'المهام', labelEn: 'Tasks', path: '/dashboard/task-board', key: 'task-board', bindingType: 'internal' as const },
+      { icon: ClipboardCheck, labelAr: 'مراقبة الجودة', labelEn: 'Quality Control', path: '/dashboard/quality-control', key: 'quality-control', bindingType: 'internal' as const },
+      { icon: Repeat, labelAr: 'الخدمات الدورية', labelEn: 'Recurring Services', path: '/dashboard/recurring-services', key: 'recurring-services', bindingType: 'internal' as const },
       { icon: ClipboardList, labelAr: 'سجل الأنشطة', labelEn: 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records', bindingType: 'hybrid' as const },
     ],
@@ -706,6 +709,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Package, labelAr: 'المخزون', labelEn: 'Inventory', path: '/dashboard/erp/inventory', key: 'erp-inventory', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
+      { icon: Boxes, labelAr: 'المخزون الذكي', labelEn: 'Smart Inventory', path: '/dashboard/smart-inventory', key: 'smart-inventory', bindingType: 'internal' as const },
       { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'create_deposits'] },
     ],
   },
@@ -763,6 +767,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health-main', bindingType: 'internal' as const },
       { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'ohs-safety', bindingType: 'hybrid' as const },
       { icon: Activity, labelAr: 'البرنامج الطبي', labelEn: 'Medical Program', path: '/dashboard/medical-program', key: 'medical-program', bindingType: 'internal' as const },
+      { icon: AlertTriangle, labelAr: 'الاستجابة للطوارئ', labelEn: 'Emergency Response', path: '/dashboard/emergency-response', key: 'emergency-response', bindingType: 'internal' as const },
     ],
   },
 
@@ -796,6 +801,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
       { icon: BarChart3, labelAr: 'التحليل التفصيلي', labelEn: 'Detailed Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: Activity, labelAr: 'خريطة التدفق', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+      { icon: TrendingUp, labelAr: 'المقارنة المعيارية', labelEn: 'Benchmarking', path: '/dashboard/benchmarking', key: 'benchmarking', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
     ],
   },
@@ -843,6 +849,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Megaphone, labelAr: 'الطلبات', labelEn: 'Demand', path: '/dashboard/b2b-marketplace?tab=demand', key: 'b2b-demand', bindingType: 'hybrid' as const },
       { icon: Package, labelAr: 'عروضي', labelEn: 'My Listings', path: '/dashboard/b2b-marketplace?tab=my-listings', key: 'b2b-listings', bindingType: 'hybrid' as const },
       { icon: Handshake, labelAr: 'صفقاتي', labelEn: 'Deals', path: '/dashboard/b2b-marketplace?tab=deals', key: 'b2b-deals', bindingType: 'hybrid' as const },
+      { icon: Crown, labelAr: 'برنامج ولاء B2B', labelEn: 'B2B Loyalty', path: '/dashboard/b2b-loyalty', key: 'b2b-loyalty', bindingType: 'hybrid' as const },
+      { icon: TrendingUp, labelAr: 'التسعير الديناميكي', labelEn: 'Dynamic Pricing', path: '/dashboard/dynamic-pricing', key: 'dynamic-pricing', bindingType: 'hybrid' as const },
       { icon: ArrowLeftRight, labelAr: 'قواعد الرؤية', labelEn: 'Visibility Rules', path: '/dashboard/b2b-marketplace?tab=rules', key: 'b2b-rules', bindingType: 'hybrid' as const },
     ],
   },
@@ -1117,6 +1125,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Headphones, labelAr: 'الدعم', labelEn: 'Support', path: '/dashboard/support', key: 'support', bindingType: 'internal' as const },
+      { icon: Brain, labelAr: 'مركز المساعدة الذكي', labelEn: 'Smart Help Center', path: '/dashboard/help-center', key: 'help-center', bindingType: 'internal' as const },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'Status', path: '/dashboard/system-status', key: 'all-system-status', bindingType: 'internal' as const },
       { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform', bindingType: 'internal' as const },
     ],
