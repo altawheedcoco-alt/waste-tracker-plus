@@ -30,6 +30,10 @@ export function useGlobalCall() {
   return ctx;
 }
 
+export function useGlobalCallSafe() {
+  return useContext(GlobalCallContext);
+}
+
 export default function GlobalCallProvider({ children }: { children: ReactNode }) {
   const webrtc = useWebRTCCall();
   const [expandedRestored, setExpandedRestored] = useState(false);
