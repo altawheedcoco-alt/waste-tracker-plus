@@ -73,7 +73,15 @@ const VoiceMessagePlayer = memo(({ url, isOwn, duration: initialDuration, sender
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     } else {
       audioRef.current.playbackRate = PLAYBACK_SPEEDS[speedIndex];
-      audioRef.current.play();
+      audioRef.current.volume = 1.0; // Ensure volume is max
+      audioRef.current.muted = false; // Ensure not muted
+      audioRef.current.play().catch((err) => {
+        console.warn('Voice play failed, retrying with user gesture context:', err);
+        // Retry once
+        setTimeout(() => {
+          audioRef.current?.play().catch(() => {});
+        }, 100);
+      });
       animationRef.current = requestAnimationFrame(updateProgress);
     }
     setIsPlaying(!isPlaying);
