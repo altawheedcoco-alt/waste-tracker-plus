@@ -21,7 +21,7 @@ export default function ResourceUtilizationWidget() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const [membersRes, driversRes, shipmentsRes, vehiclesRes] = await Promise.all([
+      const [membersRes, driversRes, shipmentsRes, positionsRes] = await Promise.all([
         supabase.from('user_organizations').select('id', { count: 'exact', head: true }).eq('organization_id', orgId!),
         supabase.from('shipments').select('driver_id').or(`transporter_id.eq.${orgId}`).not('driver_id', 'is', null)
           .gte('created_at', thirtyDaysAgo.toISOString()),
