@@ -1,10 +1,10 @@
-import { memo, useState, useCallback, useRef, useEffect } from 'react';
+import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { 
   ChevronLeft, ChevronRight, Bot, Headphones, Sparkles, MessageCircle,
-  Truck, Users, PenTool, FileText, Phone, ArrowUp, X
+  Users, Phone, ArrowUp, X, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { openWidget, type WidgetId } from '@/lib/widgetBus';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import CallLogDialog from '@/components/calls/CallLogDialog';
+import { getQuickActionsByType, getQuickActionsByCategory, type QuickActionConfig } from '@/config/quickActions';
 
 interface PanelAction {
   id: string;
@@ -20,17 +21,19 @@ interface PanelAction {
   gradient: string;
   onClick: () => void;
   visible: boolean;
-  category: 'assistant' | 'operations' | 'navigation' | 'utility';
-  badgeKey?: string; // key to look up in notification counts
+  category: 'communication' | 'critical' | 'operations' | 'tools';
+  badgeKey?: string;
 }
 
 const PANEL_WIDTH = 260;
 const TAB_WIDTH = 28;
+const CRITICAL_LIMIT = 8;
 
 const FloatingSidePanel = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrollShrunk, setIsScrollShrunk] = useState(false);
   const [showCallDialog, setShowCallDialog] = useState(false);
+  const [showMoreOps, setShowMoreOps] = useState(false);
   const { isMobile } = useDisplayMode();
   const { organization, roles } = useAuth();
   const navigate = useNavigate();
@@ -40,13 +43,15 @@ const FloatingSidePanel = memo(() => {
   const notifCounts = useNotificationCounts();
 
   const isAdmin = roles.includes('admin');
-  const isTransporter = organization?.organization_type === 'transporter';
+  const orgType = organization?.organization_type || 'generator';
+  const isTransporter = orgType === 'transporter';
   const isDriver = roles.includes('driver');
+  const hasDrivers = isTransporter || isAdmin;
   const iconSize = 18;
 
   // Auto-shrink on scroll
   useEffect(() => {
-    if (isOpen) return; // Don't shrink when panel is open
+    if (isOpen) return;
     const handleScroll = () => {
       setIsScrollShrunk(true);
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
@@ -71,106 +76,131 @@ const FloatingSidePanel = memo(() => {
     if (isMobile) setIsOpen(false);
   }, [navigate, isMobile]);
 
-  const actions: PanelAction[] = [
-    // Assistants
-    {
+  // Get quick actions from config based on org type
+  const quickActionType = useMemo(() => {
+    if (isDriver) return 'driver';
+    return orgType as 'admin' | 'transporter' | 'generator' | 'recycler' | 'disposal' | 'driver';
+  }, [orgType, isDriver]);
+
+  const primaryActions = useMemo(() => 
+    getQuickActionsByCategory(getQuickActionsByType(quickActionType), 'primary'),
+    [quickActionType]
+  );
+  
+  const secondaryActions = useMemo(() => 
+    getQuickActionsByCategory(getQuickActionsByType(quickActionType), 'secondary'),
+    [quickActionType]
+  );
+
+  const utilityActions = useMemo(() => 
+    getQuickActionsByCategory(getQuickActionsByType(quickActionType), 'utility'),
+    [quickActionType]
+  );
+
+  // Convert QuickActionConfig to PanelAction
+  const convertAction = useCallback((action: QuickActionConfig, category: 'critical' | 'operations' | 'tools'): PanelAction => {
+    const IconComp = action.icon;
+    return {
+      id: action.id,
+      icon: <IconComp size={iconSize} />,
+      label: action.title,
+      gradient: action.iconBgClass?.replace('bg-gradient-to-br ', '') || 'from-primary to-primary/80',
+      onClick: () => {
+        if (action.path) {
+          handleNavigate(action.path);
+        }
+      },
+      visible: true,
+      category,
+      badgeKey: action.id,
+    };
+  }, [handleNavigate]);
+
+  // Build all actions
+  const actions: PanelAction[] = useMemo(() => {
+    const result: PanelAction[] = [];
+
+    // === Communication category (always first) ===
+    result.push({
       id: 'ai-chat',
       icon: <Bot size={iconSize} />,
       label: 'المساعد الذكي',
       gradient: 'from-accent to-accent/80',
       onClick: () => handleWidgetOpen('ai-chat'),
       visible: true,
-      category: 'assistant',
-    },
-    {
+      category: 'communication',
+    });
+    result.push({
       id: 'support',
       icon: <Headphones size={iconSize} />,
       label: 'الدعم الفني',
       gradient: 'from-primary to-primary/70',
       onClick: () => handleWidgetOpen('support'),
       visible: true,
-      category: 'assistant',
-    },
-    {
-      id: 'operations',
+      category: 'communication',
+    });
+    result.push({
+      id: 'operations-assistant',
       icon: <Sparkles size={iconSize} />,
       label: 'مساعد العمليات',
       gradient: 'from-primary to-accent',
       onClick: () => handleWidgetOpen('operations'),
       visible: true,
-      category: 'assistant',
-    },
-    // Operations
-    {
+      category: 'communication',
+    });
+    result.push({
       id: 'team-chat',
       icon: <MessageCircle size={iconSize} />,
-      label: 'محادثات الفريق',
+      label: 'المحادثات',
       gradient: 'from-primary to-primary/80',
       onClick: () => handleNavigate('/dashboard/chat'),
       visible: true,
-      category: 'operations',
+      category: 'communication',
       badgeKey: 'chat',
-    },
-    {
-      id: 'create-shipment',
-      icon: <Truck size={iconSize} />,
-      label: t('commandPalette.newShipment'),
-      gradient: 'from-primary to-primary/80',
-      onClick: () => handleNavigate('/dashboard/shipments/new'),
-      visible: isTransporter || isDriver,
-      category: 'operations',
-      badgeKey: 'transporter-shipments',
-    },
-    {
-      id: 'driver-conversations',
-      icon: <Users size={iconSize} />,
-      label: 'محادثات السائقين',
-      gradient: 'from-primary to-primary/60',
-      onClick: () => handleNavigate('/dashboard/chat?filter=drivers'),
-      visible: isTransporter && !isDriver,
-      category: 'operations',
-      badgeKey: 'messages',
-    },
-    {
+    });
+    if (hasDrivers && !isDriver) {
+      result.push({
+        id: 'driver-conversations',
+        icon: <Users size={iconSize} />,
+        label: 'محادثات السائقين',
+        gradient: 'from-primary to-primary/60',
+        onClick: () => handleNavigate('/dashboard/chat?filter=drivers'),
+        visible: true,
+        category: 'communication',
+        badgeKey: 'messages',
+      });
+    }
+    result.push({
       id: 'call-log',
       icon: <Phone size={iconSize} />,
-      label: 'تسجيل مكالمة',
+      label: 'سجل المكالمات',
       gradient: 'from-primary to-primary/60',
       onClick: () => { setShowCallDialog(true); if (isMobile) setIsOpen(false); },
-      visible: isAdmin || isTransporter,
-      category: 'operations',
-    },
-    // Navigation
-    {
-      id: 'quick-sign',
-      icon: <PenTool size={iconSize} />,
-      label: t('dashboard.quickSign'),
-      gradient: 'from-accent to-accent/80',
-      onClick: () => handleNavigate('/dashboard/signing-inbox'),
       visible: true,
-      category: 'navigation',
-      badgeKey: 'company-approvals',
-    },
-    {
-      id: 'permits',
-      icon: <FileText size={iconSize} />,
-      label: t('dashboard.generalPermits'),
-      gradient: 'from-primary to-primary/70',
-      onClick: () => handleNavigate('/dashboard/driver-permits'),
-      visible: true,
-      category: 'navigation',
-    },
-    // Utility
-    {
+      category: 'communication',
+    });
+
+    // === Critical daily (from quickActions primary) ===
+    const criticalSlice = primaryActions.slice(0, CRITICAL_LIMIT);
+    criticalSlice.forEach(a => result.push(convertAction(a, 'critical')));
+
+    // === Operations (from quickActions secondary) ===
+    secondaryActions.forEach(a => result.push(convertAction(a, 'operations')));
+
+    // === Tools (from quickActions utility + scroll-top) ===
+    utilityActions.slice(0, 6).forEach(a => result.push(convertAction(a, 'tools')));
+    result.push({
       id: 'scroll-top',
       icon: <ArrowUp size={iconSize} />,
       label: 'العودة للأعلى',
       gradient: 'from-muted-foreground to-muted-foreground/80',
       onClick: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); },
       visible: true,
-      category: 'utility',
-    },
-  ];
+      category: 'tools',
+    });
+
+    return result;
+  }, [handleWidgetOpen, handleNavigate, hasDrivers, isDriver, isMobile, primaryActions, secondaryActions, utilityActions, convertAction]);
 
   const visibleActions = actions.filter(a => a.visible);
 
@@ -183,10 +213,10 @@ const FloatingSidePanel = memo(() => {
   }, 0);
 
   const categories = [
-    { key: 'assistant', label: 'المساعدين' },
-    { key: 'operations', label: 'العمليات' },
-    { key: 'navigation', label: 'التنقل السريع' },
-    { key: 'utility', label: 'أدوات' },
+    { key: 'communication', label: '💬 تواصل' },
+    { key: 'critical', label: '🔴 حرج يومي' },
+    { key: 'operations', label: '⚙ عمليات', collapsible: true },
+    { key: 'tools', label: '🔧 أدوات', collapsible: true },
   ];
 
   // Handle drag to open/close
@@ -228,7 +258,7 @@ const FloatingSidePanel = memo(() => {
       {/* Panel + Tab */}
       <motion.div
         ref={panelRef}
-        className="fixed top-1/2 -translate-y-1/2 z-[56]"
+        className="fixed top-[30%] -translate-y-1/4 z-[56]"
         style={{ left: 0 }}
         animate={{ x: isOpen ? 0 : -(PANEL_WIDTH) }}
         transition={{ type: 'spring', stiffness: 350, damping: 35 }}
@@ -237,14 +267,14 @@ const FloatingSidePanel = memo(() => {
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex items-center" style={{ direction: 'ltr' }}>
+        <div className="flex items-start" style={{ direction: 'ltr' }}>
           {/* The Panel */}
           <div
             className={cn(
               'bg-card/95 backdrop-blur-lg border border-border/50 rounded-l-none rounded-r-2xl shadow-2xl overflow-hidden',
               'flex flex-col'
             )}
-            style={{ width: PANEL_WIDTH, maxHeight: isMobile ? '70vh' : '80vh' }}
+            style={{ width: PANEL_WIDTH, maxHeight: isMobile ? '65vh' : '75vh' }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-border/30 bg-muted/30">
@@ -262,47 +292,62 @@ const FloatingSidePanel = memo(() => {
               {categories.map(cat => {
                 const catActions = visibleActions.filter(a => a.category === cat.key);
                 if (catActions.length === 0) return null;
+                
+                const isOpsCollapsed = cat.collapsible && cat.key === 'operations' && !showMoreOps;
+                const displayActions = isOpsCollapsed ? catActions.slice(0, 4) : catActions;
+                
                 return (
                   <div key={cat.key}>
-                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide px-1 mb-1.5">
+                    <p className="text-[10px] font-medium text-muted-foreground tracking-wide px-1 mb-1.5">
                       {cat.label}
                     </p>
-                    <div className="space-y-1">
-                      {catActions.map(action => {
+                    <div className="space-y-0.5">
+                      {displayActions.map(action => {
                         const badge = action.badgeKey ? (notifCounts[action.badgeKey] || 0) : 0;
                         return (
                           <button
                             key={action.id}
                             onClick={action.onClick}
                             className={cn(
-                              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl',
-                              'text-sm font-medium text-foreground',
+                              'w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl',
+                              'text-xs font-medium text-foreground',
                               'hover:bg-muted/60 active:scale-[0.98] transition-all',
                               'touch-manipulation'
                             )}
                           >
                             <span className={cn(
-                              'w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 relative',
+                              'w-7 h-7 rounded-lg flex items-center justify-center text-white shrink-0 relative',
                               `bg-gradient-to-br ${action.gradient}`
                             )}>
                               {action.icon}
-                              {/* Notification badge on icon */}
                               {badge > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                                <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center leading-none">
                                   {badge > 99 ? '99+' : badge}
                                 </span>
                               )}
                             </span>
                             <span className="truncate text-start flex-1">{action.label}</span>
-                            {/* Inline badge count */}
                             {badge > 0 && (
-                              <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">
+                              <span className="text-[9px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">
                                 {badge}
                               </span>
                             )}
                           </button>
                         );
                       })}
+                      {/* Show more button for operations */}
+                      {cat.key === 'operations' && catActions.length > 4 && (
+                        <button
+                          onClick={() => setShowMoreOps(prev => !prev)}
+                          className="w-full flex items-center justify-center gap-1 py-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showMoreOps ? (
+                            <>أقل <ChevronUp size={12} /></>
+                          ) : (
+                            <>المزيد ({catActions.length - 4}) <ChevronDown size={12} /></>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -310,7 +355,7 @@ const FloatingSidePanel = memo(() => {
             </div>
           </div>
 
-          {/* Pull Tab — shrinks on scroll */}
+          {/* Pull Tab */}
           <motion.button
             onClick={() => { setIsOpen(prev => !prev); setIsScrollShrunk(false); }}
             animate={{
@@ -322,7 +367,7 @@ const FloatingSidePanel = memo(() => {
             className={cn(
               'flex items-center justify-center rounded-r-xl shadow-lg border border-l-0 border-border/50',
               'bg-card/90 backdrop-blur-md text-muted-foreground hover:text-foreground hover:opacity-100',
-              'transition-colors touch-manipulation cursor-grab active:cursor-grabbing relative'
+              'transition-colors touch-manipulation cursor-grab active:cursor-grabbing relative mt-4'
             )}
             whileTap={{ scale: 0.95 }}
             aria-label={isOpen ? 'إغلاق لوحة الإجراءات' : 'فتح لوحة الإجراءات'}
@@ -330,7 +375,6 @@ const FloatingSidePanel = memo(() => {
             {!isScrollShrunk && (
               <>
                 {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-                {/* Total badge on tab */}
                 {!isOpen && totalBadge > 0 && (
                   <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center leading-none animate-pulse">
                     {totalBadge > 99 ? '99+' : totalBadge}
