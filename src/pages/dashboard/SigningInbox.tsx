@@ -36,6 +36,7 @@ import SigningChainCard from '@/components/signing/SigningChainCard';
 import CreateSigningChainDialog from '@/components/signing/CreateSigningChainDialog';
 import DocumentJourneyTimeline from '@/components/signing/DocumentJourneyTimeline';
 import { logJourneyEvent } from '@/hooks/useDocumentJourney';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'في الانتظار', icon: Clock, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -70,7 +71,7 @@ function SignedDocumentView({ request }: { request: SigningRequest }) {
   if (request.status !== 'signed' || isLoading || !signatures?.length) return null;
 
   return (
-          <div className="mt-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20">
+    <div className="mt-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20">
       <div className="flex items-center gap-2 mb-2 text-sm font-medium text-green-800 dark:text-green-300">
         <CheckCircle2 className="w-4 h-4" />
         <span>تم التوقيع والختم</span>
@@ -508,6 +509,7 @@ export default function SigningInbox() {
   }
 
   return (
+    <DashboardLayout>
     <div className="space-y-6 p-4 md:p-6" dir="rtl">
       <BackButton />
       {/* Header */}
@@ -881,5 +883,6 @@ export default function SigningInbox() {
         onSelect={handlePlatformDocSelect}
       />
     </div>
+    </DashboardLayout>
   );
 }

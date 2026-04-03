@@ -22,6 +22,7 @@ import { MyListingsTab } from '@/components/waste-exchange/MyListingsTab';
 import { MyBidsTab } from '@/components/waste-exchange/MyBidsTab';
 import { AdminExchangePanel } from '@/components/waste-exchange/AdminExchangePanel';
 import { BrokerDashboard } from '@/components/waste-exchange/BrokerDashboard';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const WasteExchange = () => {
   const { t, language } = useLanguage();
@@ -195,6 +196,7 @@ const WasteExchange = () => {
   }
 
   return (
+    <DashboardLayout>
     <div className={`space-y-4 p-3 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div className="space-y-3">
@@ -354,6 +356,7 @@ const WasteExchange = () => {
         />
       )}
     </div>
+    </DashboardLayout>
   );
 };
 
