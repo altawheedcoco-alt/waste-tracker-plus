@@ -200,6 +200,7 @@ const Notifications = () => {
   const [readFilter, setReadFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
+  const [activeStatFilter, setActiveStatFilter] = useState<string | null>(null);
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   // Get unique shipment IDs
@@ -257,14 +258,22 @@ const Notifications = () => {
   const filteredNotifications = useMemo(() => {
     return notifications.filter((n) => {
       const matchesCat = activeCategory === 'all' || categorizeNotification(n.type) === activeCategory;
-      const matchesSub = true; // Sub-categories removed — flat category filtering
+      const matchesSub = true;
       const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !n.is_read : n.is_read);
       const matchesSearch = !searchQuery ||
         n.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         n.message?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCat && matchesSub && matchesRead && matchesSearch;
+      
+      // Stat filter
+      let matchesStat = true;
+      if (activeStatFilter === 'unread') matchesStat = !n.is_read;
+      else if (activeStatFilter === 'today') matchesStat = isToday(new Date(n.created_at));
+      else if (activeStatFilter === 'urgent') matchesStat = getPriorityLevel(n) === 'urgent';
+      else if (activeStatFilter === 'high') matchesStat = getPriorityLevel(n) === 'high';
+
+      return matchesCat && matchesSub && matchesRead && matchesSearch && matchesStat;
     });
-  }, [notifications, activeCategory, activeSubCategory, readFilter, searchQuery]);
+  }, [notifications, activeCategory, activeSubCategory, readFilter, searchQuery, activeStatFilter]);
 
   const getCategoryCount = (id: string) => {
     if (id === 'all') return notifications.length;
@@ -360,13 +369,21 @@ const Notifications = () => {
           {/* ═══ Stats Dashboard ═══ */}
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-3">
             {[
-              { label: 'الإجمالي', value: stats.total, icon: Bell, color: 'text-primary', bg: 'bg-primary/10' },
-              { label: 'غير مقروء', value: stats.unread, icon: BellRing, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-              { label: 'اليوم', value: stats.todayCount, icon: CalendarDays, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-              { label: 'عاجل', value: stats.urgent, icon: Flame, color: 'text-red-500', bg: 'bg-red-500/10' },
-              { label: 'مهم', value: stats.high, icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+              { label: 'الإجمالي', value: stats.total, icon: Bell, color: 'text-primary', bg: 'bg-primary/10', filter: null },
+              { label: 'غير مقروء', value: stats.unread, icon: BellRing, color: 'text-amber-500', bg: 'bg-amber-500/10', filter: 'unread' },
+              { label: 'اليوم', value: stats.todayCount, icon: CalendarDays, color: 'text-blue-500', bg: 'bg-blue-500/10', filter: 'today' },
+              { label: 'عاجل', value: stats.urgent, icon: Flame, color: 'text-red-500', bg: 'bg-red-500/10', filter: 'urgent' },
+              { label: 'مهم', value: stats.high, icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10', filter: 'high' },
             ].map(s => (
-              <div key={s.label} className="flex items-center gap-1.5 sm:gap-2.5 p-2 sm:p-3 rounded-xl bg-card border border-border/50">
+              <div
+                key={s.label}
+                onClick={() => setActiveStatFilter(activeStatFilter === s.filter ? null : s.filter)}
+                className={`flex items-center gap-1.5 sm:gap-2.5 p-2 sm:p-3 rounded-xl bg-card border cursor-pointer transition-all ${
+                  activeStatFilter === s.filter
+                    ? 'ring-2 ring-primary border-primary shadow-md'
+                    : 'border-border/50 hover:border-primary/40 hover:shadow-sm'
+                }`}
+              >
                 <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg ${s.bg} flex items-center justify-center shrink-0`}>
                   <s.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${s.color}`} />
                 </div>
