@@ -245,6 +245,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           allItems.push({
             icon: item.icon,
             label: language === 'ar' ? item.labelAr : item.labelEn,
+            labelEn: language === 'ar' ? item.labelEn : undefined,
             path: item.path,
             key: `pinned-${item.key}`,
             badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
