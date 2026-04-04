@@ -350,14 +350,22 @@ export default function DetailedAccountLedger({
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards with Dialogs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {/* Shipments Dialog */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="border-blue-200 dark:border-blue-800 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all">
-              <CardContent className="p-4 text-center">
-                <Package className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+      <LedgerSummaryCards
+        totals={totals}
+        shipmentEntries={shipmentEntries}
+        depositEntries={depositEntries}
+        paymentEntries={paymentEntries}
+        wasteTypeBreakdown={wasteTypeBreakdown}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+        onEditDeposit={handleEditDeposit}
+        onDeleteDeposit={handleDeleteDeposit}
+        loadingDepositId={loadingDepositId}
+        deletingDepositId={deletingDepositId}
+        confirmDeleteId={confirmDeleteId}
+        setConfirmDeleteId={setConfirmDeleteId}
+        handleDeleteDeposit={handleDeleteDeposit}
+      />
                 <p className="text-xs text-muted-foreground mb-1">الشحنات</p>
                 <p className="text-lg font-bold">{totals.shipmentCount}</p>
                 <p className="text-xs text-blue-600">{formatCurrency(totals.totalShipmentValue)} ج.م</p>
