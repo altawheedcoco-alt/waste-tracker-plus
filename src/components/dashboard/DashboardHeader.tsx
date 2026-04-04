@@ -86,6 +86,7 @@ const DashboardHeader = memo(({
         {!isMobile && <GlobalRefreshButton />}
         {!isMobile && <FocusMusicPlayer />}
         {!isMobile && <ThemeCustomizer />}
+        <OfflineQueueIndicator />
         <MyShipmentsButton />
         <NotificationDropdown />
         <DashboardUserMenu
