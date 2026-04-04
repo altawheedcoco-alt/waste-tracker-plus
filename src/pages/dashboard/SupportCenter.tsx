@@ -85,11 +85,11 @@ const UserSupportPage = () => {
     in_progress: { label: t('support.statusInProgress'), color: 'bg-yellow-500', icon: Clock },
     waiting_response: { label: t('support.statusWaiting'), color: 'bg-orange-500', icon: Timer },
     resolved: { label: t('support.statusResolved'), color: 'bg-green-500', icon: CheckCircle2 },
-    closed: { label: t('support.statusClosed'), color: 'bg-gray-500', icon: CheckCircle2 },
+    closed: { label: t('support.statusClosed'), color: 'bg-muted-foreground', icon: CheckCircle2 },
   };
 
   const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
-    low: { label: t('support.priorityLow'), color: 'bg-gray-500' },
+    low: { label: t('support.priorityLow'), color: 'bg-muted-foreground' },
     medium: { label: t('support.priorityMedium'), color: 'bg-blue-500' },
     high: { label: t('support.priorityHigh'), color: 'bg-orange-500' },
     urgent: { label: t('support.priorityUrgent'), color: 'bg-red-500' },

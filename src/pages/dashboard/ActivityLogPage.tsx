@@ -82,7 +82,7 @@ const ActivityLogPage = () => {
     shipment_update: { label: t('activityLog.shipmentUpdate'), icon: Package, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
     shipment_status_change: { label: t('activityLog.shipmentStatusChange'), icon: Package, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' },
     shipment_delete: { label: t('activityLog.shipmentDelete'), icon: Package, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-    shipment_view: { label: t('activityLog.shipmentView'), icon: Eye, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
+    shipment_view: { label: t('activityLog.shipmentView'), icon: Eye, color: 'bg-muted text-foreground dark:bg-card/30 dark:text-muted-foreground' },
     shipment_print: { label: t('activityLog.shipmentPrint'), icon: FileText, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
     invoice_create: { label: t('activityLog.invoiceCreate'), icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
     invoice_update: { label: t('activityLog.invoiceUpdate'), icon: FileText, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -92,7 +92,7 @@ const ActivityLogPage = () => {
     settings_change: { label: t('activityLog.settingsChange'), icon: Settings, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' },
     user_role_change: { label: t('activityLog.userRoleChange'), icon: Shield, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
     auth_login: { label: t('activityLog.authLogin'), icon: User, color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' },
-    auth_logout: { label: t('activityLog.authLogout'), icon: User, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
+    auth_logout: { label: t('activityLog.authLogout'), icon: User, color: 'bg-muted text-foreground dark:bg-card/30 dark:text-muted-foreground' },
     file_upload: { label: t('activityLog.fileUpload'), icon: Download, color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400' },
     qr_scan: { label: t('activityLog.qrScan'), icon: Eye, color: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400' },
   };
@@ -153,7 +153,7 @@ const ActivityLogPage = () => {
     return actionTypeLabels[actionType] || { 
       label: actionType, 
       icon: Activity, 
-      color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' 
+      color: 'bg-muted text-foreground dark:bg-card/30 dark:text-muted-foreground' 
     };
   };
 

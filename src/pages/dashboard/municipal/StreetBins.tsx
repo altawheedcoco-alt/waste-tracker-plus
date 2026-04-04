@@ -44,7 +44,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   damaged: { label: 'تالف', color: 'bg-red-100 text-red-800', icon: AlertTriangle },
   missing: { label: 'مفقود', color: 'bg-amber-100 text-amber-800', icon: AlertTriangle },
   maintenance: { label: 'صيانة', color: 'bg-blue-100 text-blue-800', icon: Wrench },
-  decommissioned: { label: 'مُخرج', color: 'bg-gray-100 text-gray-800', icon: TrashBin },
+  decommissioned: { label: 'مُخرج', color: 'bg-muted text-foreground', icon: TrashBin },
 };
 
 const StreetBinsPage = () => {

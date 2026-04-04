@@ -187,7 +187,7 @@ const DriverDetailsPage = () => {
       delivered: { label: 'تم التسليم', variant: 'secondary', color: 'bg-emerald-500' },
       confirmed: { label: 'مؤكدة', variant: 'default', color: 'bg-green-600' },
     };
-    const config = statusMap[status] || { label: status, variant: 'outline' as const, color: 'bg-gray-500' };
+    const config = statusMap[status] || { label: status, variant: 'outline' as const, color: 'bg-muted-foreground' };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 

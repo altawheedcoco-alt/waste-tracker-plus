@@ -47,7 +47,7 @@ const COMPLAINT_TYPES: Record<string, string> = {
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'منخفضة', color: 'bg-gray-100 text-gray-800' },
+  low: { label: 'منخفضة', color: 'bg-muted text-foreground' },
   medium: { label: 'متوسطة', color: 'bg-blue-100 text-blue-800' },
   high: { label: 'عالية', color: 'bg-amber-100 text-amber-800' },
   urgent: { label: 'عاجلة', color: 'bg-red-100 text-red-800' },
@@ -58,7 +58,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   assigned: { label: 'مُعيّنة', color: 'text-amber-600', icon: User },
   in_progress: { label: 'جارية', color: 'text-blue-600', icon: Clock },
   resolved: { label: 'تم الحل', color: 'text-emerald-600', icon: CheckCircle2 },
-  closed: { label: 'مغلقة', color: 'text-gray-500', icon: CheckCircle2 },
+  closed: { label: 'مغلقة', color: 'text-muted-foreground', icon: CheckCircle2 },
   rejected: { label: 'مرفوضة', color: 'text-red-400', icon: XCircle },
 };
 

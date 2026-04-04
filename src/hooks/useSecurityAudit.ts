@@ -149,5 +149,5 @@ export const statusConfig: Record<string, { label: string; color: string; bgColo
   passed: { label: 'ناجح', color: 'text-green-600', bgColor: 'bg-green-100' },
   warning: { label: 'تحذير', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
   failed: { label: 'فشل', color: 'text-red-600', bgColor: 'bg-red-100' },
-  error: { label: 'خطأ', color: 'text-gray-600', bgColor: 'bg-gray-100' },
+  error: { label: 'خطأ', color: 'text-muted-foreground', bgColor: 'bg-muted' },
 };

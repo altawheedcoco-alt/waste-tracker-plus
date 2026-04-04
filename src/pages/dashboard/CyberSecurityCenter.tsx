@@ -374,7 +374,7 @@ const CyberSecurityCenter = () => {
                           <span className="font-semibold text-sm">{ch.name}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
+                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-muted'}`} />
                           <span className="text-[10px] text-muted-foreground">{isActive ? 'نشط' : 'متوقف'}</span>
                         </div>
                       </div>

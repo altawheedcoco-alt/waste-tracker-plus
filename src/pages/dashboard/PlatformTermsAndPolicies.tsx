@@ -266,7 +266,7 @@ const policySections: PolicySection[] = [
     id: 'security',
     title: 'أمن المعلومات والخصوصية',
     icon: Lock,
-    color: 'text-gray-700',
+    color: 'text-foreground',
     articles: [
       {
         number: '18',
@@ -293,7 +293,7 @@ const policySections: PolicySection[] = [
     id: 'final',
     title: 'أحكام ختامية',
     icon: Gavel,
-    color: 'text-gray-800',
+    color: 'text-foreground',
     articles: [
       {
         number: '20',

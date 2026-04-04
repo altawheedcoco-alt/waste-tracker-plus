@@ -40,7 +40,7 @@ const CONDITION_MAP: Record<string, { label: string; color: string }> = {
   fair: { label: 'متوسط', color: 'bg-amber-100 text-amber-800' },
   poor: { label: 'ضعيف', color: 'bg-orange-100 text-orange-800' },
   broken: { label: 'معطل', color: 'bg-red-100 text-red-800' },
-  scrapped: { label: 'مُخردة', color: 'bg-gray-100 text-gray-800' },
+  scrapped: { label: 'مُخردة', color: 'bg-muted text-foreground' },
 };
 
 const FUEL_TYPES: Record<string, string> = {

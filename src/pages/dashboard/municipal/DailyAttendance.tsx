@@ -31,7 +31,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = 
   late: { label: 'متأخر', color: 'bg-amber-100 text-amber-800', icon: Clock },
   sick_leave: { label: 'إجازة مرضية', color: 'bg-blue-100 text-blue-800', icon: AlertTriangle },
   annual_leave: { label: 'إجازة سنوية', color: 'bg-purple-100 text-purple-800', icon: Calendar },
-  excused: { label: 'إذن', color: 'bg-gray-100 text-gray-800', icon: UserCheck },
+  excused: { label: 'إذن', color: 'bg-muted text-foreground', icon: UserCheck },
 };
 
 const DailyAttendancePage = () => {

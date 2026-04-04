@@ -33,7 +33,7 @@ interface CollectionTrip {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending: { label: 'في الانتظار', color: 'bg-gray-100 text-gray-800' },
+  pending: { label: 'في الانتظار', color: 'bg-muted text-foreground' },
   in_progress: { label: 'جارية', color: 'bg-blue-100 text-blue-800' },
   completed: { label: 'مكتملة', color: 'bg-emerald-100 text-emerald-800' },
   cancelled: { label: 'ملغاة', color: 'bg-red-100 text-red-800' },

@@ -101,7 +101,7 @@ const REQUEST_TYPE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  low: 'bg-muted text-foreground dark:bg-card dark:text-gray-300',
   normal: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
   urgent: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',

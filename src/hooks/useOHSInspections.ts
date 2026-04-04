@@ -412,8 +412,8 @@ export const CHECKLIST_STATUS_CONFIG: Record<string, { label: string; color: str
   compliant: { label: 'ممتثل', color: 'text-green-600' },
   non_compliant: { label: 'غير ممتثل', color: 'text-red-600' },
   partial: { label: 'جزئي', color: 'text-yellow-600' },
-  not_applicable: { label: 'لا ينطبق', color: 'text-gray-400' },
-  not_checked: { label: 'لم يُفحص', color: 'text-gray-500' },
+  not_applicable: { label: 'لا ينطبق', color: 'text-muted-foreground' },
+  not_checked: { label: 'لم يُفحص', color: 'text-muted-foreground' },
 };
 
 export function useOHSInspections() {

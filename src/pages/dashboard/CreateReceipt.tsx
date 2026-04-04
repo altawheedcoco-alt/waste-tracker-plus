@@ -284,7 +284,7 @@ const CreateReceipt = () => {
       delivered: { label: 'تم التسليم', className: 'bg-purple-100 text-purple-700' },
       confirmed: { label: 'مؤكدة', className: 'bg-emerald-100 text-emerald-700' },
     };
-    return config[status] || { label: status, className: 'bg-gray-100 text-gray-700' };
+    return config[status] || { label: status, className: 'bg-muted text-foreground' };
   };
 
   return (

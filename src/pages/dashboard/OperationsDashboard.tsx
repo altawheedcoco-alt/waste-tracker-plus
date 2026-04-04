@@ -187,7 +187,7 @@ export default function OperationsDashboard() {
   );
 
   const getStatusBadge = (status: string) => {
-    const config = statusConfig[status] || { label: status, color: 'bg-gray-500', icon: Clock };
+    const config = statusConfig[status] || { label: status, color: 'bg-muted-foreground', icon: Clock };
     const Icon = config.icon;
     return (
       <Badge className={cn('gap-1', config.color, 'text-white')}>

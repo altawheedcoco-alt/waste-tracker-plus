@@ -901,7 +901,7 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
         {video.status === 'available' ? (
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 flex items-center justify-center opacity-80 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all shadow-lg">
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 ml-0.5" />
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 text-foreground ml-0.5" />
             </div>
           </div>
         ) : (

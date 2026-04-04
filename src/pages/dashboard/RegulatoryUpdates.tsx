@@ -108,7 +108,7 @@ const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  low: 'bg-muted text-foreground dark:bg-card dark:text-gray-300',
   normal: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   urgent: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',

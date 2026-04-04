@@ -506,7 +506,7 @@ export default function AIDocumentStudioPage() {
       {/* Full-screen Preview Modal */}
       {previewHtml && (
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-900">
+          <div className="flex items-center justify-between px-4 py-2 bg-card">
             <Badge variant="secondary" className="gap-1">
               <FileText className="w-3 h-3" /> معاينة المستند
             </Badge>
@@ -574,12 +574,12 @@ export default function AIDocumentStudioPage() {
       {/* Edit Modal - Visual + Code */}
       {editHtml !== null && (
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-900" dir="rtl">
+          <div className="flex items-center justify-between px-4 py-2 bg-card" dir="rtl">
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="gap-1">
                 <Edit3 className="w-3 h-3" /> تحرير المستند
               </Badge>
-              <div className="flex items-center bg-gray-800 rounded-lg p-0.5 gap-0.5">
+              <div className="flex items-center bg-card rounded-lg p-0.5 gap-0.5">
                 <Button size="sm" variant={editMode === 'visual' ? 'secondary' : 'ghost'}
                   className="h-7 text-xs gap-1 text-gray-200" onClick={() => {
                     if (editMode === 'code' && editableRef.current) {
@@ -655,7 +655,7 @@ export default function AIDocumentStudioPage() {
                   <textarea
                     value={editHtml}
                     onChange={e => setEditHtml(e.target.value)}
-                    className="w-full h-full bg-gray-900 text-green-400 font-mono text-xs p-4 resize-none border-none outline-none"
+                    className="w-full h-full bg-card text-green-400 font-mono text-xs p-4 resize-none border-none outline-none"
                     dir="ltr"
                     spellCheck={false}
                   />

@@ -20,8 +20,8 @@ const clauseStatusConfig: Record<string, { label: string; color: string; icon: a
   minor_nc: { label: 'عدم مطابقة ثانوي', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: AlertTriangle },
   major_nc: { label: 'عدم مطابقة رئيسي', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', icon: XCircle },
   observation: { label: 'ملاحظة', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: Eye },
-  not_applicable: { label: 'لا ينطبق', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300', icon: FileText },
-  not_assessed: { label: 'لم يُقيّم', color: 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-400', icon: Clock },
+  not_applicable: { label: 'لا ينطبق', color: 'bg-muted text-muted-foreground dark:bg-card dark:text-gray-300', icon: FileText },
+  not_assessed: { label: 'لم يُقيّم', color: 'bg-gray-50 text-muted-foreground dark:bg-card dark:text-muted-foreground', icon: Clock },
 };
 
 const dataSourceLabels: Record<string, string> = {
