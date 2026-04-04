@@ -136,7 +136,7 @@ const AdminDashboardSwitcher = () => {
       case 'disposal':
         return { label: 'جهة تخلص نهائي', icon: Trash2, color: 'bg-red-500' };
       default:
-        return { label: 'جهة', icon: Building2, color: 'bg-gray-500' };
+        return { label: 'جهة', icon: Building2, color: 'bg-muted-foreground' };
     }
   };
 

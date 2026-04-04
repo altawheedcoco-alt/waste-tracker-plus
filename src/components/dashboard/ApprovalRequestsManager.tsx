@@ -555,9 +555,9 @@ const ApprovalRequestsManager = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">الإجمالي</p>
-                <p className="text-xl font-bold text-gray-600">{requests.length}</p>
+                <p className="text-xl font-bold text-muted-foreground">{requests.length}</p>
               </div>
-              <ClipboardList className="h-6 w-6 text-gray-500" />
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
