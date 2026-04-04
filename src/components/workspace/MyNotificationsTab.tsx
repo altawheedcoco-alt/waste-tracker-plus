@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Loader2, Inbox, Settings2, BellOff, ChevronDown, Layers } from 'lucide-react';
+import { Bell, CheckCheck, Loader2, Inbox, Settings2, BellOff, ChevronDown, Layers, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
@@ -14,6 +14,7 @@ import NotificationTypePreferences from '@/components/notifications/Notification
 import { getNotificationRoute } from '@/lib/notificationRouting';
 import { groupNotifications, type GroupedNotification } from '@/lib/notificationGrouping';
 import { cn } from '@/lib/utils';
+import { useNativePush } from '@/hooks/useNativePush';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
@@ -28,6 +29,42 @@ const MyNotificationsTab = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
+  const nativePush = useNativePush();
+  const [testingPush, setTestingPush] = useState(false);
+
+  const handleTestNativePush = useCallback(async () => {
+    if (testingPush) return;
+    setTestingPush(true);
+    try {
+      // If not subscribed, subscribe first (will also send test notification)
+      if (!nativePush.isSubscribed) {
+        const ok = await nativePush.subscribe();
+        if (ok) {
+          toast.success('تم تفعيل الإشعارات الأصلية — تحقق من جهازك!');
+        }
+      } else {
+        // Already subscribed, just send a test push
+        const { error } = await supabase.functions.invoke('send-push', {
+          body: {
+            user_ids: [user?.id],
+            title: '🔔 اختبار Web Push الأصلي',
+            body: 'إشعار تجريبي من النظام الأصلي بدون Firebase — ' + new Date().toLocaleTimeString('ar-EG'),
+            data: { url: '/dashboard' },
+          },
+        });
+        if (error) {
+          toast.error('فشل إرسال الإشعار التجريبي');
+        } else {
+          toast.success('تم إرسال إشعار تجريبي — تحقق من جهازك!');
+        }
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'حصل خطأ');
+    } finally {
+      setTestingPush(false);
+    }
+  }, [testingPush, nativePush, user]);
+
   const [showTypePrefs, setShowTypePrefs] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
@@ -145,6 +182,16 @@ const MyNotificationsTab = () => {
           <Button size="sm" variant={showTypePrefs ? "default" : "outline"} className="gap-1 text-xs h-8" onClick={() => { setShowTypePrefs(!showTypePrefs); setShowPrefs(false); }}>
             <BellOff className="w-3.5 h-3.5" />
             الأنواع
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1 text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={handleTestNativePush}
+            disabled={testingPush || nativePush.loading}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            {testingPush || nativePush.loading ? 'جاري...' : nativePush.isSubscribed ? 'اختبر الإشعار' : 'فعّل واختبر'}
           </Button>
         </div>
       </div>
