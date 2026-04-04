@@ -7,78 +7,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Calendar,
-  Package,
-  CreditCard,
-  Banknote,
-  TrendingUp,
-  TrendingDown,
-  Scale,
-  ArrowUpRight,
-  ArrowDownRight,
-  Filter,
-  RotateCcw,
-  Printer,
-  Download,
-  Eye,
-  Loader2,
-  Info,
-  Pencil,
-  FileImage,
-  ExternalLink,
-  Trash2,
-  AlertTriangle,
-  Link,
-  Unlink,
+  Calendar, ArrowUpRight, ArrowDownRight, Filter, RotateCcw,
+  Printer, Download, Eye, Loader2, Pencil, FileImage, Trash2, Unlink,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import AccountLedgerPrint from './AccountLedgerPrint';
 import { createRoot } from 'react-dom/client';
-import { WasteTypeInline } from './WasteTypeDetailsBadge';
-import { wasteTypeLabels, getWasteTypeCode, isHazardousWasteType } from '@/lib/wasteClassification';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Table as DetailTable,
-  TableBody as DetailTableBody,
-  TableCell as DetailTableCell,
-  TableHead as DetailTableHead,
-  TableHeader as DetailTableHeader,
-  TableRow as DetailTableRow,
-} from '@/components/ui/table';
 import EditDepositDialog from '@/components/deposits/EditDepositDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import LedgerSummaryCards from './ledger/LedgerSummaryCards';
 
 interface Deposit {
   id: string;
