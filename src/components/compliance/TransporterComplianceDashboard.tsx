@@ -13,7 +13,8 @@ import { Progress } from '@/components/ui/progress';
 import { 
   Shield, ShieldCheck, ShieldAlert, ShieldX, 
   Truck, Users, FileCheck, AlertTriangle,
-  TrendingUp, Award, CheckCircle2, XCircle
+  TrendingUp, Award, CheckCircle2, XCircle,
+  MapPin, BookOpen
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
