@@ -7,7 +7,7 @@ export interface DashboardWidgetConfig {
   icon: LucideIcon;
   category: 'quick_action' | 'stats' | 'data' | 'financial' | 'operations' | 'compliance' | 'ai' | 'advanced';
   /** Which org types can see this widget */
-  availableFor: Array<'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'>;
+  availableFor: Array<'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver'>;
   /** Default order position (lower = higher) */
   defaultOrder: number;
   /** Is it pinned by default? */
