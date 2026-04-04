@@ -224,7 +224,7 @@ const ShipmentCompactView = ({ shipment, onStatusChange }: CompactViewProps) => 
         </Suspense>
       )}
       <GeneratorDeliveryCertificateDialog open={isDeliveryCertOpen} onOpenChange={setIsDeliveryCertOpen}
-        shipment={{ id: shipment.id, shipment_number: shipment.shipment_number, waste_type: shipment.waste_type, quantity: shipment.quantity, unit: shipment.unit || 'كجم', status: shipment.status, created_at: shipment.created_at, pickup_address: shipment.pickup_address || '', delivery_address: shipment.delivery_address || '', generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : undefined, transporter: shipment.transporter ? { name: shipment.transporter.name, city: shipment.transporter.city } : undefined, recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : undefined } as Record<string, unknown>}
+        shipment={{ id: shipment.id, shipment_number: shipment.shipment_number, waste_type: shipment.waste_type, quantity: shipment.quantity, unit: shipment.unit || 'كجم', status: shipment.status, created_at: shipment.created_at, pickup_address: shipment.pickup_address || '', delivery_address: shipment.delivery_address || '', generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : undefined, transporter: shipment.transporter ? { name: shipment.transporter.name, city: shipment.transporter.city } : undefined, recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : undefined } as any}
         onSuccess={onStatusChange}
       />
     </>
