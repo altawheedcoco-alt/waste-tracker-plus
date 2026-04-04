@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { AlertItem } from './DashboardV2Header';
+import type { AlertItem } from '../DashboardV2Header';
 
 const SEVERITY_CONFIG = {
   info: { icon: Info, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { WeatherData } from './DashboardV2Header';
+import type { WeatherData } from '../DashboardV2Header';
 
 const WEATHER_ICONS: Record<string, LucideIcon> = {
   sunny: Sun, cloudy: Cloud, rainy: CloudRain, stormy: CloudLightning, windy: Wind, snowy: Snowflake,

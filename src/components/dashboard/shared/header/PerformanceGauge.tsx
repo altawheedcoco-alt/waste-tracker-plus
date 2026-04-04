@@ -9,7 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { formatNumber } from '@/lib/numberFormat';
-import type { RadarStat } from './DashboardV2Header';
+import type { RadarStat } from '../DashboardV2Header';
 
 /* ── Helpers ── */
 const getHealthLevel = (score: number) => {
