@@ -92,9 +92,10 @@ const FuelManagement = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="analytics">التحليلات</TabsTrigger>
             <TabsTrigger value="fraud">كشف التلاعب {fraudAlerts.length > 0 && <Badge variant="destructive" className="ms-1 text-[9px] h-4 w-4 p-0 flex items-center justify-center rounded-full">{fraudAlerts.length}</Badge>}</TabsTrigger>
+            <TabsTrigger value="shipments">ربط الشحنات</TabsTrigger>
             <TabsTrigger value="tanks">التانكات</TabsTrigger>
             <TabsTrigger value="records">السجلات</TabsTrigger>
           </TabsList>
