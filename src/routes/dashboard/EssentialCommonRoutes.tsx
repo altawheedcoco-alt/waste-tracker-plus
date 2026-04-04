@@ -16,6 +16,7 @@ const SystemStatus = lazyRetry(() => import('@/pages/dashboard/SystemStatus'));
 const PlatformTermsAndPolicies = lazyRetry(() => import('@/pages/dashboard/PlatformTermsAndPolicies'));
 const DigitalWallet = lazyRetry(() => import('@/pages/dashboard/DigitalWallet'));
 const GamificationPage = lazyRetry(() => import('@/pages/GamificationPage'));
+const ComplianceAnalysis = lazyRetry(() => import('@/pages/dashboard/ComplianceAnalysis'));
 
 export const essentialCommonRoutes = (
   <>
