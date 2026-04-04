@@ -86,6 +86,8 @@ const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
 const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
 const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
 const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
+const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
+const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
 
 
 interface RecentShipment {
@@ -349,6 +351,12 @@ const GeneratorDashboard = () => {
       <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
         <DailyOperationsSummary />
       </ErrorBoundary>
+
+      {/* ★ تذكيرات ذكية */}
+      <Suspense fallback={null}><SmartReminderWidget role="generator" /></Suspense>
+
+      {/* ★ مقارنة الأداء الشهري */}
+      <Suspense fallback={null}><PeriodComparisonWidget role="generator" /></Suspense>
 
       {/* 5. التنبيهات والإشعارات */}
       <DashboardAlertsHub orgType="generator" />

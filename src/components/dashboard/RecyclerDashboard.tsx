@@ -33,6 +33,11 @@ import GlobalCommodityTicker from './shared/GlobalCommodityTicker';
 import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
 import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
+const RecyclerPerformanceStrip = lazy(() => import('./recycler/RecyclerPerformanceStrip'));
+const RecyclerTodayProgress = lazy(() => import('./recycler/RecyclerTodayProgress'));
+const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
+const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
+
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
@@ -282,6 +287,16 @@ const RecyclerDashboard = () => {
 
       {/* ★ بورصة السلع العالمية — أعلى لوحة التحكم */}
       <GlobalCommodityTicker />
+
+      {/* ★ شريط الأداء + تقدم اليوم */}
+      <Suspense fallback={null}><RecyclerPerformanceStrip /></Suspense>
+      <Suspense fallback={null}><RecyclerTodayProgress /></Suspense>
+
+      {/* ★ تذكيرات ذكية */}
+      <Suspense fallback={null}><SmartReminderWidget role="recycler" /></Suspense>
+
+      {/* ★ مقارنة الأداء الشهري */}
+      <Suspense fallback={null}><PeriodComparisonWidget role="recycler" /></Suspense>
 
       {/* 2. مركز القيادة */}
       <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>

@@ -10,7 +10,7 @@ interface WidgetPreferences {
   pinned_widgets: string[];
 }
 
-export function useDashboardWidgets(orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin') {
+export function useDashboardWidgets(orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver') {
   const { user, organization } = useAuth();
   const { toast } = useToast();
   const [userPrefs, setUserPrefs] = useState<WidgetPreferences | null>(null);
