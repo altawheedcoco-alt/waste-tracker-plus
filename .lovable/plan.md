@@ -1,97 +1,61 @@
 
 
-# خطة دمج نظام إدارة الوقود الذكي (Fuel Intelligence System)
+# خطة تطوير صفحة المنظمة (Organization Profile Enhancement)
 
-## الوضع الحالي
+## التحليل الحالي
 
-الصفحة الحالية (`FuelManagement.tsx` - 212 سطر) بسيطة: إضافة/حذف سجلات وقود مع عرض إجمالي اللترات والتكلفة. لا توجد أي تحليلات أو كشف تلاعب أو ربط بالصيانة.
-
-**البيانات المتاحة فعلاً في قاعدة البيانات:**
-- `fuel_records`: 16 عمود (لتر، تكلفة، عداد، محطة، vehicle_id, shipment_id)
-- `fleet_vehicles`: بيانات المركبات (نوع، سعة، حالة)
-- `vehicle_telemetry`: أداء المركبة (إجمالي كم، متوسط استهلاك، health_score)
-- `vehicle_maintenance`: سجل الصيانة مع عداد الكيلومترات
-- `gps_location_logs`: إحداثيات السائقين اللحظية
-- `geofence_alerts`: تنبيهات النطاق الجغرافي
+الصفحة الحالية (1,059 سطر) تحتوي على 15 تبويب مع بنية Facebook-style جيدة (Cover + Avatar + Stats + Tabs). لكنها تفتقر لـ:
+- **عداد التأثير البيئي الحي** (لا يوجد أي ربط بـ `useEnvironmentalKPIs` أو شحنات المنظمة)
+- **أوسمة المنظمة** (النظام الحالي `gamification` يعمل على مستوى الفرد فقط، لا يظهر في بروفايل المنظمة)
+- **معرض العمليات** (يوجد `OrganizationPhotoGallery` لكنه مخفي في تبويب "الموقع والصور" وغير مدمج في `BusinessPagePreview`)
+- **SEO ديناميكي** (لا يوجد Meta Tags ديناميكية للصفحة العامة)
+- **ترتيب المعلومات**: المعلومات الأهم للشريك المحتمل (قانونية، قرب جغرافي، تأثير بيئي) ليست بارزة
 
 ---
 
-## هيكل النظام الجديد
+## خطة التنفيذ
 
-```text
-Fuel Intelligence System
-├── 1. useFuelCalculations Hook (محرك الحسابات)
-│   ├── L/100km لكل مركبة
-│   ├── كشف الانحرافات (vs متوسط النوع)
-│   └── توقعات الميزانية
-│
-├── 2. FuelManagement.tsx (الصفحة الرئيسية - مُعاد بناؤها)
-│   ├── FuelDashboardCards (6 بطاقات ملخص)
-│   ├── FuelFraudDetector (كشف التلاعب)
-│   ├── FuelConsumptionChart (شارت المقارنة)
-│   ├── FuelBudgetForecaster (تنبؤ الميزانية)
-│   ├── FuelRecordForm (نموذج محسّن + GPS + صورة بون)
-│   └── FuelRecordsList (قائمة السجلات)
-│
-├── 3. Internal Tank Module (التانكات الداخلية)
-│   └── مخزون الوقود الداخلي + تنبيهات إعادة التعبئة
-│
-└── 4. Maintenance Auto-Trigger
-    └── ربط الاستهلاك الزائد → أمر صيانة تلقائي
-```
+### 1. عداد التأثير البيئي اللحظي (Live ESG Impact Counter)
+**ملف جديد**: `src/components/organization/OrgImpactCounter.tsx`
+- Hook جديد `useOrganizationImpact(orgId)` يسحب شحنات المنظمة المكتملة ويحسب:
+  - إجمالي الأطنان المُدوّرة
+  - CO₂ الموفّر (باستخدام معاملات `RECYCLING_CO2_FACTORS` من `useEnvironmentalKPIs`)
+  - مكافئ الأشجار المُنقذة
+  - معدل التدوير
+- عرض بـ **Animated Counters** (CSS counter animation) في شريط أسفل الـ Cover مباشرة
+- يظهر في `BusinessPagePreview` للزوار + `ProfileHeader` للمالك
 
----
+### 2. نظام أوسمة المنظمة (Organization Achievement Badges)
+**ملف جديد**: `src/components/organization/OrgAchievementBadges.tsx`
+- حساب الأوسمة ديناميكياً من بيانات الشحنات (بدون جدول جديد):
+  - **صديق البيئة الذهبي**: دوّر > 100 طن
+  - **صديق البيئة الفضي**: دوّر > 50 طن
+  - **ناقل موثوق**: > 50 شحنة مكتملة
+  - **شريك ملتزم**: > 10 شراكات نشطة
+  - **مُوثّق**: لديه ختم + توقيع + سجل تجاري
+  - **رائد بيئي**: وفّر > 10 طن CO₂
+- عرض كشارات لامعة أسفل اسم المنظمة في `BusinessPagePreview`
 
-## التفاصيل
+### 3. تعزيز BusinessPagePreview بالمعلومات الحاسمة
+**تعديل**: `src/components/organization/BusinessPagePreview.tsx`
+- إضافة **قسم "لماذا نتميز"** (Trust Signals) يظهر فوق المنشورات:
+  - أوسمة المنظمة (من المكون أعلاه)
+  - عداد التأثير البيئي (4 بطاقات صغيرة)
+  - حالة التراخيص (سارية/منتهية) من `orgData`
+  - التقييم العام (عدد النجوم من الشراكات)
+- إضافة تبويب **"الإنجازات"** جديد بجانب المنشورات/حول/الصور
+- دمج معرض العمليات (صور المعدات والمصنع) في تبويب الصور
 
-### 1. Hook حسابات الوقود (`useFuelCalculations`)
-- حساب **L/100km** لكل مركبة من فارق عداد الكيلومترات بين تعبئتين متتاليتين
-- مقارنة الاستهلاك الفعلي بـ **المعيار المتوقع** حسب نوع المركبة (جدول مرجعي)
-- حساب **درجة كفاءة الوقود** لكل سائق (Fuel Efficiency Score)
-- توقع **ميزانية الشهر القادم** بناءً على متوسط آخر 3 أشهر
+### 4. SEO ديناميكي للبروفايل العام
+**تعديل**: `src/pages/dashboard/OrganizationProfile.tsx`
+- إضافة `useEffect` لتحديث `document.title` و `meta description` ديناميكياً
+- تضمين JSON-LD (Organization schema) للبروفايلات العامة
 
-### 2. كشف التلاعب (Fraud Detection)
-- **Geofence Validation**: مقارنة إحداثيات GPS للسائق وقت التعبئة بموقع المحطة المسجلة
-- **KM vs Liters**: لو الاستهلاك > 150% من المتوقع → Red Flag فوري
-- **تكرار التعبئة**: لو نفس السائق عبّأ مرتين في يوم واحد → Yellow Flag
-- **عرض مرئي**: بطاقات التنبيهات بألوان (أحمر/أصفر/أخضر) مع تفاصيل كل حالة مشبوهة
-
-### 3. نموذج التسجيل المحسّن
-- إضافة حقل **المركبة** (ربط بـ `fleet_vehicles`)
-- إضافة **رفع صورة البون** (receipt_url موجود فعلاً في الجدول)
-- التقاط **إحداثيات GPS تلقائياً** عند التسجيل (للتحقق لاحقاً)
-- حساب **الإجمالي تلقائياً** + عرض **المسافة منذ آخر تعبئة**
-
-### 4. لوحة التحليلات
-- **6 بطاقات ملخص**: إجمالي لترات، إجمالي تكلفة، متوسط L/100km، أكفأ سائق، أكثر سائق استهلاكاً، عدد التنبيهات
-- **شارت مقارنة**: Recharts bar chart يقارن استهلاك المركبات من نفس النوع
-- **توقع الميزانية**: عرض التكلفة المتوقعة للشهر القادم مع نسبة الثقة
-
-### 5. التانكات الداخلية
-- قسم جديد لإدارة **مخزون الوقود الداخلي** (لو المصنع عنده تانك)
-- تتبع الرصيد الحالي + تنبيه عند وصول المستوى لـ 20%
-- سجل السحب من التانك مربوط بالسائق والمركبة
-
-### 6. الربط مع الصيانة
-- لو استهلاك مركبة زاد > 30% فجأة عن متوسطها → إنشاء تنبيه صيانة تلقائي
-- عرض رابط مباشر لصفحة الصيانة الوقائية من بطاقة التنبيه
-
----
-
-## تغييرات قاعدة البيانات
-
-إضافة أعمدة لجدول `fuel_records`:
-- `latitude` / `longitude` (إحداثيات وقت التعبئة)
-- `vehicle_plate` (لوحة المركبة)
-- `km_since_last_fill` (محسوبة)
-- `l_per_100km` (محسوبة)
-- `fraud_flags` (JSONB للتنبيهات)
-
-جدول جديد `fuel_tanks`:
-- `id`, `organization_id`, `tank_name`, `fuel_type`, `capacity_liters`, `current_level`, `location`, `last_refill_date`
-
-جدول جديد `fuel_tank_transactions`:
-- `id`, `tank_id`, `transaction_type` (fill/withdraw), `liters`, `driver_id`, `vehicle_plate`, `recorded_at`
+### 5. تفكيك OrganizationProfile.tsx (1,059 سطر)
+- نقل منطق الوثائق (upload/download/print) لـ `src/components/organization/OrgDocumentsManager.tsx`
+- نقل بيانات الممثلين لـ `src/components/organization/OrgRepresentatives.tsx`
+- نقل بيانات التواصل لـ `src/components/organization/OrgContactInfo.tsx`
+- الصفحة الرئيسية تصبح ~300 سطر (tab router فقط)
 
 ---
 
@@ -99,26 +63,14 @@ Fuel Intelligence System
 
 | الملف | الإجراء |
 |-------|---------|
-| `src/hooks/useFuelCalculations.ts` | إنشاء - محرك الحسابات |
-| `src/components/fuel/FuelDashboardCards.tsx` | إنشاء - 6 بطاقات ملخص |
-| `src/components/fuel/FuelFraudDetector.tsx` | إنشاء - كشف التلاعب |
-| `src/components/fuel/FuelConsumptionChart.tsx` | إنشاء - شارت المقارنة |
-| `src/components/fuel/FuelBudgetForecaster.tsx` | إنشاء - تنبؤ الميزانية |
-| `src/components/fuel/FuelRecordForm.tsx` | إنشاء - نموذج محسّن |
-| `src/components/fuel/FuelTankManager.tsx` | إنشاء - التانكات الداخلية |
-| `src/components/fuel/FuelMaintenanceLink.tsx` | إنشاء - ربط الصيانة |
-| `src/pages/dashboard/FuelManagement.tsx` | إعادة بناء كاملة (موديولي) |
-| Migration SQL | إضافة أعمدة + جدولين جديدين |
+| `src/hooks/useOrganizationImpact.ts` | إنشاء — Hook حساب التأثير البيئي للمنظمة |
+| `src/components/organization/OrgImpactCounter.tsx` | إنشاء — عداد التأثير الحي (animated) |
+| `src/components/organization/OrgAchievementBadges.tsx` | إنشاء — أوسمة المنظمة الديناميكية |
+| `src/components/organization/OrgDocumentsManager.tsx` | إنشاء — منطق الوثائق (مستخرج) |
+| `src/components/organization/OrgRepresentatives.tsx` | إنشاء — بيانات الممثلين (مستخرج) |
+| `src/components/organization/OrgContactInfo.tsx` | إنشاء — بيانات التواصل (مستخرج) |
+| `src/components/organization/BusinessPagePreview.tsx` | تعديل — إضافة Trust Signals + أوسمة + تبويب إنجازات |
+| `src/pages/dashboard/OrganizationProfile.tsx` | تعديل — تفكيك + SEO ديناميكي |
 
----
-
-## النتيجة المتوقعة
-
-صفحة وقود ذكية متكاملة بـ 8 مكونات موديولية تغطي:
-- تسجيل محسّن مع GPS وصور
-- كشف تلاعب تلقائي (Geofence + KM/L)
-- تحليلات بصرية ومقارنات بين المركبات
-- تنبؤ ميزانية شهرية
-- إدارة تانكات داخلية
-- ربط تلقائي مع نظام الصيانة
+**لا تغييرات في قاعدة البيانات** — كل الحسابات من بيانات موجودة فعلاً (شحنات + شراكات + وثائق).
 
