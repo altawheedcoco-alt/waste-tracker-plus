@@ -108,6 +108,7 @@ const TABS: TabItem[] = [
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
+  { value: 'fullcircle', label: 'الدائرة الكاملة', icon: Globe },
   { value: 'notes', label: 'الملاحظات', icon: StickyNote },
   { value: 'chat', label: 'المحادثات', icon: MessageSquare },
   { value: 'actions', label: 'الإجراءات', icon: Settings2 },
