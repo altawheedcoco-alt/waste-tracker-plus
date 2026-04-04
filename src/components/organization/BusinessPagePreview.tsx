@@ -14,7 +14,7 @@ import {
   MapPin, Clock, Phone, Globe, ShoppingBag, Info, Calendar,
   Pin, Heart, MessageCircle, Share2, ImageIcon, CheckCircle,
   ExternalLink, Navigation, Copy, Link2, Users, Eye,
-  Building2, Settings, ShieldCheck
+  Building2, Settings, ShieldCheck, Trophy
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -25,6 +25,8 @@ import StoryCircles from '@/components/stories/StoryCircles';
 import PostInteractions from './PostInteractions';
 import PostShareActions from '@/components/content-generator/PostShareActions';
 import BusinessPageSharePanel from './BusinessPageSharePanel';
+import OrgImpactCounter from './OrgImpactCounter';
+import OrgAchievementBadges from './OrgAchievementBadges';
 
 interface BusinessPagePreviewProps {
   organizationId: string;
@@ -205,6 +207,14 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
             )}
           </div>
 
+          {/* Achievement Badges */}
+          <OrgAchievementBadges orgId={organizationId} orgData={orgData} />
+
+          {/* ESG Impact Counter */}
+          <div className="mt-3">
+            <OrgImpactCounter orgId={organizationId} />
+          </div>
+
           {/* Action Buttons */}
           <div className="flex gap-2 mt-4">
             {orgData?.phone && (
@@ -257,6 +267,9 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
               </TabsTrigger>
               <TabsTrigger value="about" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
                 حول
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
+                الإنجازات
               </TabsTrigger>
               <TabsTrigger value="photos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
                 الصور
@@ -327,6 +340,28 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
           <TabsContent value="about" className="p-4 mt-0">
             <div className="max-w-xl mx-auto space-y-4">
               <SidebarAbout orgData={orgData} services={services} workingHours={workingHours} hasWorkingHours={hasWorkingHours} coords={coords} socialLinks={socialLinks} showMap />
+            </div>
+          </TabsContent>
+
+          {/* ═══ Achievements Tab ═══ */}
+          <TabsContent value="achievements" className="p-4 mt-0">
+            <div className="max-w-xl mx-auto space-y-4">
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-primary" /> الأوسمة المكتسبة
+                  </h4>
+                  <OrgAchievementBadges orgId={organizationId} orgData={orgData} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5">
+                    🌍 الأثر البيئي التراكمي
+                  </h4>
+                  <OrgImpactCounter orgId={organizationId} />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
