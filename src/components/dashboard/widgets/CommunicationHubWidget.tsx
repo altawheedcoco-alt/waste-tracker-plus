@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Bell, FileText, CircleDot, Video, Send, Phone, 
   Hash, BarChart3, Bot, PenTool, Radio, 
-  TrendingUp, Eye, X, ArrowLeft, ExternalLink
+  TrendingUp, Eye, X, ArrowLeft, ExternalLink,
+  Film, Newspaper
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
