@@ -1,6 +1,10 @@
 // Tab auth isolation MUST be imported before any Supabase client usage
 import './lib/tabAuthIsolation';
 
+// Initialize offline interceptor for all Supabase writes
+import { initOfflineInterceptor } from './lib/offlineInterceptor';
+initOfflineInterceptor();
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
