@@ -786,78 +786,21 @@ const OrganizationProfile = () => {
 
           {/* الممثلون */}
           <TabsContent value="representatives">
-            <div className="space-y-4">
-              {/* الممثل القانوني */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />الممثل القانوني</CardTitle>
-                  <CardDescription>الشخص المخول قانونياً بتمثيل الجهة</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.representative_name || ''} onChange={(e) => setOrgData({ ...orgData, representative_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.representative_national_id || ''} onChange={(e) => setOrgData({ ...orgData, representative_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>المنصب</Label><Input value={orgData?.representative_position || ''} onChange={(e) => setOrgData({ ...orgData, representative_position: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.representative_phone || ''} onChange={(e) => setOrgData({ ...orgData, representative_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
-                    <div className="space-y-2 md:col-span-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.representative_email || ''} onChange={(e) => setOrgData({ ...orgData, representative_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
-                  </div>
-                </CardContent>
-              </Card>
-              {/* المفوض */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />المفوض</CardTitle>
-                  <CardDescription>الشخص المفوض من قبل الممثل القانوني</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.delegate_name || ''} onChange={(e) => setOrgData({ ...orgData, delegate_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.delegate_national_id || ''} onChange={(e) => setOrgData({ ...orgData, delegate_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.delegate_phone || ''} onChange={(e) => setOrgData({ ...orgData, delegate_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
-                    <div className="space-y-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.delegate_email || ''} onChange={(e) => setOrgData({ ...orgData, delegate_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
-                  </div>
-                </CardContent>
-              </Card>
-              {/* الموكل */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />الموكل</CardTitle>
-                  <CardDescription>بيانات الموكل (إن وجد)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.agent_name || ''} onChange={(e) => setOrgData({ ...orgData, agent_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.agent_national_id || ''} onChange={(e) => setOrgData({ ...orgData, agent_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
-                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.agent_phone || ''} onChange={(e) => setOrgData({ ...orgData, agent_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
-                    <div className="space-y-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.agent_email || ''} onChange={(e) => setOrgData({ ...orgData, agent_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
-                  </div>
-                </CardContent>
-              </Card>
-              <SaveButton />
-            </div>
+            <ErrorBoundary fallbackTitle="خطأ في بيانات الممثلين">
+              <Suspense fallback={<TabFallback />}>
+                <OrgRepresentatives orgData={orgData} isEditable={isCompanyAdmin} onUpdate={setOrgData} onSave={handleSave} saving={saving} />
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
           {/* التواصل */}
           <TabsContent value="contact">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5" />بيانات التواصل</CardTitle>
-                <CardDescription>معلومات الاتصال بالجهة</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Mail className="w-4 h-4" />البريد الإلكتروني</Label>
-                    <Input value={orgData?.email || ''} onChange={(e) => setOrgData({ ...orgData, email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4" />رقم الهاتف الأساسي</Label>
-                    <Input value={orgData?.phone || ''} onChange={(e) => setOrgData({ ...orgData, phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4" />رقم الهاتف الثانوي</Label>
-                    <Input value={orgData?.secondary_phone || ''} onChange={(e) => setOrgData({ ...orgData, secondary_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" />
-                  </div>
+            <ErrorBoundary fallbackTitle="خطأ في بيانات التواصل">
+              <Suspense fallback={<TabFallback />}>
+                <OrgContactInfo orgData={orgData} isEditable={isCompanyAdmin} onUpdate={setOrgData} onSave={handleSave} saving={saving} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
                 </div>
                 <SaveButton />
               </CardContent>
