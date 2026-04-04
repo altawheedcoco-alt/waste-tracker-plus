@@ -160,7 +160,8 @@ function getTabsForType(type: DriverType | undefined): typeof companyTabs {
 
 const DriverDashboard = () => {
   const { profile } = useAuth();
-  const navigate = useNavigate();
+  const realWeather = useRealWeather();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
   const {
     driverInfo,
     shipments,
