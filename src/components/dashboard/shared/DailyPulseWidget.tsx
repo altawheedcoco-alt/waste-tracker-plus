@@ -13,6 +13,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 
 function getGreeting() {
   const h = new Date().getHours();
