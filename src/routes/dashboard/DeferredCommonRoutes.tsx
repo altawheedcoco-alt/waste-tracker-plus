@@ -46,6 +46,9 @@ const PartnerReviews = lazyRetry(() => import('@/pages/dashboard/PartnerReviews'
 const SharedLinksPage = lazyRetry(() => import('@/pages/dashboard/SharedLinksPage'));
 const AdvancedAnalyticsPage = lazyRetry(() => import('@/pages/dashboard/AdvancedAnalyticsPage'));
 const ExecutiveSummaryPage = lazyRetry(() => import('@/pages/dashboard/ExecutiveSummaryPage'));
+const LegalShield = lazyRetry(() => import('@/pages/dashboard/LegalShield'));
+const RevenueRadar = lazyRetry(() => import('@/pages/dashboard/RevenueRadar'));
+const SmartScale = lazyRetry(() => import('@/pages/dashboard/SmartScale'));
 
 export const deferredCommonRoutes = (
   <>
