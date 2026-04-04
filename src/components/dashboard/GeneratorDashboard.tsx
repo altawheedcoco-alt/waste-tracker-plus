@@ -86,6 +86,8 @@ const QuickWasteLogEntry = lazy(() => import('./generator/QuickWasteLogEntry'));
 const WasteSourceTracker = lazy(() => import('./generator/WasteSourceTracker'));
 const CollectionCalendarMini = lazy(() => import('./generator/CollectionCalendarMini'));
 const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
+const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
+const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
 
 
 interface RecentShipment {
