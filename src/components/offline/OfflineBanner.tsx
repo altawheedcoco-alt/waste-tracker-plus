@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Wifi, X, CloudOff, Database, RefreshCw, Loader2 } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
@@ -15,9 +15,9 @@ interface OfflineBannerProps {
  * بانر ثابت يظهر في أسفل الشاشة عند انقطاع الاتصال
  * مع معلومات عن المزامنة والعمليات المعلقة
  */
-const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
+const OfflineBanner = ({ className }: OfflineBannerProps) => {
   const { isOnline } = useNetworkStatus();
-  const { isSyncing, pendingCount, syncNow } = useOfflineSync();
+  const { isSyncing, pendingCount, syncNow, syncProgress } = useOfflineSync();
   const [dismissed, setDismissed] = useState(false);
   const [wasOffline, setWasOffline] = useState(false);
   const [showReconnected, setShowReconnected] = useState(false);
@@ -54,13 +54,13 @@ const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
           <div className="flex-1">
             <p className="font-semibold text-sm">تم استعادة الاتصال</p>
             <p className="text-xs opacity-90">
-              {isSyncing ? 'جاري مزامنة البيانات...' : 
-               pendingCount > 0 ? `${pendingCount} عملية معلقة` : 'تمت المزامنة بنجاح'}
+              {isSyncing ? `جاري مزامنة البيانات... ${syncProgress}%` : 
+               pendingCount > 0 ? `${pendingCount} عملية معلقة` : 'تمت المزامنة بنجاح ✓'}
             </p>
           </div>
           {isSyncing && <Loader2 className="w-4 h-4 animate-spin" />}
         </div>
-        {isSyncing && <Progress value={60} className="h-1 bg-primary-foreground/20" />}
+        {isSyncing && <Progress value={syncProgress} className="h-1 bg-primary-foreground/20" />}
       </motion.div>
     );
   }
@@ -93,7 +93,7 @@ const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
         {/* Content */}
         <div className="p-4 space-y-3">
           <p className="text-sm text-muted-foreground">
-            أنت تعمل بدون اتصال بالإنترنت. لا تقلق، بياناتك محفوظة.
+            أنت تعمل بدون اتصال بالإنترنت. لا تقلق، بياناتك محفوظة وكل العمليات ستُزامن تلقائياً.
           </p>
 
           {pendingCount > 0 && (
@@ -108,18 +108,18 @@ const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Database className="w-4 h-4 text-primary" />
-              <span>البيانات المحفوظة متاحة للعرض</span>
+              <span>البيانات المحفوظة متاحة للعرض والتعديل</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <CloudOff className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">التحديثات ستتم عند عودة الاتصال</span>
+              <span className="text-muted-foreground">كل التعديلات ستُرسل بترتيبها عند عودة الاتصال</span>
             </div>
           </div>
         </div>
       </motion.div>
     </AnimatePresence>
   );
-});
+};
 
 OfflineBanner.displayName = 'OfflineBanner';
 
