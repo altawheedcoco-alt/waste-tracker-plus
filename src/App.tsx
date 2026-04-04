@@ -32,6 +32,7 @@ const OfflineBanner = lazy(() => lazyRetry(() => import("./components/offline/Of
 const CodeProtection = lazy(() => lazyRetry(() => import("./components/security/CodeProtection")));
 const ProductionReadiness = lazy(() => lazyRetry(() => import("./components/production/ProductionReadiness")));
 const SoundIntegrator = lazy(() => lazyRetry(() => import("./components/SoundIntegrator")));
+const AutoDataPreloader = lazy(() => lazyRetry(() => import("./components/offline/AutoDataPreloader")));
 
 // Minimal loading component
 const PageLoader = memo(() => (
@@ -206,6 +207,7 @@ const Providers = memo(() => (
                 <AutoPushSubscriber />
                 <PushPermissionBanner />
                 <MobileEnhancements />
+                <Suspense fallback={null}><AutoDataPreloader /></Suspense>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
