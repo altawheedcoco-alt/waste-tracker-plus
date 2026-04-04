@@ -157,8 +157,14 @@ const RadarChart = ({ stats }: { stats: RadarStat[] }) => {
 };
 
 /* ── System icons ── */
-interface SystemIcon { icon: LucideIcon; label: string; tooltip: string; status: 'ok' | 'warn' | 'error'; route?: string; }
+interface SystemIcon { icon: LucideIcon; label: string; tooltip: string; status: 'ok' | 'warn' | 'error'; route?: string; priority?: boolean; }
 const systemIcons: SystemIcon[] = [
+  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments', priority: true },
+  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive', priority: true },
+  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/org-structure', priority: true },
+  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/erp/accounting', priority: true },
+  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox', priority: true },
+  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/system-status', priority: true },
   { icon: Wifi, label: 'NET', tooltip: 'الشبكة متصلة', status: 'ok' },
   { icon: Database, label: 'DB', tooltip: 'قاعدة البيانات تعمل', status: 'ok' },
   { icon: Cpu, label: 'CPU', tooltip: 'المعالجة مستقرة', status: 'ok' },
@@ -168,19 +174,15 @@ const systemIcons: SystemIcon[] = [
   { icon: CircuitBoard, label: 'IOT', tooltip: 'أجهزة IoT متصلة', status: 'ok' },
   { icon: BatteryCharging, label: 'PWR', tooltip: 'الطاقة مستقرة', status: 'ok' },
   { icon: Antenna, label: 'RF', tooltip: 'التردد اللاسلكي نشط', status: 'ok' },
-  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox' },
-  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/erp/accounting' },
-  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/org-structure' },
-  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive' },
-  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments' },
   { icon: Lock, label: 'RLS', tooltip: 'سياسات الأمان', status: 'ok' },
   { icon: RefreshCw, label: 'SYNC', tooltip: 'المزامنة اللحظية', status: 'ok' },
   { icon: HardDrive, label: 'STOR', tooltip: 'التخزين السحابي', status: 'ok' },
   { icon: MessageSquare, label: 'CHAT', tooltip: 'نظام الدردشة', status: 'ok', route: '/dashboard/chat' },
   { icon: ClipboardCheck, label: 'CMPL', tooltip: 'الامتثال البيئي', status: 'ok', route: '/dashboard/compliance-assessment' },
-  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/system-status' },
   { icon: PlugZap, label: 'API', tooltip: 'واجهات API', status: 'ok' },
 ];
+const priorityIcons = systemIcons.filter(si => si.priority);
+const secondaryIcons = systemIcons.filter(si => !si.priority);
 const statusColors: Record<string, string> = { ok: 'text-emerald-500', warn: 'text-amber-500', error: 'text-destructive' };
 
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
