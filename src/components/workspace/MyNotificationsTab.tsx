@@ -29,6 +29,42 @@ const MyNotificationsTab = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
+  const nativePush = useNativePush();
+  const [testingPush, setTestingPush] = useState(false);
+
+  const handleTestNativePush = useCallback(async () => {
+    if (testingPush) return;
+    setTestingPush(true);
+    try {
+      // If not subscribed, subscribe first (will also send test notification)
+      if (!nativePush.isSubscribed) {
+        const ok = await nativePush.subscribe();
+        if (ok) {
+          toast.success('تم تفعيل الإشعارات الأصلية — تحقق من جهازك!');
+        }
+      } else {
+        // Already subscribed, just send a test push
+        const { error } = await supabase.functions.invoke('send-push', {
+          body: {
+            user_ids: [user?.id],
+            title: '🔔 اختبار Web Push الأصلي',
+            body: 'إشعار تجريبي من النظام الأصلي بدون Firebase — ' + new Date().toLocaleTimeString('ar-EG'),
+            data: { url: '/dashboard' },
+          },
+        });
+        if (error) {
+          toast.error('فشل إرسال الإشعار التجريبي');
+        } else {
+          toast.success('تم إرسال إشعار تجريبي — تحقق من جهازك!');
+        }
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'حصل خطأ');
+    } finally {
+      setTestingPush(false);
+    }
+  }, [testingPush, nativePush, user]);
+
   const [showTypePrefs, setShowTypePrefs] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
