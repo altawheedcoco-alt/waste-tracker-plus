@@ -352,6 +352,12 @@ const GeneratorDashboard = () => {
         <DailyOperationsSummary />
       </ErrorBoundary>
 
+      {/* ★ تذكيرات ذكية */}
+      <Suspense fallback={null}><SmartReminderWidget role="generator" /></Suspense>
+
+      {/* ★ مقارنة الأداء الشهري */}
+      <Suspense fallback={null}><PeriodComparisonWidget role="generator" /></Suspense>
+
       {/* 5. التنبيهات والإشعارات */}
       <DashboardAlertsHub orgType="generator" />
 

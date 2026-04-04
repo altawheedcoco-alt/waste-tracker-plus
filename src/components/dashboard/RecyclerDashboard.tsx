@@ -288,6 +288,16 @@ const RecyclerDashboard = () => {
       {/* ★ بورصة السلع العالمية — أعلى لوحة التحكم */}
       <GlobalCommodityTicker />
 
+      {/* ★ شريط الأداء + تقدم اليوم */}
+      <Suspense fallback={null}><RecyclerPerformanceStrip /></Suspense>
+      <Suspense fallback={null}><RecyclerTodayProgress /></Suspense>
+
+      {/* ★ تذكيرات ذكية */}
+      <Suspense fallback={null}><SmartReminderWidget role="recycler" /></Suspense>
+
+      {/* ★ مقارنة الأداء الشهري */}
+      <Suspense fallback={null}><PeriodComparisonWidget role="recycler" /></Suspense>
+
       {/* 2. مركز القيادة */}
       <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
