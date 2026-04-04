@@ -32,11 +32,9 @@ export default function TransporterComplianceDashboard() {
     queryKey: ['transporter-track-record', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
-      const [totalRes, completedRes, incidentRes] = await Promise.all([
-        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id),
-        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id).eq('status', 'confirmed'),
-        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id).eq('has_incident', true),
-      ]);
+      const totalRes = await (supabase as any).from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id);
+      const completedRes = await (supabase as any).from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id).eq('status', 'confirmed');
+      const incidentRes = await (supabase as any).from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', organization.id).eq('has_incident', true);
       const total = totalRes.count || 0;
       const completed = completedRes.count || 0;
       const incidents = incidentRes.count || 0;
