@@ -29,6 +29,9 @@ import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
 import LegalDataSection from '@/components/organization/LegalDataSection';
 
+const OrgRepresentatives = lazy(() => import('@/components/organization/OrgRepresentatives'));
+const OrgContactInfo = lazy(() => import('@/components/organization/OrgContactInfo'));
+
 // Lazy load heavy tab components
 const BusinessPagePreview = lazy(() => import('@/components/organization/BusinessPagePreview'));
 const OrgPublicProfileSettings = lazy(() => import('@/components/org-structure/OrgPublicProfileSettings'));
