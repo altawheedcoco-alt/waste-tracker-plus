@@ -152,6 +152,23 @@ const OrganizationProfile = () => {
     fetchOrganizationData();
   }, [user, organization]);
 
+  // Dynamic SEO
+  useEffect(() => {
+    if (orgData?.name) {
+      document.title = `${orgData.name} | iRecycle`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      const desc = `${orgData.name} - ${orgData.activity_type || 'إدارة المخلفات'} | ${orgData.city || ''} | منصة iRecycle`;
+      if (metaDesc) metaDesc.setAttribute('content', desc);
+      else {
+        const meta = document.createElement('meta');
+        meta.name = 'description';
+        meta.content = desc;
+        document.head.appendChild(meta);
+      }
+    }
+    return () => { document.title = 'iRecycle — Waste Management Solution Platform'; };
+  }, [orgData?.name, orgData?.activity_type, orgData?.city]);
+
   const fetchOrganizationData = async () => {
     if (!organization?.id) { setLoading(false); return; }
     try {
