@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useDataPreloader } from '@/hooks/useDataPreloader';
 import { offlineStorage } from '@/lib/offlineStorage';
 import { cn } from '@/lib/utils';
 import {
