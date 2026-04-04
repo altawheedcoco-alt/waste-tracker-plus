@@ -11,145 +11,124 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'غير مصرح' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-    const supabaseAuth = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
-    const { error: authError } = await supabaseAuth.auth.getClaims(authHeader.replace('Bearer ', ''));
-    if (authError) {
-      return new Response(JSON.stringify({ error: 'غير مصرح' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const DAYS_BEFORE_EXPIRY = 7;
     const today = new Date();
-    const warningDate = new Date(today);
-    warningDate.setDate(warningDate.getDate() + DAYS_BEFORE_EXPIRY);
-    const warningDateStr = warningDate.toISOString().split("T")[0];
+    const todayStr = today.toISOString().split("T")[0];
 
-    // Find transporters with license expiring within 7 days and not yet suspended
-    const { data: expiringOrgs, error } = await supabase
+    // License fields to check per org type
+    const LICENSE_FIELDS: Record<string, { field: string; label: string }[]> = {
+      transporter: [
+        { field: "wmra_license_expiry_date", label: "ترخيص WMRA" },
+        { field: "eeaa_license_expiry_date", label: "ترخيص جهاز البيئة" },
+        { field: "land_transport_license_expiry_date", label: "رخصة النقل البري" },
+        { field: "license_expiry_date", label: "السجل التجاري" },
+        { field: "transport_insurance_expiry", label: "تأمين النقل" },
+        { field: "adr_certificate_expiry", label: "شهادة ADR" },
+      ],
+      recycler: [
+        { field: "wmra_license_expiry_date", label: "ترخيص WMRA" },
+        { field: "eeaa_license_expiry_date", label: "ترخيص جهاز البيئة" },
+        { field: "license_expiry_date", label: "السجل التجاري" },
+        { field: "ida_license_expiry_date", label: "التنمية الصناعية" },
+      ],
+      disposal: [
+        { field: "wmra_license_expiry_date", label: "ترخيص WMRA" },
+        { field: "eeaa_license_expiry_date", label: "ترخيص جهاز البيئة" },
+        { field: "license_expiry_date", label: "السجل التجاري" },
+        { field: "eia_certificate_expiry", label: "تقييم الأثر البيئي" },
+        { field: "incineration_permit_expiry", label: "تصريح الحرق" },
+        { field: "landfill_license_expiry", label: "ترخيص المدفن" },
+        { field: "emissions_permit_expiry", label: "تصريح الانبعاثات" },
+      ],
+      generator: [
+        { field: "wmra_license_expiry_date", label: "ترخيص WMRA" },
+        { field: "license_expiry_date", label: "السجل التجاري" },
+      ],
+    };
+
+    const allFields = [...new Set(Object.values(LICENSE_FIELDS).flat().map(f => f.field))];
+    const selectStr = `id, name, organization_type, ${allFields.join(", ")}`;
+
+    const { data: orgs, error: orgsError } = await supabase
       .from("organizations")
-      .select("id, name, license_expiry_date, license_renewal_url, is_suspended")
-      .eq("organization_type", "transporter")
-      .eq("is_active", true)
-      .eq("is_suspended", false)
-      .not("license_expiry_date", "is", null)
-      .lte("license_expiry_date", warningDateStr);
+      .select(selectStr)
+      .eq("is_active", true);
 
-    if (error) {
-      console.error("Error fetching organizations:", error);
-      throw error;
-    }
+    if (orgsError) throw orgsError;
 
-    console.log(`Found ${expiringOrgs?.length || 0} transporters with expiring licenses`);
+    let totalNotifications = 0;
+    const alertDays = [30, 15, 7, 3, 1, 0];
 
-    const results = { suspended: 0, warned: 0, errors: 0 };
+    for (const org of orgs || []) {
+      const orgType = (org as any).organization_type as string;
+      const fields = LICENSE_FIELDS[orgType] || LICENSE_FIELDS.generator;
 
-    for (const org of expiringOrgs || []) {
-      try {
-        const expiryDate = new Date(org.license_expiry_date);
-        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        const hasRenewal = !!org.license_renewal_url;
+      // Get org admin users
+      const { data: members } = await supabase
+        .from("organization_members")
+        .select("user_id, role")
+        .eq("organization_id", (org as any).id)
+        .in("role", ["owner", "admin", "manager"]);
 
-        if (hasRenewal) {
-          console.log(`Skipping ${org.name}: renewal document uploaded`);
-          continue;
-        }
+      if (!members?.length) continue;
 
-        if (daysUntilExpiry <= 0) {
-          // License expired - suspend account
-          const { error: suspendError } = await supabase
-            .from("organizations")
-            .update({
-              is_suspended: true,
-              is_active: false,
-              suspension_reason: `تم تعطيل الحساب تلقائياً: انتهاء ترخيص النقل بتاريخ ${org.license_expiry_date}`,
-              suspended_at: new Date().toISOString(),
-            } as any)
-            .eq("id", org.id);
+      for (const license of fields) {
+        const expiryDate = (org as any)[license.field] as string | null;
+        if (!expiryDate) continue;
 
-          if (suspendError) throw suspendError;
+        const expiry = new Date(expiryDate);
+        const daysRemaining = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-          // Notify all org members
-          const { data: members } = await supabase
-            .from("profiles")
+        const isExpired = daysRemaining < 0;
+        const shouldAlert = alertDays.includes(daysRemaining) || (isExpired && daysRemaining >= -1);
+        if (!shouldAlert) continue;
+
+        const severity = isExpired ? "critical" : daysRemaining <= 7 ? "high" : "medium";
+        const title = isExpired
+          ? `⛔ ${license.label} منتهي — ${(org as any).name}`
+          : `⚠️ ${license.label} ينتهي خلال ${daysRemaining} يوم — ${(org as any).name}`;
+        const message = isExpired
+          ? `تنبيه: ${license.label} لجهة "${(org as any).name}" منتهي. يرجى التجديد.`
+          : `${license.label} لجهة "${(org as any).name}" ينتهي خلال ${daysRemaining} يوم (${expiryDate}).`;
+
+        for (const member of members) {
+          // Skip if already notified today
+          const { data: existing } = await supabase
+            .from("notifications")
             .select("id")
-            .eq("organization_id", org.id);
+            .eq("user_id", member.user_id)
+            .eq("type", "license_expiry")
+            .gte("created_at", todayStr)
+            .limit(1);
 
-          if (members) {
-            const notifications = members.map((m: any) => ({
-              user_id: m.id,
-              title: "⛔ تم تعطيل حساب شركتكم",
-              message: `تم تعطيل حساب "${org.name}" بسبب انتهاء ترخيص النقل. يرجى رفع نسخة محدثة من الترخيص لإعادة تفعيل الحساب.`,
-              type: "license_expired",
-              reference_id: org.id,
-              reference_type: "organization",
-            }));
-            await supabase.from("notifications").insert(notifications);
-          }
+          if (existing?.length) continue;
 
-          // Notify admins
-          const { data: admins } = await supabase
-            .from("user_roles")
-            .select("user_id")
-            .eq("role", "admin");
-
-          if (admins) {
-            const adminNotifs = admins.map((a: any) => ({
-              user_id: a.user_id,
-              title: "تنبيه: تعطيل حساب ناقل",
-              message: `تم تعطيل حساب "${org.name}" تلقائياً بسبب انتهاء الترخيص بتاريخ ${org.license_expiry_date}.`,
-              type: "license_expired",
-              reference_id: org.id,
-              reference_type: "organization",
-            }));
-            await supabase.from("notifications").insert(adminNotifs);
-          }
-
-          results.suspended++;
-          console.log(`Suspended: ${org.name} (expired ${org.license_expiry_date})`);
-        } else {
-          // License expiring soon - send warning
-          const { data: members } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("organization_id", org.id);
-
-          if (members) {
-            const notifications = members.map((m: any) => ({
-              user_id: m.id,
-              title: `⚠️ ترخيص النقل ينتهي خلال ${daysUntilExpiry} يوم`,
-              message: `ترخيص النقل لشركة "${org.name}" ينتهي بتاريخ ${org.license_expiry_date}. يرجى رفع نسخة محدثة قبل انتهاء الصلاحية لتجنب تعطيل الحساب تلقائياً.`,
-              type: "license_expiry_warning",
-              reference_id: org.id,
-              reference_type: "organization",
-            }));
-            await supabase.from("notifications").insert(notifications);
-          }
-
-          results.warned++;
-          console.log(`Warning sent: ${org.name} (expires in ${daysUntilExpiry} days)`);
+          await supabase.from("notifications").insert({
+            user_id: member.user_id,
+            type: isExpired ? "license_expired" : "license_expiry_warning",
+            title,
+            message,
+            severity,
+            reference_id: (org as any).id,
+            reference_type: "organization",
+          });
+          totalNotifications++;
         }
-      } catch (orgError) {
-        console.error(`Error processing ${org.name}:`, orgError);
-        results.errors++;
       }
     }
 
-    return new Response(JSON.stringify({ success: true, results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, notifications_sent: totalNotifications }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("License check error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });

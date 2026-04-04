@@ -16,6 +16,7 @@ const SystemStatus = lazyRetry(() => import('@/pages/dashboard/SystemStatus'));
 const PlatformTermsAndPolicies = lazyRetry(() => import('@/pages/dashboard/PlatformTermsAndPolicies'));
 const DigitalWallet = lazyRetry(() => import('@/pages/dashboard/DigitalWallet'));
 const GamificationPage = lazyRetry(() => import('@/pages/GamificationPage'));
+const ComplianceAnalysis = lazyRetry(() => import('@/pages/dashboard/ComplianceAnalysis'));
 
 export const essentialCommonRoutes = (
   <>
@@ -31,5 +32,6 @@ export const essentialCommonRoutes = (
     <Route path="/dashboard/platform-terms" element={<PlatformTermsAndPolicies />} />
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
     <Route path="/dashboard/gamification" element={<GamificationPage />} />
+    <Route path="/dashboard/compliance-analysis" element={<ComplianceAnalysis />} />
   </>
 );
