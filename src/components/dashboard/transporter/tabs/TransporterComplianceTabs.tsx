@@ -55,7 +55,7 @@ const COMPLIANCE_SECTIONS: { id: ComplianceSection; labelAr: string; icon: React
 ];
 
 const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
-  const [activeSection, setActiveSection] = useState<ComplianceSection>('compliance');
+  const [activeSection, setActiveSection] = useState<ComplianceSection>('gate');
 
   return (
     <>
