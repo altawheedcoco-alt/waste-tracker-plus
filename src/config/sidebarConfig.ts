@@ -836,10 +836,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Package, labelAr: 'عروضي', labelEn: 'My Listings', path: '/dashboard/waste-exchange?tab=my-listings', key: 'waste-exchange-listings', bindingType: 'hybrid' as const },
       { icon: Handshake, labelAr: 'مزايداتي', labelEn: 'My Bids', path: '/dashboard/waste-exchange?tab=my-bids', key: 'waste-exchange-bids', bindingType: 'hybrid' as const },
       { icon: TrendingUp, labelAr: 'مؤشر الأسعار', labelEn: 'Price Index', path: '/dashboard/waste-exchange?tab=price-index', key: 'waste-exchange-prices', bindingType: 'hybrid' as const },
+      { icon: Recycle, labelAr: 'السلع الثانوية', labelEn: 'Secondary Materials', path: '/dashboard/secondary-materials', key: 'secondary-materials', bindingType: 'hybrid' as const },
+      { icon: GitCompareArrows, labelAr: 'المطابق الدائري', labelEn: 'Circular Matcher', path: '/dashboard/circular-matcher', key: 'circular-matcher', bindingType: 'hybrid' as const },
     ],
   },
-
-  // ═══════════════ سوق B2B ═══════════════
   {
     id: 'b2b-marketplace',
     icon: ShoppingCart,
