@@ -501,6 +501,12 @@ export const wasteTypeLabels: Record<string, string> = {
   other: 'أخرى',
 };
 
+/** ترجمة نوع المخلف من الإنجليزي للعربي — fallback للقيمة الأصلية */
+export const translateWasteType = (type: string | null | undefined): string => {
+  if (!type) return 'غير محدد';
+  return wasteTypeLabels[type] || type;
+};
+
 // Waste type labels specific to disposal facilities (التخلص النهائي)
 // جهة التخلص النهائي هي جهة مستقبلة لكل أنواع المخلفات (خطرة وغير خطرة) حسب ترخيصها
 export const disposalWasteTypeLabels: Record<string, string> = {
