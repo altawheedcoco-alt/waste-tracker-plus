@@ -233,60 +233,64 @@ const DriverDashboard = () => {
     <div className="space-y-3 pb-20">
       <ConnectedSmartBrief role="driver" />
 
-      {/* Compact Header */}
-      <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                {profile?.full_name?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${driverInfo?.is_available ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium">
-                {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
-              </span>
-              {driverInfo && <DriverTypeBadge type={driverInfo.driver_type || 'company'} size="sm" />}
-            </div>
-            <div className="flex items-center gap-1.5">
-              {driverInfo?.organization?.name && (
-                <p className="text-[10px] text-muted-foreground">{driverInfo.organization.name}</p>
-              )}
-              {driverInfo?.vehicle_plate && (
-                <p className="text-[10px] text-muted-foreground">• {driverInfo.vehicle_plate}</p>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* ★ V2 Header — ترقية من بسيط لاحترافي */}
+      <DashboardV2Header
+        userName={profile?.full_name || ''}
+        orgName={driverInfo?.organization?.name || 'سائق مستقل'}
+        orgLabel={driverInfo?.driver_type === 'independent' ? 'سائق مستقل' : driverInfo?.driver_type === 'hired' ? 'سائق مؤجر' : 'سائق شركة'}
+        icon={Truck}
+        gradient="from-blue-500 to-indigo-600"
+        onRefresh={refreshData}
+        radarStats={[
+          { label: 'إجمالي الشحنات', value: shipments.length, icon: Package, color: 'text-primary', max: shipments.length || 1, trend: 'up' as const },
+          { label: 'نشطة', value: activeShipments.length, icon: Clock, color: 'text-amber-500', max: Math.max(shipments.length, 1), trend: 'up' as const },
+          { label: 'مكتملة', value: completedShipments.length, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(shipments.length, 1), trend: 'up' as const },
+          { label: 'التقييم', value: driverInfo?.rating || 0, icon: Star, color: 'text-amber-500', max: 5, trend: 'stable' as const },
+          { label: 'الرحلات', value: driverInfo?.total_trips || 0, icon: Route, color: 'text-violet-500', max: (driverInfo?.total_trips || 0) + 1, trend: 'up' as const },
+          { label: 'القبول', value: Math.round(driverInfo?.acceptance_rate || 0), icon: Zap, color: 'text-emerald-500', max: 100, trend: 'stable' as const },
+        ]}
+        alerts={operationalAlerts}
+        onAlertClick={(alert: any) => { if (alert.route) navigate(alert.route); }}
+        weather={{
+          temp: realWeather.temp,
+          condition: realWeather.condition,
+          conditionLabel: realWeather.conditionLabel,
+          humidity: realWeather.humidity,
+          windSpeed: realWeather.windSpeed,
+          roadWarning: realWeather.roadWarning,
+          feelsLike: realWeather.feelsLike,
+          uvIndex: realWeather.uvIndex,
+          precipProb: realWeather.precipProb,
+          pressure: realWeather.pressure,
+          locationName: realWeather.locationName,
+          hourlyForecast: realWeather.hourlyForecast,
+          isLoading: realWeather.isLoading,
+          refreshFromGPS: realWeather.refreshFromGPS,
+          isLocating: realWeather.isLocating,
+        }}
+      >
+        <DashboardWidgetCustomizer orgType="driver" />
+        {driverInfo && (
+          <>
+            <LiveLocationIndicator
+              isTracking={!!lastLocationUpdate}
+              lastUpdate={lastLocationUpdate}
+              signalStrength={lastLocationUpdate ? 'good' : 'offline'}
+            />
+            <TrackingWatcherIndicator driverId={driverInfo.id} />
+            <QuickLocationButton driverId={driverInfo.id} variant="icon" onSuccess={handleLocationSuccess} />
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleOpenLiveMap()}>
+              <Map className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowSettingsDialog(true)}>
+          <Settings className="h-4 w-4" />
+        </Button>
+      </DashboardV2Header>
 
-        <div className="flex items-center gap-1.5">
-          {driverInfo && (
-            <>
-              <LiveLocationIndicator
-                isTracking={!!lastLocationUpdate}
-                lastUpdate={lastLocationUpdate}
-                signalStrength={lastLocationUpdate ? 'good' : 'offline'}
-              />
-              <TrackingWatcherIndicator driverId={driverInfo.id} />
-              <QuickLocationButton
-                driverId={driverInfo.id}
-                variant="icon"
-                onSuccess={handleLocationSuccess}
-              />
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleOpenLiveMap()}>
-                <Map className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowSettingsDialog(true)}>
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      {/* ★ تنبيهات ذكية */}
+      <DashboardAlertsHub orgType="driver" />
 
       {/* Location Toggle — All Driver Types */}
       {driverInfo && (
