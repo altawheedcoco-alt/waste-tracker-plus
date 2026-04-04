@@ -162,6 +162,7 @@ const DriverDashboard = () => {
   const { profile } = useAuth();
   const realWeather = useRealWeather();
   const { data: operationalAlerts = [] } = useOperationalAlerts();
+  const navigate = useNavigate();
   const {
     driverInfo,
     shipments,
