@@ -310,6 +310,7 @@ const SidebarNavContent = memo(({
                   key={item.key}
                   icon={item.icon}
                   label={item.label}
+                  labelEn={item.labelEn}
                   path={item.path}
                   isCollapsed={false}
                 />
