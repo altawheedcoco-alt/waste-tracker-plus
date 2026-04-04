@@ -1,9 +1,9 @@
 /**
  * useDataPreloader - تحميل البيانات مسبقاً للعمل بدون إنترنت
- * محسّن: تحديث تفاضلي، أولويات، ضغط، مزامنة لحظية
+ * محسّن: تغطية شاملة لكل جداول المشروع
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { offlineStorage } from '@/lib/offlineStorage';
 import { toast } from 'sonner';
@@ -16,9 +16,7 @@ interface PreloadCategory {
   icon: string;
   priority: 'critical' | 'high' | 'normal';
   maxRecords: number;
-  /** دقائق - فترة صلاحية هذه الفئة */
   ttlMinutes: number;
-  /** هل يتم تحديثها تفاضلياً (فقط الجديد)؟ */
   incrementalField?: string;
 }
 
@@ -31,29 +29,38 @@ interface PreloadProgress {
   totalRecords: number;
   error: string | null;
   lastPreloadAt: Date | null;
-  /** حجم البيانات المخزنة تقريبياً بالكيلوبايت */
   estimatedSizeKB: number;
-  /** عدد السجلات المحدّثة في آخر تحديث تفاضلي */
   lastDeltaCount: number;
 }
 
 const PRELOAD_META_KEY = 'preload_meta';
 
 const CATEGORIES: PreloadCategory[] = [
-  // بيانات حرجة - تحديث كل 10 دقائق
-  { key: 'shipments', label: 'الشحنات النشطة', table: 'shipments', select: '*', icon: '📦', priority: 'critical', maxRecords: 1000, ttlMinutes: 10, incrementalField: 'updated_at' },
-  { key: 'notifications', label: 'الإشعارات', table: 'notifications', select: 'id,title,body,type,is_read,created_at', icon: '🔔', priority: 'critical', maxRecords: 200, ttlMinutes: 5, incrementalField: 'created_at' },
+  // بيانات حرجة - تحديث كل 5-10 دقائق
+  { key: 'shipments', label: 'الشحنات', table: 'shipments', select: '*', icon: '📦', priority: 'critical', maxRecords: 1000, ttlMinutes: 5, incrementalField: 'updated_at' },
+  { key: 'notifications', label: 'الإشعارات', table: 'notifications', select: 'id,title,body,type,is_read,created_at,user_id', icon: '🔔', priority: 'critical', maxRecords: 300, ttlMinutes: 3, incrementalField: 'created_at' },
+  { key: 'direct_messages', label: 'الرسائل المباشرة', table: 'direct_messages', select: '*', icon: '💬', priority: 'critical', maxRecords: 500, ttlMinutes: 3, incrementalField: 'created_at' },
 
-  // بيانات مهمة - تحديث كل 30 دقيقة
-  { key: 'invoices', label: 'الفواتير', table: 'invoices', select: '*', icon: '🧾', priority: 'high', maxRecords: 500, ttlMinutes: 30, incrementalField: 'updated_at' },
+  // بيانات مهمة - تحديث كل 10-30 دقيقة
+  { key: 'invoices', label: 'الفواتير', table: 'invoices', select: '*', icon: '🧾', priority: 'high', maxRecords: 500, ttlMinutes: 10, incrementalField: 'updated_at' },
+  { key: 'collection_requests', label: 'طلبات الجمع', table: 'collection_requests', select: '*', icon: '🚛', priority: 'high', maxRecords: 300, ttlMinutes: 10, incrementalField: 'updated_at' },
+  { key: 'work_orders', label: 'أوامر العمل', table: 'work_orders', select: '*', icon: '📋', priority: 'high', maxRecords: 300, ttlMinutes: 10, incrementalField: 'updated_at' },
+  { key: 'accounting_ledger', label: 'دفتر الحسابات', table: 'accounting_ledger', select: '*', icon: '📊', priority: 'high', maxRecords: 500, ttlMinutes: 15, incrementalField: 'created_at' },
+  { key: 'deposits', label: 'الإيداعات', table: 'deposits', select: '*', icon: '💰', priority: 'high', maxRecords: 300, ttlMinutes: 15, incrementalField: 'created_at' },
+  { key: 'contracts', label: 'العقود', table: 'contracts', select: '*', icon: '📝', priority: 'high', maxRecords: 200, ttlMinutes: 30, incrementalField: 'updated_at' },
+
+  // بيانات اجتماعية
+  { key: 'social_posts', label: 'المنشورات', table: 'social_posts', select: '*', icon: '📰', priority: 'normal', maxRecords: 200, ttlMinutes: 15, incrementalField: 'created_at' },
+  { key: 'broadcast_posts', label: 'البث', table: 'broadcast_posts', select: '*', icon: '📡', priority: 'normal', maxRecords: 200, ttlMinutes: 15, incrementalField: 'created_at' },
 
   // بيانات مرجعية - تحديث كل ساعة
   { key: 'profiles', label: 'المستخدمين', table: 'profiles', select: 'id,full_name,phone,avatar_url,organization_id', icon: '👥', priority: 'normal', maxRecords: 500, ttlMinutes: 60 },
   { key: 'organizations', label: 'المؤسسات', table: 'organizations', select: 'id,name,name_ar,logo_url,type,city', icon: '🏢', priority: 'normal', maxRecords: 300, ttlMinutes: 60 },
   { key: 'waste_types', label: 'أنواع النفايات', table: 'waste_types', select: '*', icon: '♻️', priority: 'normal', maxRecords: 100, ttlMinutes: 120 },
+  { key: 'external_partners', label: 'الشركاء', table: 'external_partners', select: '*', icon: '🤝', priority: 'normal', maxRecords: 300, ttlMinutes: 60 },
+  { key: 'academy_courses', label: 'الدورات', table: 'academy_courses', select: '*', icon: '🎓', priority: 'normal', maxRecords: 100, ttlMinutes: 120 },
 ];
 
-/** ترتيب حسب الأولوية */
 const SORTED_CATEGORIES = [...CATEGORIES].sort((a, b) => {
   const order = { critical: 0, high: 1, normal: 2 };
   return order[a.priority] - order[b.priority];
@@ -80,7 +87,6 @@ export const useDataPreloader = () => {
         lastPreloadAt: string;
         totalRecords: number;
         estimatedSizeKB: number;
-        categoryTimestamps: Record<string, string>;
       }>(PRELOAD_META_KEY);
       if (meta) {
         setProgress(prev => ({
@@ -93,12 +99,8 @@ export const useDataPreloader = () => {
     } catch {}
   }, []);
 
-  /**
-   * تحديث تفاضلي - يجلب فقط السجلات المحدّثة منذ آخر تحميل
-   */
   const incrementalSync = useCallback(async (cat: PreloadCategory, lastTimestamp: string | null): Promise<{ data: any[]; isFullSync: boolean }> => {
     if (!cat.incrementalField || !lastTimestamp) {
-      // Full sync
       const { data, error } = await supabase
         .from(cat.table as any)
         .select(cat.select || '*')
@@ -108,7 +110,6 @@ export const useDataPreloader = () => {
       return { data: data || [], isFullSync: true };
     }
 
-    // Delta sync - فقط الجديد/المحدّث
     const { data: deltaData, error } = await supabase
       .from(cat.table as any)
       .select(cat.select || '*')
@@ -120,9 +121,6 @@ export const useDataPreloader = () => {
     return { data: deltaData || [], isFullSync: false };
   }, []);
 
-  /**
-   * تحميل كامل أو تحديث تفاضلي حسب الحاجة
-   */
   const preloadAll = useCallback(async (forceFullSync = false) => {
     abortRef.current = false;
     setProgress(prev => ({
@@ -139,7 +137,6 @@ export const useDataPreloader = () => {
     let deltaCount = 0;
     let estimatedSizeKB = 0;
 
-    // تحميل بيانات Meta السابقة
     const metaRaw = await offlineStorage.getCache<{
       categoryTimestamps: Record<string, string>;
       totalRecords: number;
@@ -151,15 +148,12 @@ export const useDataPreloader = () => {
         if (abortRef.current) break;
 
         const cat = SORTED_CATEGORIES[i];
-
-        // تحقق: هل هذه الفئة تحتاج تحديث؟
         const lastTs = categoryTimestamps[cat.key];
         const lastTsTime = lastTs ? new Date(lastTs).getTime() : 0;
         const ttlMs = cat.ttlMinutes * 60 * 1000;
         const needsUpdate = forceFullSync || !lastTsTime || (Date.now() - lastTsTime > ttlMs);
 
         if (!needsUpdate) {
-          // البيانات لا تزال صالحة، احسب من الكاش
           const cached = await offlineStorage.getCache<any[]>(`preload_${cat.key}`);
           if (cached) totalRecords += cached.length;
           setProgress(prev => ({
@@ -181,13 +175,11 @@ export const useDataPreloader = () => {
           const { data, isFullSync } = await incrementalSync(cat, lastTimestamp);
 
           if (isFullSync) {
-            // تحميل كامل - استبدال
             if (data.length > 0) {
               await offlineStorage.setCache(`preload_${cat.key}`, data, ttlMs);
               totalRecords += data.length;
             }
           } else {
-            // تحديث تفاضلي - دمج مع الموجود
             const existing = await offlineStorage.getCache<any[]>(`preload_${cat.key}`) || [];
             if (data.length > 0) {
               const newIds = new Set(data.map((d: any) => d.id));
@@ -203,10 +195,7 @@ export const useDataPreloader = () => {
             }
           }
 
-          // تحديث الطابع الزمني لهذه الفئة
           categoryTimestamps[cat.key] = new Date().toISOString();
-
-          // تقدير الحجم
           const dataStr = JSON.stringify(data);
           estimatedSizeKB += Math.round(dataStr.length / 1024);
         } catch (catError: any) {
@@ -220,17 +209,15 @@ export const useDataPreloader = () => {
         }));
       }
 
-      // حساب الحجم الكلي
       const totalSizeKB = await estimateTotalSize();
 
-      // حفظ Meta
       const meta = {
         lastPreloadAt: new Date().toISOString(),
         totalRecords,
         estimatedSizeKB: totalSizeKB,
         categoryTimestamps,
       };
-      await offlineStorage.setCache(PRELOAD_META_KEY, meta, 7 * 24 * 60 * 60 * 1000); // 7 أيام
+      await offlineStorage.setCache(PRELOAD_META_KEY, meta, 7 * 24 * 60 * 60 * 1000);
 
       setProgress(prev => ({
         ...prev,
@@ -246,8 +233,6 @@ export const useDataPreloader = () => {
 
       if (deltaCount > 0) {
         toast.success(`تم تحديث ${deltaCount} سجل جديد`);
-      } else if (totalRecords > 0) {
-        toast.success(`البيانات محدّثة — ${totalRecords} سجل جاهز للعمل بدون إنترنت`);
       }
     } catch (error: any) {
       setProgress(prev => ({
@@ -255,13 +240,9 @@ export const useDataPreloader = () => {
         isPreloading: false,
         error: error.message || 'فشل في التحميل المسبق',
       }));
-      toast.error('فشل في التحميل المسبق للبيانات');
     }
   }, [incrementalSync]);
 
-  /**
-   * تحديث سريع للبيانات الحرجة فقط (شحنات + إشعارات)
-   */
   const quickSync = useCallback(async () => {
     if (!navigator.onLine) return;
 
@@ -295,7 +276,6 @@ export const useDataPreloader = () => {
       }
     }
 
-    // تحديث Meta
     if (deltaCount > 0) {
       const meta = await offlineStorage.getCache<any>(PRELOAD_META_KEY) || {};
       meta.categoryTimestamps = { ...meta.categoryTimestamps, ...timestamps };
@@ -352,7 +332,6 @@ export const useDataPreloader = () => {
   };
 };
 
-/** تقدير حجم البيانات المخزنة */
 async function estimateTotalSize(): Promise<number> {
   let total = 0;
   for (const cat of CATEGORIES) {

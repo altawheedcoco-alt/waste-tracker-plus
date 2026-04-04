@@ -1,6 +1,7 @@
 /**
- * Offline Sync Manager v2 - مدير المزامنة المحسّن
+ * Offline Sync Manager v3 - مدير المزامنة مع حل التعارضات
  * يتكامل مع offlineStorage v2 لدعم الترتيب والأولويات
+ * + حل تلقائي للتعارضات (duplicate key, conflicts)
  */
 
 import { offlineStorage } from './offlineStorage';
@@ -10,6 +11,7 @@ interface SyncResult {
   success: boolean;
   synced: number;
   failed: number;
+  conflicts: number;
   errors: string[];
 }
 
@@ -52,11 +54,11 @@ class OfflineSyncManager {
 
   async syncPendingActions(): Promise<SyncResult> {
     if (this.syncInProgress || !this.isOnline) {
-      return { success: false, synced: 0, failed: 0, errors: ['Sync in progress or offline'] };
+      return { success: false, synced: 0, failed: 0, conflicts: 0, errors: ['Sync in progress or offline'] };
     }
 
     this.syncInProgress = true;
-    const result: SyncResult = { success: true, synced: 0, failed: 0, errors: [] };
+    const result: SyncResult = { success: true, synced: 0, failed: 0, conflicts: 0, errors: [] };
 
     try {
       const pendingActions = await offlineStorage.getPendingActions();
@@ -68,8 +70,21 @@ class OfflineSyncManager {
           await offlineStorage.removePendingAction(action.id);
           result.synced++;
         } catch (error: any) {
+          const errorMsg = error?.message || error?.code || String(error);
+          
+          // حل التعارضات تلقائياً
+          if (this.isConflictError(errorMsg, error?.code)) {
+            const resolved = await this.resolveConflict(action, error);
+            if (resolved) {
+              await offlineStorage.removePendingAction(action.id);
+              result.conflicts++;
+              result.synced++;
+              continue;
+            }
+          }
+
           result.failed++;
-          result.errors.push(`${action.table}: ${error.message}`);
+          result.errors.push(`${action.table}: ${errorMsg.slice(0, 80)}`);
           await offlineStorage.updateActionRetries(action.id);
           
           if (action.retries >= 5) {
@@ -87,6 +102,67 @@ class OfflineSyncManager {
     }
 
     return result;
+  }
+
+  /** هل هذا خطأ تعارض؟ */
+  private isConflictError(message: string, code?: string): boolean {
+    const conflictPatterns = [
+      '23505',           // duplicate key violation
+      'duplicate key',
+      'unique constraint',
+      'already exists',
+      'conflict',
+      '409',
+    ];
+    const lower = (message + (code || '')).toLowerCase();
+    return conflictPatterns.some(p => lower.includes(p));
+  }
+
+  /** محاولة حل التعارض */
+  private async resolveConflict(action: { type: string; table: string; data: any; meta?: Record<string, any> }, _error: any): Promise<boolean> {
+    try {
+      const { type, table, data } = action;
+
+      if (type === 'create') {
+        // duplicate key في insert → حاول upsert
+        const cleanData = { ...data };
+        delete cleanData._tempId;
+        delete cleanData._status;
+        delete cleanData._offlineId;
+        
+        const { error } = await (supabase.from(table as any) as any).upsert(cleanData, { onConflict: 'id' });
+        if (!error) {
+          console.log(`[SyncManager] ✅ Conflict resolved via upsert: ${table}`);
+          return true;
+        }
+      }
+
+      if (type === 'update') {
+        // التحديث قد يفشل لأن السجل حُذف - تجاهل بصمت
+        const updates = data.updates || data;
+        const id = data.id;
+        const { data: existing } = await (supabase.from(table as any) as any).select('id').eq('id', id).maybeSingle();
+        
+        if (!existing) {
+          console.log(`[SyncManager] ⚠️ Record ${id} no longer exists in ${table}, skipping update`);
+          return true; // حُذف - لا مشكلة
+        }
+
+        // أعد المحاولة مع بيانات محدثة
+        const { error } = await (supabase.from(table as any) as any).update(updates).eq('id', id);
+        if (!error) return true;
+      }
+
+      if (type === 'delete') {
+        // حذف سجل غير موجود = نجاح بالفعل
+        console.log(`[SyncManager] ⚠️ Delete conflict on ${table}, record may already be deleted`);
+        return true;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
   }
 
   private async executeAction(action: { type: string; table: string; data: any; meta?: Record<string, any> }): Promise<void> {
