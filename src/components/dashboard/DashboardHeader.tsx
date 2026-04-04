@@ -17,6 +17,7 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import MyShipmentsButton from './header/MyShipmentsButton';
 import DashboardUserMenu from './DashboardUserMenu';
+import OfflineQueueIndicator from '@/components/offline/OfflineQueueIndicator';
 
 interface DashboardHeaderProps {
   isMobile: boolean;
