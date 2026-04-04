@@ -932,6 +932,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
+  // ═══════════════ أدوات ذكية متقدمة ═══════════════
+  {
+    id: 'smart-tools',
+    icon: Zap,
+    labelAr: 'أدوات ذكية',
+    labelEn: 'Smart Tools',
+    visibleFor: [],
+    items: [
+      { icon: Shield, labelAr: 'الدرع القانوني', labelEn: 'Legal Shield', path: '/dashboard/legal-shield', key: 'legal-shield', bindingType: 'hybrid' as const },
+      { icon: Banknote, labelAr: 'رادار الفلوس المنسية', labelEn: 'Revenue Radar', path: '/dashboard/revenue-radar', key: 'revenue-radar', bindingType: 'hybrid' as const },
+      { icon: Scale, labelAr: 'الميزان الذكي', labelEn: 'Smart Scale', path: '/dashboard/smart-scale', key: 'smart-scale', bindingType: 'hybrid' as const },
+    ],
+  },
+
   // ═══════════════ أدوات AI ═══════════════
   {
     id: 'ai-tools',
@@ -1230,6 +1244,7 @@ const CATEGORY_ORDER: string[] = [
   'quick-links',
 
   // ═══ 13. AI والتعلم ═══
+  'smart-tools',
   'ai-tools',
   'learning',
   'achievements',
@@ -1382,7 +1397,7 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'الذكاء الاصطناعي والتعلم',
     labelEn: 'AI & Learning',
     icon: Brain,
-    groupIds: ['ai-tools', 'learning', 'achievements'],
+    groupIds: ['smart-tools', 'ai-tools', 'learning', 'achievements'],
   },
   {
     id: 'sec-regulators',
