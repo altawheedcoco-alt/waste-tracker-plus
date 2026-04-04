@@ -1397,7 +1397,7 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'الذكاء الاصطناعي والتعلم',
     labelEn: 'AI & Learning',
     icon: Brain,
-    groupIds: ['ai-tools', 'learning', 'achievements'],
+    groupIds: ['smart-tools', 'ai-tools', 'learning', 'achievements'],
   },
   {
     id: 'sec-regulators',
