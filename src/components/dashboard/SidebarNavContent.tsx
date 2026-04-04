@@ -91,6 +91,7 @@ const SidebarNavContent = memo(({
     const searchLower = sidebarSearch.toLowerCase();
     const matchItem = (item: SidebarMenuItem) =>
       item.label.toLowerCase().includes(searchLower) ||
+      (item.labelEn && item.labelEn.toLowerCase().includes(searchLower)) ||
       (item.key && item.key.toLowerCase().includes(searchLower)) ||
       (item.path && item.path.toLowerCase().includes(searchLower));
     return menuItems.reduce<SidebarMenuItem[]>((acc, item) => {
@@ -310,6 +311,7 @@ const SidebarNavContent = memo(({
                   key={item.key}
                   icon={item.icon}
                   label={item.label}
+                  labelEn={item.labelEn}
                   path={item.path}
                   isCollapsed={false}
                 />

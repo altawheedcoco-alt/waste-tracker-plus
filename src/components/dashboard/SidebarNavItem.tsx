@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface SidebarNavItemProps {
   icon: LucideIcon;
   label: string;
+  labelEn?: string;
   path: string;
   isCollapsed: boolean;
   badge?: number;
@@ -13,7 +14,7 @@ interface SidebarNavItemProps {
   statusColor?: string;
 }
 
-const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge, statusColor }: SidebarNavItemProps) => {
+const SidebarNavItem = ({ icon: Icon, label, labelEn, path, isCollapsed, badge, statusColor }: SidebarNavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === path;
 
@@ -58,15 +59,18 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge, statusCol
         
         <AnimatePresence>
           {!isCollapsed && (
-            <motion.span
+            <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
               transition={{ duration: 0.15 }}
-              className="overflow-hidden whitespace-nowrap text-sm flex-1 leading-tight"
+              className="overflow-hidden whitespace-nowrap flex-1 leading-tight"
             >
-              {label}
-            </motion.span>
+              <span className="text-sm">{label}</span>
+              {labelEn && (
+                <span className="block text-[9px] text-primary/60 font-normal leading-none mt-0.5">{labelEn}</span>
+              )}
+            </motion.div>
           )}
         </AnimatePresence>
 

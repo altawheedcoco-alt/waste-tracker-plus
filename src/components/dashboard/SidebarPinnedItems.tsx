@@ -37,6 +37,7 @@ const SidebarPinnedItems = memo(({ pinnedItems, isCollapsed }: SidebarPinnedItem
             <SidebarNavItem
               icon={item.icon}
               label={item.label}
+              labelEn={item.labelEn}
               path={item.path}
               isCollapsed={isCollapsed}
               badge={item.badge}
