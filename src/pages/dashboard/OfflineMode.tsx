@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useDataPreloader } from '@/hooks/useDataPreloader';
 import { offlineStorage } from '@/lib/offlineStorage';
 import { cn } from '@/lib/utils';
 import {
@@ -46,6 +47,7 @@ interface StorageStats {
 const OfflineMode = () => {
   const { isOnline, isSlowConnection, connectionType, effectiveType, downlink, rtt } = useNetworkStatus();
   const { isSyncing, pendingCount, lastSyncAt, errors, syncNow } = useOfflineSync();
+  const preloader = useDataPreloader();
   const [stats, setStats] = useState<StorageStats>({ pendingActions: 0, cachedItems: 0, drafts: 0 });
   const [storageUsage, setStorageUsage] = useState<{ used: number; quota: number } | null>(null);
   const [isClearing, setIsClearing] = useState(false);
@@ -62,9 +64,10 @@ const OfflineMode = () => {
 
   useEffect(() => {
     refreshStats();
+    preloader.loadMeta();
     const interval = setInterval(refreshStats, 5000);
     return () => clearInterval(interval);
-  }, [refreshStats]);
+  }, [refreshStats, preloader.loadMeta]);
 
   // Check storage quota
   useEffect(() => {
@@ -335,6 +338,96 @@ const OfflineMode = () => {
           </Card>
         </div>
 
+
+        {/* Data Preloader */}
+        <Card className="border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <ArrowDownToLine className="h-5 w-5 text-primary" />
+              تحميل البيانات للعمل بدون إنترنت
+            </CardTitle>
+            <CardDescription>
+              حمّل بياناتك مسبقاً وأنت متصل بالإنترنت، واستخدمها لاحقاً بدون اتصال
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Preload Status */}
+            {preloader.lastPreloadAt && (
+              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">آخر تحميل مسبق</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(preloader.lastPreloadAt).toLocaleString('ar-EG')} — {preloader.totalRecords} سجل
+                    </p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={preloader.clearPreloadedData}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            {preloader.isPreloading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    جاري تحميل: {preloader.currentCategory}
+                  </span>
+                  <span className="font-medium">{preloader.progress}%</span>
+                </div>
+                <Progress value={preloader.progress} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {preloader.completedCategories}/{preloader.totalCategories} فئة — {preloader.totalRecords} سجل
+                </p>
+              </div>
+            )}
+
+            {/* Error */}
+            {preloader.error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive">{preloader.error}</p>
+              </div>
+            )}
+
+            {/* Categories Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {preloader.categories.map((cat) => (
+                <div key={cat.key} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 text-sm">
+                  <span>{cat.icon}</span>
+                  <span className="text-muted-foreground">{cat.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              {preloader.isPreloading ? (
+                <Button variant="destructive" onClick={preloader.cancelPreload} className="flex-1 gap-2">
+                  إلغاء التحميل
+                </Button>
+              ) : (
+                <Button
+                  onClick={preloader.preloadAll}
+                  disabled={!isOnline}
+                  className="flex-1 gap-2"
+                >
+                  <ArrowDownToLine className="h-4 w-4" />
+                  {preloader.lastPreloadAt ? 'تحديث البيانات المحلية' : 'تحميل البيانات الآن'}
+                </Button>
+              )}
+            </div>
+
+            {!isOnline && (
+              <p className="text-xs text-muted-foreground text-center">
+                يجب أن تكون متصلاً بالإنترنت لتحميل البيانات
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* How Offline Mode Works */}
         <Card>
