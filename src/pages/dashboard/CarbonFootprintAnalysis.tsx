@@ -750,6 +750,22 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} ${t('car
           </CardContent>
         </Card>
 
+        {/* Scope 1/2/3 Breakdown (Organization-level) */}
+        <Card>
+          <CardHeader className="text-right pb-2">
+            <CardTitle className="flex items-center gap-2 justify-end text-lg">
+              <Leaf className="w-5 h-5 text-primary" />
+              تحليل النطاقات (Scope 1/2/3)
+            </CardTitle>
+            <CardDescription>تصنيف الانبعاثات حسب بروتوكول GHG — وقود مباشر + كهرباء + سلسلة القيمة</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CarbonScopeBreakdown period="year" />
+          </CardContent>
+        </Card>
+
+        <Separator />
+
         {loading ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
