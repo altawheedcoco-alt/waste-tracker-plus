@@ -1244,6 +1244,7 @@ const CATEGORY_ORDER: string[] = [
   'quick-links',
 
   // ═══ 13. AI والتعلم ═══
+  'smart-tools',
   'ai-tools',
   'learning',
   'achievements',
