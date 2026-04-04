@@ -18,6 +18,7 @@ import FuelBudgetForecaster from '@/components/fuel/FuelBudgetForecaster';
 import FuelRecordForm from '@/components/fuel/FuelRecordForm';
 import FuelTankManager from '@/components/fuel/FuelTankManager';
 import FuelMaintenanceLink from '@/components/fuel/FuelMaintenanceLink';
+import FuelShipmentLinker from '@/components/fuel/FuelShipmentLinker';
 
 const FuelManagement = () => {
   const { organization } = useAuth();
