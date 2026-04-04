@@ -29123,6 +29123,9 @@ export type Database = {
           business_email: string | null
           can_create_shipments: boolean
           certifications_approvals: Json | null
+          chemical_treatment_permit_expiry: string | null
+          chemical_treatment_permit_number: string | null
+          chemical_treatment_permit_url: string | null
           city: string | null
           civil_aviation_approval_expiry: string | null
           civil_aviation_approval_number: string | null
@@ -29150,7 +29153,13 @@ export type Database = {
           drug_authority_approval_url: string | null
           eeaa_license_expiry_date: string | null
           eeaa_license_issue_date: string | null
+          eia_certificate_expiry: string | null
+          eia_certificate_number: string | null
+          eia_certificate_url: string | null
           email: string
+          emissions_permit_expiry: string | null
+          emissions_permit_number: string | null
+          emissions_permit_url: string | null
           env_approval_date: string | null
           env_approval_expiry: string | null
           env_approval_number: string | null
@@ -29168,6 +29177,9 @@ export type Database = {
           governorate_activity_license_expiry: string | null
           governorate_activity_license_number: string | null
           governorate_activity_license_url: string | null
+          groundwater_monitoring_license_expiry: string | null
+          groundwater_monitoring_license_number: string | null
+          groundwater_monitoring_license_url: string | null
           hazardous_certified: boolean | null
           hazardous_materials_register_expiry: string | null
           hazardous_materials_register_number: string | null
@@ -29184,6 +29196,12 @@ export type Database = {
           ida_license_expiry_date: string | null
           ida_license_issue_date: string | null
           identity_verified: boolean | null
+          incineration_permit_expiry: string | null
+          incineration_permit_number: string | null
+          incineration_permit_url: string | null
+          industrial_discharge_permit_expiry: string | null
+          industrial_discharge_permit_number: string | null
+          industrial_discharge_permit_url: string | null
           industrial_registry: string | null
           is_active: boolean | null
           is_location_public: boolean | null
@@ -29196,6 +29214,9 @@ export type Database = {
           land_transport_license: string | null
           land_transport_license_expiry_date: string | null
           land_transport_license_issue_date: string | null
+          landfill_license_expiry: string | null
+          landfill_license_number: string | null
+          landfill_license_url: string | null
           license_expiry_date: string | null
           license_geographic_scope: string | null
           license_number: string | null
@@ -29235,6 +29256,9 @@ export type Database = {
           ports_authority_approval_url: string | null
           price_range: string | null
           production_capacity: string | null
+          radiation_protection_license_expiry: string | null
+          radiation_protection_license_number: string | null
+          radiation_protection_license_url: string | null
           region: string | null
           registered_activity: string | null
           representative_email: string | null
@@ -29250,6 +29274,9 @@ export type Database = {
           suspended_at: string | null
           suspension_reason: string | null
           tax_card: string | null
+          temp_storage_permit_expiry: string | null
+          temp_storage_permit_number: string | null
+          temp_storage_permit_url: string | null
           terms_accepted: boolean | null
           transport_insurance_expiry: string | null
           transport_insurance_policy_number: string | null
@@ -29287,6 +29314,9 @@ export type Database = {
           business_email?: string | null
           can_create_shipments?: boolean
           certifications_approvals?: Json | null
+          chemical_treatment_permit_expiry?: string | null
+          chemical_treatment_permit_number?: string | null
+          chemical_treatment_permit_url?: string | null
           city?: string | null
           civil_aviation_approval_expiry?: string | null
           civil_aviation_approval_number?: string | null
@@ -29314,7 +29344,13 @@ export type Database = {
           drug_authority_approval_url?: string | null
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
+          eia_certificate_expiry?: string | null
+          eia_certificate_number?: string | null
+          eia_certificate_url?: string | null
           email: string
+          emissions_permit_expiry?: string | null
+          emissions_permit_number?: string | null
+          emissions_permit_url?: string | null
           env_approval_date?: string | null
           env_approval_expiry?: string | null
           env_approval_number?: string | null
@@ -29332,6 +29368,9 @@ export type Database = {
           governorate_activity_license_expiry?: string | null
           governorate_activity_license_number?: string | null
           governorate_activity_license_url?: string | null
+          groundwater_monitoring_license_expiry?: string | null
+          groundwater_monitoring_license_number?: string | null
+          groundwater_monitoring_license_url?: string | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
@@ -29348,6 +29387,12 @@ export type Database = {
           ida_license_expiry_date?: string | null
           ida_license_issue_date?: string | null
           identity_verified?: boolean | null
+          incineration_permit_expiry?: string | null
+          incineration_permit_number?: string | null
+          incineration_permit_url?: string | null
+          industrial_discharge_permit_expiry?: string | null
+          industrial_discharge_permit_number?: string | null
+          industrial_discharge_permit_url?: string | null
           industrial_registry?: string | null
           is_active?: boolean | null
           is_location_public?: boolean | null
@@ -29360,6 +29405,9 @@ export type Database = {
           land_transport_license?: string | null
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
+          landfill_license_expiry?: string | null
+          landfill_license_number?: string | null
+          landfill_license_url?: string | null
           license_expiry_date?: string | null
           license_geographic_scope?: string | null
           license_number?: string | null
@@ -29399,6 +29447,9 @@ export type Database = {
           ports_authority_approval_url?: string | null
           price_range?: string | null
           production_capacity?: string | null
+          radiation_protection_license_expiry?: string | null
+          radiation_protection_license_number?: string | null
+          radiation_protection_license_url?: string | null
           region?: string | null
           registered_activity?: string | null
           representative_email?: string | null
@@ -29414,6 +29465,9 @@ export type Database = {
           suspended_at?: string | null
           suspension_reason?: string | null
           tax_card?: string | null
+          temp_storage_permit_expiry?: string | null
+          temp_storage_permit_number?: string | null
+          temp_storage_permit_url?: string | null
           terms_accepted?: boolean | null
           transport_insurance_expiry?: string | null
           transport_insurance_policy_number?: string | null
@@ -29451,6 +29505,9 @@ export type Database = {
           business_email?: string | null
           can_create_shipments?: boolean
           certifications_approvals?: Json | null
+          chemical_treatment_permit_expiry?: string | null
+          chemical_treatment_permit_number?: string | null
+          chemical_treatment_permit_url?: string | null
           city?: string | null
           civil_aviation_approval_expiry?: string | null
           civil_aviation_approval_number?: string | null
@@ -29478,7 +29535,13 @@ export type Database = {
           drug_authority_approval_url?: string | null
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
+          eia_certificate_expiry?: string | null
+          eia_certificate_number?: string | null
+          eia_certificate_url?: string | null
           email?: string
+          emissions_permit_expiry?: string | null
+          emissions_permit_number?: string | null
+          emissions_permit_url?: string | null
           env_approval_date?: string | null
           env_approval_expiry?: string | null
           env_approval_number?: string | null
@@ -29496,6 +29559,9 @@ export type Database = {
           governorate_activity_license_expiry?: string | null
           governorate_activity_license_number?: string | null
           governorate_activity_license_url?: string | null
+          groundwater_monitoring_license_expiry?: string | null
+          groundwater_monitoring_license_number?: string | null
+          groundwater_monitoring_license_url?: string | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
@@ -29512,6 +29578,12 @@ export type Database = {
           ida_license_expiry_date?: string | null
           ida_license_issue_date?: string | null
           identity_verified?: boolean | null
+          incineration_permit_expiry?: string | null
+          incineration_permit_number?: string | null
+          incineration_permit_url?: string | null
+          industrial_discharge_permit_expiry?: string | null
+          industrial_discharge_permit_number?: string | null
+          industrial_discharge_permit_url?: string | null
           industrial_registry?: string | null
           is_active?: boolean | null
           is_location_public?: boolean | null
@@ -29524,6 +29596,9 @@ export type Database = {
           land_transport_license?: string | null
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
+          landfill_license_expiry?: string | null
+          landfill_license_number?: string | null
+          landfill_license_url?: string | null
           license_expiry_date?: string | null
           license_geographic_scope?: string | null
           license_number?: string | null
@@ -29563,6 +29638,9 @@ export type Database = {
           ports_authority_approval_url?: string | null
           price_range?: string | null
           production_capacity?: string | null
+          radiation_protection_license_expiry?: string | null
+          radiation_protection_license_number?: string | null
+          radiation_protection_license_url?: string | null
           region?: string | null
           registered_activity?: string | null
           representative_email?: string | null
@@ -29578,6 +29656,9 @@ export type Database = {
           suspended_at?: string | null
           suspension_reason?: string | null
           tax_card?: string | null
+          temp_storage_permit_expiry?: string | null
+          temp_storage_permit_number?: string | null
+          temp_storage_permit_url?: string | null
           terms_accepted?: boolean | null
           transport_insurance_expiry?: string | null
           transport_insurance_policy_number?: string | null
