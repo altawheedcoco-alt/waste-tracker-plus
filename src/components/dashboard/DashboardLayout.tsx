@@ -187,6 +187,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     const items: SidebarMenuItem[] = standaloneItems.map(item => ({
       icon: item.icon,
       label: language === 'ar' ? item.labelAr : item.labelEn,
+      labelEn: language === 'ar' ? item.labelEn : undefined,
       path: item.path,
       key: item.key,
       badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
@@ -201,6 +202,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         items.push({
           icon: section.icon,
           label: language === 'ar' ? section.labelAr : section.labelEn,
+          labelEn: language === 'ar' ? section.labelEn : undefined,
           path: `#section-${section.id}`,
           key: `__section__${section.id}`,
         });
@@ -213,12 +215,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       items.push({
         icon: group.icon,
         label: language === 'ar' ? group.labelAr : group.labelEn,
+        labelEn: language === 'ar' ? group.labelEn : undefined,
         path: '#',
         key: group.id,
         badge: groupBadge || undefined,
         children: group.items.map(item => ({
           icon: item.icon,
           label: language === 'ar' ? item.labelAr : item.labelEn,
+          labelEn: language === 'ar' ? item.labelEn : undefined,
           path: item.path,
           key: item.key,
           badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
