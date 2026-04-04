@@ -94,6 +94,23 @@ interface ShipmentData {
     establishment_registration?: string | null;
     registered_activity?: string | null;
     land_transport_license?: string | null;
+    wmra_permit_number?: string | null;
+    environmental_register_number?: string | null;
+    hazardous_materials_register_number?: string | null;
+    land_transport_authority_approval_number?: string | null;
+    civil_defense_approval_number?: string | null;
+    occupational_safety_approval_number?: string | null;
+    adr_certificate_number?: string | null;
+    transport_insurance_policy_number?: string | null;
+    health_ministry_approval_number?: string | null;
+    petroleum_authority_approval_number?: string | null;
+    drug_authority_approval_number?: string | null;
+    nuclear_regulatory_approval_number?: string | null;
+    food_safety_approval_number?: string | null;
+    ports_authority_approval_number?: string | null;
+    governorate_activity_license_number?: string | null;
+    customs_authority_approval_number?: string | null;
+    ida_approval_number?: string | null;
   } | null;
   recycler: { 
     name: string;
