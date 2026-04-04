@@ -132,6 +132,15 @@ interface ShipmentData {
     ida_license?: string | null;
     industrial_registry?: string | null;
     license_number?: string | null;
+    civil_defense_approval_number?: string | null;
+    occupational_safety_approval_number?: string | null;
+    governorate_activity_license_number?: string | null;
+    veterinary_quarantine_approval_number?: string | null;
+    health_ministry_approval_number?: string | null;
+    food_safety_approval_number?: string | null;
+    ida_approval_number?: string | null;
+    environmental_register_number?: string | null;
+    hazardous_materials_register_number?: string | null;
   } | null;
   driver: {
     license_number: string;
