@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
+import CarbonScopeBreakdown from '@/components/carbon/CarbonScopeBreakdown';
 // jsPDF & html2canvas loaded dynamically
 
 // IPCC-based emission factors - loaded from database at runtime
