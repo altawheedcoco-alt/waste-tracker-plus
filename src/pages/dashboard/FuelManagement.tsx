@@ -111,6 +111,10 @@ const FuelManagement = () => {
             <FuelFraudDetector alerts={fraudAlerts} />
           </TabsContent>
 
+          <TabsContent value="shipments" className="mt-4">
+            <FuelShipmentLinker records={records} />
+          </TabsContent>
+
           <TabsContent value="tanks" className="mt-4">
             <FuelTankManager />
           </TabsContent>
