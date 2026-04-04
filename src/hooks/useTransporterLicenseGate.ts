@@ -45,6 +45,10 @@ export interface TransporterGateResult {
   drivers: DriverCheck;
   complianceScore: number; // 0-100
   lastChecked: Date;
+  geographicScope: string | null;
+  licensedGovernorates: string[];
+  hasEnvironmentalRegister: boolean;
+  hasHazardousRegister: boolean;
 }
 
 // Critical licenses that BLOCK shipment creation if expired
