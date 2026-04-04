@@ -10,6 +10,7 @@ import {
   Radio,
   Globe,
   ExternalLink,
+  Film,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,12 +19,14 @@ import { motion } from 'framer-motion';
 const OrganizationPosts = lazy(() => import('@/components/organization/OrganizationPosts'));
 const BroadcastChannelView = lazy(() => import('@/components/chat/BroadcastChannelView'));
 
-// Lightweight embedded versions for Partners Timeline & Platform Posts
+// Lightweight embedded versions
 import PartnersTimelineEmbed from './PostsHubPartners';
 import PlatformPostsEmbed from './PostsHubPlatform';
+import PostsHubReels from './PostsHubReels';
 
 const TAB_CONFIG = [
   { value: 'org-posts', label: 'منشورات جهتي', icon: Building2, color: 'text-primary' },
+  { value: 'reels', label: 'الريلز', icon: Film, color: 'text-pink-500' },
   { value: 'partners', label: 'تايم لاين الشركاء', icon: Users, color: 'text-violet-500' },
   { value: 'broadcast', label: 'قنوات البث', icon: Radio, color: 'text-amber-500' },
   { value: 'platform', label: 'منشورات المنصة', icon: Globe, color: 'text-emerald-500' },
@@ -81,6 +84,14 @@ const PostsHub = () => {
                 )}
               </Suspense>
               <LinkButton label="فتح في الملف التجاري" onClick={() => navigate('/dashboard/organization-profile?tab=posts')} />
+            </TabsContent>
+
+            {/* Reels */}
+            <TabsContent value="reels" className="mt-0 p-2 sm:p-4">
+              <div className="max-h-[70vh] overflow-y-auto">
+                <PostsHubReels />
+              </div>
+              <LinkButton label="فتح صفحة الريلز" onClick={() => navigate('/dashboard/reels')} />
             </TabsContent>
 
             {/* Partners Timeline */}

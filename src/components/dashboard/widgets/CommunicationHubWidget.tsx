@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, Bell, FileText, CircleDot, Video, Send, Phone, 
   Hash, BarChart3, Bot, PenTool, Radio, 
-  TrendingUp, Eye, X, ArrowLeft, ExternalLink
+  TrendingUp, Eye, X, ArrowLeft, ExternalLink,
+  Film, Newspaper
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,14 +34,16 @@ export default function CommunicationHubWidget() {
   const links: QuickLink[] = [
     { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', badgeCount: counts?.unreadMessages, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'message' },
     { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: counts?.unreadNotifications, color: 'text-destructive', bgColor: 'bg-destructive/10', previewType: 'notification' },
-    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'note' },
+    { icon: Film, labelAr: 'الريلز', path: '/dashboard/reels', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+    { icon: Newspaper, labelAr: 'المنشورات', path: '/dashboard/organization-profile?tab=posts', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: Radio, labelAr: 'البث', path: '/dashboard/broadcast-channels', badgeCount: counts?.broadcastChannels, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'note' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },
-    { icon: Phone, labelAr: 'سجل المكالمات', path: '/dashboard/call-history', color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: Phone, labelAr: 'المكالمات', path: '/dashboard/call-history', color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'work_order' },
     { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'signature' },
     { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-primary', bgColor: 'bg-primary/10' },
-    { icon: Radio, labelAr: 'البث', path: '/dashboard/broadcast-channels', badgeCount: counts?.broadcastChannels, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', badgeCount: counts?.activePolls, color: 'text-accent-foreground', bgColor: 'bg-accent/30' },
     { icon: Bot, labelAr: 'المساعد', path: '/dashboard/ai-tools', color: 'text-muted-foreground', bgColor: 'bg-muted' },
     { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/reports', color: 'text-primary', bgColor: 'bg-primary/10' },
