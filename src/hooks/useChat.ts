@@ -315,22 +315,52 @@ export const useChat = () => {
     } catch (error: any) {
       console.error('Error sending message:', error);
       
-      // Mark as failed
-      const shouldRetry = failMessage(optimistic.tempId);
-      
-      if (shouldRetry) {
-        // Auto-retry
-        setTimeout(() => sendMessage(content, receiverOrgId, messageType, fileUrl, fileName), 2000);
-      } else {
-        // Mark as failed in UI
-        setMessages(prev => prev.map(m =>
-          m._tempId === optimistic.tempId ? { ...m, _status: 'failed' } : m
-        ));
-        toast({
-          title: 'خطأ',
-          description: 'فشل إرسال الرسالة',
-          variant: 'destructive',
+      // إذا كنا غير متصلين، احفظ في الطابور للمزامنة لاحقاً
+      if (!navigator.onLine) {
+        const messageContent = messageType === 'text' ? content : JSON.stringify({
+          text: content,
+          file_url: fileUrl,
+          file_name: fileName,
         });
+
+        await offlineStorage.addPendingAction({
+          type: 'create',
+          table: 'direct_messages',
+          data: {
+            sender_id: user.id,
+            sender_organization_id: organization.id,
+            receiver_organization_id: receiverOrgId,
+            content: messageContent,
+            message_type: messageType,
+          },
+          priority: 'critical',
+          originalCreatedAt: new Date().toISOString(),
+          userId: user.id,
+          meta: { type: 'chat_message' },
+        });
+
+        // الرسالة تظهر كـ "في الانتظار" حتى تعود الشبكة
+        setMessages(prev => prev.map(m =>
+          m._tempId === optimistic.tempId ? { ...m, _status: 'pending' as any } : m
+        ));
+        
+        console.log('[Chat] رسالة محفوظة للإرسال عند عودة الاتصال');
+      } else {
+        // Mark as failed
+        const shouldRetry = failMessage(optimistic.tempId);
+        
+        if (shouldRetry) {
+          setTimeout(() => sendMessage(content, receiverOrgId, messageType, fileUrl, fileName), 2000);
+        } else {
+          setMessages(prev => prev.map(m =>
+            m._tempId === optimistic.tempId ? { ...m, _status: 'failed' } : m
+          ));
+          toast({
+            title: 'خطأ',
+            description: 'فشل إرسال الرسالة',
+            variant: 'destructive',
+          });
+        }
       }
     } finally {
       setSending(false);
