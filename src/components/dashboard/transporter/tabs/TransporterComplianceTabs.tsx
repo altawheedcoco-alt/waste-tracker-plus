@@ -7,7 +7,10 @@ import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat, AlertTriangle, Link2 } from 'lucide-react';
+import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat, AlertTriangle, Link2, Truck, BarChart3 } from 'lucide-react';
+
+const TransporterComplianceDashboard = lazy(() => import('@/components/compliance/TransporterComplianceDashboard'));
+const CertifiedFleetManager = lazy(() => import('@/components/compliance/CertifiedFleetManager'));
 
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const LegalArchiveWidget = lazy(() => import('@/components/dashboard/generator/LegalArchiveWidget'));
@@ -35,9 +38,11 @@ interface ComplianceTabsProps {
   organizationId?: string;
 }
 
-type ComplianceSection = 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government' | 'ohs' | 'risk' | 'custody';
+type ComplianceSection = 'gate' | 'fleet_cert' | 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government' | 'ohs' | 'risk' | 'custody';
 
 const COMPLIANCE_SECTIONS: { id: ComplianceSection; labelAr: string; icon: React.ElementType }[] = [
+  { id: 'gate', labelAr: 'بوابة الامتثال', icon: BarChart3 },
+  { id: 'fleet_cert', labelAr: 'الأسطول المعتمد', icon: Truck },
   { id: 'compliance', labelAr: 'الامتثال', icon: Shield },
   { id: 'licenses', labelAr: 'التراخيص', icon: FileCheck },
   { id: 'declarations', labelAr: 'الإقرارات', icon: FileText },
@@ -50,7 +55,7 @@ const COMPLIANCE_SECTIONS: { id: ComplianceSection; labelAr: string; icon: React
 ];
 
 const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
-  const [activeSection, setActiveSection] = useState<ComplianceSection>('compliance');
+  const [activeSection, setActiveSection] = useState<ComplianceSection>('gate');
 
   return (
     <>
@@ -79,6 +84,12 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
         </div>
 
         <Suspense fallback={<TabFallback />}>
+          {activeSection === 'gate' && (
+            <ErrorBoundary fallbackTitle="خطأ في بوابة الامتثال"><TransporterComplianceDashboard /></ErrorBoundary>
+          )}
+          {activeSection === 'fleet_cert' && (
+            <ErrorBoundary fallbackTitle="خطأ في الأسطول المعتمد"><CertifiedFleetManager /></ErrorBoundary>
+          )}
           {activeSection === 'compliance' && (
             <ErrorBoundary fallbackTitle="خطأ في الامتثال">
               <LegalComplianceWidget />
