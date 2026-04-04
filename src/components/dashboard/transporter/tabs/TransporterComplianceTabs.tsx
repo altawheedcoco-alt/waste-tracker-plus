@@ -84,6 +84,12 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
         </div>
 
         <Suspense fallback={<TabFallback />}>
+          {activeSection === 'gate' && (
+            <ErrorBoundary fallbackTitle="خطأ في بوابة الامتثال"><TransporterComplianceDashboard /></ErrorBoundary>
+          )}
+          {activeSection === 'fleet_cert' && (
+            <ErrorBoundary fallbackTitle="خطأ في الأسطول المعتمد"><CertifiedFleetManager /></ErrorBoundary>
+          )}
           {activeSection === 'compliance' && (
             <ErrorBoundary fallbackTitle="خطأ في الامتثال">
               <LegalComplianceWidget />
