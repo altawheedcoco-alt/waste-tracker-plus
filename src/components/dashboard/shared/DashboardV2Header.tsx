@@ -293,15 +293,17 @@ const DashboardV2Header = memo(({
                 <div className="flex items-center gap-1"><Radio className="w-2.5 h-2.5 text-primary animate-pulse" /><span className="text-[7px] font-mono text-muted-foreground">RADAR</span></div>
               </div>
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5">
-                {radarStats!.map((stat, i) => (
+                {radarStats!.map((stat, i) => {
+                  const trendDotColor = stat.trend === 'down' ? 'bg-destructive' : stat.trend === 'up' ? 'bg-emerald-500' : 'bg-muted-foreground';
+                  return (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
                     onClick={() => stat.route && navigate(stat.route)}
                     className={cn("group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden", stat.route ? "cursor-pointer active:scale-[0.97]" : "cursor-default")}>
                     <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center justify-between mb-1 relative z-10">
                       <div className="flex items-center gap-0.5">
-                        <motion.span className="w-1.5 h-1.5 rounded-full bg-emerald-500" animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }} />
-                        <MiniSpark />
+                        <motion.span className={cn("w-1.5 h-1.5 rounded-full", trendDotColor)} animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }} />
+                        <MiniSpark color={stat.trend === 'down' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'} />
                       </div>
                       <motion.div className="w-6 h-6 rounded-md flex items-center justify-center bg-muted/30" whileHover={{ scale: 1.15, rotate: 10 }}>
                         <stat.icon className={cn("w-3 h-3", stat.color)} />
@@ -309,16 +311,17 @@ const DashboardV2Header = memo(({
                     </div>
                     <div className="text-right relative z-10">
                       <div className="flex items-baseline gap-0.5 justify-end">
-                        <p className={cn("text-base sm:text-xl font-black tabular-nums tracking-tight leading-none font-mono", stat.color)} dir="ltr"><AnimDigit value={stat.value} suffix={stat.suffix} /></p>
+                        <p className={cn("text-base sm:text-xl font-black tabular-nums tracking-tight leading-none font-mono", stat.trend === 'down' ? 'text-destructive' : stat.color)} dir="ltr"><AnimDigit value={stat.value} suffix={stat.suffix} /></p>
                         {stat.trend && <TrendIcon trend={stat.trend} />}
                       </div>
                       <p className="text-[8px] sm:text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{stat.label}</p>
                     </div>
                     <div className="mt-1 h-[2px] w-full bg-border/20 rounded-full overflow-hidden">
-                      <motion.div className="h-full bg-primary/40 rounded-full" initial={{ width: '0%' }} animate={{ width: `${Math.min((stat.value / (stat.max || Math.max(stat.value, 1))) * 100, 100)}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.04, ease: 'easeOut' }} />
+                      <motion.div className={cn("h-full rounded-full", stat.trend === 'down' ? 'bg-destructive/40' : 'bg-primary/40')} initial={{ width: '0%' }} animate={{ width: `${Math.min((stat.value / (stat.max || Math.max(stat.value, 1))) * 100, 100)}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.04, ease: 'easeOut' }} />
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
               {heatmapData && heatmapData.length > 0 && (
                 <div className="hidden lg:flex flex-col gap-1 shrink-0 justify-center">
