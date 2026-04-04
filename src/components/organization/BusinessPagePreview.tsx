@@ -207,6 +207,14 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
             )}
           </div>
 
+          {/* Achievement Badges */}
+          <OrgAchievementBadges orgId={organizationId} orgData={orgData} />
+
+          {/* ESG Impact Counter */}
+          <div className="mt-3">
+            <OrgImpactCounter orgId={organizationId} />
+          </div>
+
           {/* Action Buttons */}
           <div className="flex gap-2 mt-4">
             {orgData?.phone && (
