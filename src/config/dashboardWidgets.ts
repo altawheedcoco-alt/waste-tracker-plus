@@ -819,7 +819,7 @@ export const dashboardWidgets: DashboardWidgetConfig[] = [
  * Get widgets available for a specific organization type
  */
 export function getWidgetsByOrgType(
-  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
+  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver'
 ): DashboardWidgetConfig[] {
   return dashboardWidgets
     .filter(w => w.availableFor.includes(orgType))
