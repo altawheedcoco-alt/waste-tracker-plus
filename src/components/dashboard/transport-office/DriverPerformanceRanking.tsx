@@ -62,7 +62,7 @@ const DriverPerformanceRanking = () => {
     staleTime: 1000 * 60 * 10,
   });
 
-  const medalColors = ['text-yellow-500', 'text-gray-400', 'text-amber-600'];
+  const medalColors = ['text-yellow-500', 'text-muted-foreground', 'text-amber-600'];
 
   return (
     <Card>

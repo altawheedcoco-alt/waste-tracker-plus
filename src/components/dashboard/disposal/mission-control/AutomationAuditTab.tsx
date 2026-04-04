@@ -77,7 +77,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
           { mode: 'ai', icon: Brain, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', count: modeStats.ai },
           { mode: 'auto', icon: Zap, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30', count: modeStats.auto },
           { mode: 'hybrid', icon: Settings2, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', count: modeStats.hybrid },
-          { mode: 'manual', icon: Hand, color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30', count: modeStats.manual },
+          { mode: 'manual', icon: Hand, color: 'text-muted-foreground bg-muted', count: modeStats.manual },
         ].map((item) => (
           <Card key={item.mode} className="p-3">
             <div className="flex items-center gap-3">

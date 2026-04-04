@@ -44,8 +44,8 @@ const OperationModeSwitch = ({ facilityId, currentMode }: OperationModeSwitchPro
       value: 'manual',
       label: t('missionControl.modeManual'),
       icon: Hand,
-      color: 'bg-gray-500 text-white',
-      inactiveColor: 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-950/30',
+      color: 'bg-muted-foreground text-primary-foreground',
+      inactiveColor: 'text-muted-foreground hover:bg-muted',
       description: t('missionControl.modeManualDesc'),
     },
   ];
