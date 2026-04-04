@@ -29141,10 +29141,16 @@ export type Database = {
           env_approval_number: string | null
           environmental_approval_number: string | null
           environmental_license: string | null
+          environmental_register_expiry: string | null
+          environmental_register_number: string | null
+          environmental_register_url: string | null
           establishment_registration: string | null
           field_of_work: string | null
           founded_year: number | null
           hazardous_certified: boolean | null
+          hazardous_materials_register_expiry: string | null
+          hazardous_materials_register_number: string | null
+          hazardous_materials_register_url: string | null
           headquarters: string | null
           id: string
           ida_license: string | null
@@ -29161,12 +29167,14 @@ export type Database = {
           land_transport_license_expiry_date: string | null
           land_transport_license_issue_date: string | null
           license_expiry_date: string | null
+          license_geographic_scope: string | null
           license_number: string | null
           license_renewal_url: string | null
           license_scope_notes: string | null
           license_source_env_approval: boolean | null
           license_source_ida: boolean | null
           license_source_wmra_permit: boolean | null
+          licensed_governorates: string[] | null
           licensed_waste_categories: string[] | null
           licensed_waste_types: string[] | null
           location_description: string | null
@@ -29249,10 +29257,16 @@ export type Database = {
           env_approval_number?: string | null
           environmental_approval_number?: string | null
           environmental_license?: string | null
+          environmental_register_expiry?: string | null
+          environmental_register_number?: string | null
+          environmental_register_url?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
           founded_year?: number | null
           hazardous_certified?: boolean | null
+          hazardous_materials_register_expiry?: string | null
+          hazardous_materials_register_number?: string | null
+          hazardous_materials_register_url?: string | null
           headquarters?: string | null
           id?: string
           ida_license?: string | null
@@ -29269,12 +29283,14 @@ export type Database = {
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
           license_expiry_date?: string | null
+          license_geographic_scope?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
           license_scope_notes?: string | null
           license_source_env_approval?: boolean | null
           license_source_ida?: boolean | null
           license_source_wmra_permit?: boolean | null
+          licensed_governorates?: string[] | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
           location_description?: string | null
@@ -29357,10 +29373,16 @@ export type Database = {
           env_approval_number?: string | null
           environmental_approval_number?: string | null
           environmental_license?: string | null
+          environmental_register_expiry?: string | null
+          environmental_register_number?: string | null
+          environmental_register_url?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
           founded_year?: number | null
           hazardous_certified?: boolean | null
+          hazardous_materials_register_expiry?: string | null
+          hazardous_materials_register_number?: string | null
+          hazardous_materials_register_url?: string | null
           headquarters?: string | null
           id?: string
           ida_license?: string | null
@@ -29377,12 +29399,14 @@ export type Database = {
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
           license_expiry_date?: string | null
+          license_geographic_scope?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
           license_scope_notes?: string | null
           license_source_env_approval?: boolean | null
           license_source_ida?: boolean | null
           license_source_wmra_permit?: boolean | null
+          licensed_governorates?: string[] | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
           location_description?: string | null

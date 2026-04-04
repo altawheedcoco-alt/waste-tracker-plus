@@ -45,6 +45,10 @@ export interface TransporterGateResult {
   drivers: DriverCheck;
   complianceScore: number; // 0-100
   lastChecked: Date;
+  geographicScope: string | null;
+  licensedGovernorates: string[];
+  hasEnvironmentalRegister: boolean;
+  hasHazardousRegister: boolean;
 }
 
 // Critical licenses that BLOCK shipment creation if expired
@@ -52,10 +56,12 @@ const CRITICAL_LICENSES = [
   { field: 'wmra_permit_expiry', label: 'تصريح WMRA لتداول المخلفات', isCritical: true },
   { field: 'wmra_license_expiry_date', label: 'ترخيص WMRA', isCritical: true },
   { field: 'land_transport_license_expiry_date', label: 'رخصة النقل البري', isCritical: true },
-  { field: 'license_expiry_date', label: 'الترخيص العام', isCritical: true },
-  { field: 'eeaa_license_expiry_date', label: 'ترخيص جهاز شئون البيئة', isCritical: false },
+  { field: 'license_expiry_date', label: 'السجل التجاري', isCritical: true },
+  { field: 'eeaa_license_expiry_date', label: 'ترخيص جهاز شئون البيئة (EEAA)', isCritical: true },
   { field: 'env_approval_expiry', label: 'الموافقة البيئية', isCritical: false },
-  { field: 'ida_license_expiry_date', label: 'ترخيص هيئة التنمية الصناعية', isCritical: false },
+  { field: 'ida_license_expiry_date', label: 'البطاقة الضريبية', isCritical: false },
+  { field: 'environmental_register_expiry', label: 'السجل البيئي (EEAA)', isCritical: false },
+  { field: 'hazardous_materials_register_expiry', label: 'سجل المواد والمخلفات الخطرة', isCritical: false },
 ];
 
 function checkLicenseStatus(expiry: string | null, isCritical: boolean): { status: LicenseCheck['status']; days: number | null } {
@@ -82,7 +88,7 @@ export function useTransporterLicenseGate() {
       // 1. Check organization licenses
       const { data: org } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, license_expiry_date, wmra_license_expiry_date, wmra_permit_expiry, eeaa_license_expiry_date, env_approval_expiry, ida_license_expiry_date, land_transport_license_expiry_date')
+        .select('id, name, organization_type, license_expiry_date, wmra_license_expiry_date, wmra_permit_expiry, eeaa_license_expiry_date, env_approval_expiry, ida_license_expiry_date, land_transport_license_expiry_date, environmental_register_number, environmental_register_expiry, hazardous_materials_register_number, hazardous_materials_register_expiry, license_geographic_scope, licensed_governorates')
         .eq('id', orgId)
         .single();
 
@@ -198,6 +204,17 @@ export function useTransporterLicenseGate() {
 
       const overallStatus: GateStatus = blockReasons.length > 0 ? 'blocked' : warnings.length > 0 ? 'warning' : 'clear';
 
+      const geographicScope = (org as any)?.license_geographic_scope || null;
+      const licensedGovernorates: string[] = (org as any)?.licensed_governorates || [];
+      const hasEnvironmentalRegister = !!(org as any)?.environmental_register_number;
+      const hasHazardousRegister = !!(org as any)?.hazardous_materials_register_number;
+
+      if (!geographicScope || geographicScope === 'single_governorate') {
+        if (licensedGovernorates.length === 0) {
+          warnings.push('النطاق الجغرافي للترخيص غير محدد — حدد المحافظات المصرح بها');
+        }
+      }
+
       return {
         overallStatus,
         canCreateShipment: blockReasons.length === 0,
@@ -208,6 +225,10 @@ export function useTransporterLicenseGate() {
         drivers: driverCheck,
         complianceScore,
         lastChecked: new Date(),
+        geographicScope,
+        licensedGovernorates,
+        hasEnvironmentalRegister,
+        hasHazardousRegister,
       };
     },
     enabled: !!orgId && isTransporter,
