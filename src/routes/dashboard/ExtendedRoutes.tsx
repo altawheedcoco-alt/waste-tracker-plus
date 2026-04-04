@@ -94,5 +94,7 @@ export const extendedRoutes = (
     <Route path="/dashboard/benchmarking" element={<Benchmarking />} />
     <Route path="/dashboard/predictive-failure" element={<PredictiveFailure />} />
     <Route path="/dashboard/help-center" element={<SmartHelpCenter />} />
+    <Route path="/dashboard/environmental-passport" element={<EnvironmentalPassport />} />
+    <Route path="/dashboard/iot-fill-prediction" element={<IoTFillPrediction />} />
   </>
 );
