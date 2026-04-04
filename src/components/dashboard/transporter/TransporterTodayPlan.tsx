@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   new: { label: 'جديدة', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
