@@ -47,6 +47,8 @@ const PredictiveFailure = lazyRetry(() => import('@/pages/dashboard/PredictiveFa
 const SmartHelpCenter = lazyRetry(() => import('@/pages/dashboard/SmartHelpCenter'));
 const EnvironmentalPassport = lazyRetry(() => import('@/pages/dashboard/EnvironmentalPassport'));
 const IoTFillPrediction = lazyRetry(() => import('@/pages/dashboard/IoTFillPrediction'));
+const CircularMatcher = lazyRetry(() => import('@/pages/dashboard/CircularMatcher'));
+const DeveloperPortal = lazyRetry(() => import('@/pages/dashboard/DeveloperPortal'));
 
 export const extendedRoutes = (
   <>
@@ -96,5 +98,7 @@ export const extendedRoutes = (
     <Route path="/dashboard/help-center" element={<SmartHelpCenter />} />
     <Route path="/dashboard/environmental-passport" element={<EnvironmentalPassport />} />
     <Route path="/dashboard/iot-fill-prediction" element={<IoTFillPrediction />} />
+    <Route path="/dashboard/circular-matcher" element={<CircularMatcher />} />
+    <Route path="/dashboard/developer-portal" element={<DeveloperPortal />} />
   </>
 );

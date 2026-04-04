@@ -16,7 +16,7 @@ import {
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload, UserCheck,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
-  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
+  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel, Code,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import type { SidebarSectionConfig } from '@/config/sidebar/sidebarTypes';
@@ -836,10 +836,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Package, labelAr: 'عروضي', labelEn: 'My Listings', path: '/dashboard/waste-exchange?tab=my-listings', key: 'waste-exchange-listings', bindingType: 'hybrid' as const },
       { icon: Handshake, labelAr: 'مزايداتي', labelEn: 'My Bids', path: '/dashboard/waste-exchange?tab=my-bids', key: 'waste-exchange-bids', bindingType: 'hybrid' as const },
       { icon: TrendingUp, labelAr: 'مؤشر الأسعار', labelEn: 'Price Index', path: '/dashboard/waste-exchange?tab=price-index', key: 'waste-exchange-prices', bindingType: 'hybrid' as const },
+      { icon: Recycle, labelAr: 'السلع الثانوية', labelEn: 'Secondary Materials', path: '/dashboard/secondary-materials', key: 'secondary-materials', bindingType: 'hybrid' as const },
+      { icon: GitCompareArrows, labelAr: 'المطابق الدائري', labelEn: 'Circular Matcher', path: '/dashboard/circular-matcher', key: 'circular-matcher', bindingType: 'hybrid' as const },
     ],
   },
-
-  // ═══════════════ سوق B2B ═══════════════
   {
     id: 'b2b-marketplace',
     icon: ShoppingCart,
@@ -988,10 +988,23 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Trophy, labelAr: 'نظام الإنجازات', labelEn: 'Gamification', path: '/dashboard/gamification', key: 'gamification', bindingType: 'internal' as const },
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Pride Certs', path: '/dashboard/pride-certificates', key: 'pride-certificates', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'منشئ السيرة', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder', bindingType: 'internal' as const },
+      { icon: Star, labelAr: 'المكافآت المجتمعية', labelEn: 'Community Rewards', path: '/dashboard/community-rewards', key: 'community-rewards', bindingType: 'internal' as const },
     ],
   },
 
-  // ═══════════════ مركز القيادة (أدمن) ═══════════════
+  // ═══════════════ بوابة المطورين ═══════════════
+  {
+    id: 'developer-portal',
+    icon: Code,
+    labelAr: 'بوابة المطورين',
+    labelEn: 'Developer Portal',
+    visibleFor: ['admin'],
+    items: [
+      { icon: Blocks, labelAr: 'API المرجع', labelEn: 'API Reference', path: '/dashboard/developer-portal', key: 'dev-api-ref', bindingType: 'admin' as const },
+      { icon: LinkIcon, labelAr: 'Webhooks', labelEn: 'Webhooks', path: '/dashboard/webhooks', key: 'dev-webhooks', bindingType: 'admin' as const },
+    ],
+  },
+
   {
     id: 'admin-command-center',
     icon: Zap,
