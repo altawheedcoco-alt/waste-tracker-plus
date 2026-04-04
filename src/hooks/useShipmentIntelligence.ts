@@ -239,8 +239,8 @@ function summarizeFinancials(shipment: any, weight: WeightReconciliation): Finan
   return {
     approvedWeight: weight.approvedWeight,
     unitPrice: Number(shipment.price_per_unit) || 0,
-    totalAmount: Number(shipment.total_price) || (weight.approvedWeight * (Number(shipment.price_per_unit) || 0)),
-    invoiceGenerated: !!shipment.total_price,
+    totalAmount: Number(shipment.total_value) || (weight.approvedWeight * (Number(shipment.price_per_unit) || 0)),
+    invoiceGenerated: !!shipment.total_value,
     paymentStatus: shipment.status === 'confirmed' ? 'settled' : 'pending',
   };
 }
