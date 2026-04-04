@@ -183,6 +183,16 @@ const MyNotificationsTab = () => {
             <BellOff className="w-3.5 h-3.5" />
             الأنواع
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1 text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={handleTestNativePush}
+            disabled={testingPush || nativePush.loading}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            {testingPush || nativePush.loading ? 'جاري...' : nativePush.isSubscribed ? 'اختبر الإشعار' : 'فعّل واختبر'}
+          </Button>
         </div>
       </div>
 
