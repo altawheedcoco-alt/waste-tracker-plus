@@ -77,12 +77,14 @@ export function useShipmentIntelligence(shipmentId: string | undefined) {
         .from('shipments')
         .select(`
           id, waste_type, quantity, unit, status, disposal_method,
-          actual_weight, price_per_unit, total_price,
+          actual_weight, price_per_unit, total_value,
           pickup_latitude, pickup_longitude,
           delivery_latitude, delivery_longitude,
           generator_id, transporter_id, recycler_id, disposal_facility_id,
-          driver_id, vehicle_id,
-          qr_code, tracking_number, created_at
+          driver_id, shipment_number,
+          generator_qr_code, transporter_pickup_qr, recycler_receipt_qr,
+          weight_at_source, weight_at_destination, weight_discrepancy_pct,
+          weighbridge_verified, created_at
         `)
         .eq('id', shipmentId)
         .single();
