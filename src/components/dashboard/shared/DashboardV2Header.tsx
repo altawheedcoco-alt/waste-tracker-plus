@@ -245,8 +245,8 @@ const DashboardV2Header = memo(({
                   <span className="hidden sm:inline text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
                 </div>
                 <TooltipProvider delayDuration={200}>
-                  <div className="hidden lg:flex items-center gap-0.5 px-2 py-1 rounded-lg bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[600px]">
-                    {systemIcons.map((si, i) => (
+                  <div className="hidden lg:flex items-center gap-0.5 px-2 py-1 rounded-lg bg-muted/30 border border-border/20">
+                    {priorityIcons.map((si, i) => (
                       <Tooltip key={si.label}><TooltipTrigger asChild>
                         <motion.div className={cn("flex items-center gap-0.5 px-1 py-0.5 cursor-pointer rounded-md transition-colors hover:bg-primary/10")}
                           onClick={() => si.route && navigate(si.route)} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.03 }} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
@@ -254,6 +254,18 @@ const DashboardV2Header = memo(({
                         </motion.div>
                       </TooltipTrigger><TooltipContent side="bottom" className="text-xs"><div className="flex items-center gap-1.5"><span className={cn("w-2 h-2 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />{si.tooltip}</div></TooltipContent></Tooltip>
                     ))}
+                    <Tooltip><TooltipTrigger asChild>
+                      <motion.div className="flex items-center gap-0.5 px-1.5 py-0.5 cursor-pointer rounded-md transition-colors hover:bg-primary/10 border-r border-border/30 mr-0.5 pr-1.5"
+                        whileHover={{ scale: 1.1 }}>
+                        <Cog className="w-3 h-3 text-muted-foreground" /><span className="text-[7px] font-mono text-muted-foreground">+{secondaryIcons.length}</span>
+                      </motion.div>
+                    </TooltipTrigger><TooltipContent side="bottom" className="text-xs max-w-[200px]">
+                      <div className="grid grid-cols-2 gap-1">
+                        {secondaryIcons.map(si => (
+                          <div key={si.label} className="flex items-center gap-1 text-[10px]"><si.icon className={cn("w-3 h-3", statusColors[si.status])} />{si.tooltip}</div>
+                        ))}
+                      </div>
+                    </TooltipContent></Tooltip>
                   </div>
                 </TooltipProvider>
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary"><Sparkles className="w-2 h-2" /> v5.0</Badge>
