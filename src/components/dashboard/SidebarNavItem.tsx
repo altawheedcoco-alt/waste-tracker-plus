@@ -14,7 +14,7 @@ interface SidebarNavItemProps {
   statusColor?: string;
 }
 
-const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge, statusColor }: SidebarNavItemProps) => {
+const SidebarNavItem = ({ icon: Icon, label, labelEn, path, isCollapsed, badge, statusColor }: SidebarNavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === path;
 
