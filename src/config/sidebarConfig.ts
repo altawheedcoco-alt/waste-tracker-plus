@@ -814,10 +814,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Environmental Reports',
     visibleFor: [],
     items: [
+      { icon: Globe, labelAr: 'جواز السفر البيئي', labelEn: 'Env. Passport', path: '/dashboard/environmental-passport', key: 'environmental-passport', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: Leaf, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'carbon-footprint', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: TreePine, labelAr: 'الاستدامة', labelEn: 'Sustainability', path: '/dashboard/environmental-sustainability', key: 'environmental-sustainability', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: Leaf, labelAr: 'تقارير ESG', labelEn: 'ESG', path: '/dashboard/esg-reports', key: 'esg-reports', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
       { icon: Shield, labelAr: 'تقارير السلامة', labelEn: 'OHS', path: '/dashboard/ohs-reports', key: 'ohs-reports', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+      { icon: Radio, labelAr: 'رادار الامتلاء', labelEn: 'Fill Prediction', path: '/dashboard/iot-fill-prediction', key: 'iot-fill-prediction', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
     ],
   },
 
