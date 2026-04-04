@@ -207,6 +207,7 @@ const Providers = memo(() => (
                 <AutoPushSubscriber />
                 <PushPermissionBanner />
                 <MobileEnhancements />
+                <Suspense fallback={null}><AutoDataPreloader /></Suspense>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
