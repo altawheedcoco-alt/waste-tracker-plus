@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Loader2, Inbox, Settings2, BellOff, ChevronDown, Layers } from 'lucide-react';
+import { Bell, CheckCheck, Loader2, Inbox, Settings2, BellOff, ChevronDown, Layers, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
@@ -14,6 +14,7 @@ import NotificationTypePreferences from '@/components/notifications/Notification
 import { getNotificationRoute } from '@/lib/notificationRouting';
 import { groupNotifications, type GroupedNotification } from '@/lib/notificationGrouping';
 import { cn } from '@/lib/utils';
+import { useNativePush } from '@/hooks/useNativePush';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
