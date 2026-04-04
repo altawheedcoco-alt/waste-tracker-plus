@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
 
 /**
  * استراتيجيات التخزين المؤقت الذكي حسب نوع البيانات
