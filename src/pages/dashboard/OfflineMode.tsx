@@ -47,6 +47,7 @@ interface StorageStats {
 const OfflineMode = () => {
   const { isOnline, isSlowConnection, connectionType, effectiveType, downlink, rtt } = useNetworkStatus();
   const { isSyncing, pendingCount, lastSyncAt, errors, syncNow } = useOfflineSync();
+  const preloader = useDataPreloader();
   const [stats, setStats] = useState<StorageStats>({ pendingActions: 0, cachedItems: 0, drafts: 0 });
   const [storageUsage, setStorageUsage] = useState<{ used: number; quota: number } | null>(null);
   const [isClearing, setIsClearing] = useState(false);
