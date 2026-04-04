@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   new: { label: 'جديدة', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
@@ -99,7 +100,7 @@ const TransporterTodayPlan = () => {
                     </Badge>
                     <div className="text-right flex-1 mr-2">
                       <div className="flex items-center gap-1 justify-end">
-                        <span className="text-[10px] text-muted-foreground">{s.waste_type || 'نفايات'}</span>
+                        <span className="text-[10px] text-muted-foreground">{translateWasteType(s.waste_type)}</span>
                         <span className="text-xs font-bold text-foreground">
                           {s.quantity ? `${Number(s.quantity).toLocaleString('ar-SA')} طن` : '—'}
                         </span>

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 import { useRouteOptimizer } from '@/hooks/useRouteOptimizer';
 import { Route, MapPin, Fuel, Clock, Leaf, Zap, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -112,7 +113,7 @@ const SmartRouteOptimizer = () => {
                   <div key={s.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-xs">
                     <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
                     <span className="truncate">{s.delivery_address || s.shipment_number}</span>
-                    <Badge variant="outline" className="text-[10px] shrink-0">{s.waste_type}</Badge>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{translateWasteType(s.waste_type)}</Badge>
                   </div>
                 ))}
               </div>

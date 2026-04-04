@@ -157,8 +157,14 @@ const RadarChart = ({ stats }: { stats: RadarStat[] }) => {
 };
 
 /* ── System icons ── */
-interface SystemIcon { icon: LucideIcon; label: string; tooltip: string; status: 'ok' | 'warn' | 'error'; route?: string; }
+interface SystemIcon { icon: LucideIcon; label: string; tooltip: string; status: 'ok' | 'warn' | 'error'; route?: string; priority?: boolean; }
 const systemIcons: SystemIcon[] = [
+  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments', priority: true },
+  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive', priority: true },
+  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/org-structure', priority: true },
+  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/erp/accounting', priority: true },
+  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox', priority: true },
+  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/system-status', priority: true },
   { icon: Wifi, label: 'NET', tooltip: 'الشبكة متصلة', status: 'ok' },
   { icon: Database, label: 'DB', tooltip: 'قاعدة البيانات تعمل', status: 'ok' },
   { icon: Cpu, label: 'CPU', tooltip: 'المعالجة مستقرة', status: 'ok' },
@@ -168,19 +174,15 @@ const systemIcons: SystemIcon[] = [
   { icon: CircuitBoard, label: 'IOT', tooltip: 'أجهزة IoT متصلة', status: 'ok' },
   { icon: BatteryCharging, label: 'PWR', tooltip: 'الطاقة مستقرة', status: 'ok' },
   { icon: Antenna, label: 'RF', tooltip: 'التردد اللاسلكي نشط', status: 'ok' },
-  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox' },
-  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/erp/accounting' },
-  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/org-structure' },
-  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive' },
-  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments' },
   { icon: Lock, label: 'RLS', tooltip: 'سياسات الأمان', status: 'ok' },
   { icon: RefreshCw, label: 'SYNC', tooltip: 'المزامنة اللحظية', status: 'ok' },
   { icon: HardDrive, label: 'STOR', tooltip: 'التخزين السحابي', status: 'ok' },
   { icon: MessageSquare, label: 'CHAT', tooltip: 'نظام الدردشة', status: 'ok', route: '/dashboard/chat' },
   { icon: ClipboardCheck, label: 'CMPL', tooltip: 'الامتثال البيئي', status: 'ok', route: '/dashboard/compliance-assessment' },
-  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/system-status' },
   { icon: PlugZap, label: 'API', tooltip: 'واجهات API', status: 'ok' },
 ];
+const priorityIcons = systemIcons.filter(si => si.priority);
+const secondaryIcons = systemIcons.filter(si => !si.priority);
 const statusColors: Record<string, string> = { ok: 'text-emerald-500', warn: 'text-amber-500', error: 'text-destructive' };
 
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
@@ -243,8 +245,8 @@ const DashboardV2Header = memo(({
                   <span className="hidden sm:inline text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
                 </div>
                 <TooltipProvider delayDuration={200}>
-                  <div className="hidden lg:flex items-center gap-0.5 px-2 py-1 rounded-lg bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[600px]">
-                    {systemIcons.map((si, i) => (
+                  <div className="hidden lg:flex items-center gap-0.5 px-2 py-1 rounded-lg bg-muted/30 border border-border/20">
+                    {priorityIcons.map((si, i) => (
                       <Tooltip key={si.label}><TooltipTrigger asChild>
                         <motion.div className={cn("flex items-center gap-0.5 px-1 py-0.5 cursor-pointer rounded-md transition-colors hover:bg-primary/10")}
                           onClick={() => si.route && navigate(si.route)} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.03 }} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
@@ -252,6 +254,18 @@ const DashboardV2Header = memo(({
                         </motion.div>
                       </TooltipTrigger><TooltipContent side="bottom" className="text-xs"><div className="flex items-center gap-1.5"><span className={cn("w-2 h-2 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />{si.tooltip}</div></TooltipContent></Tooltip>
                     ))}
+                    <Tooltip><TooltipTrigger asChild>
+                      <motion.div className="flex items-center gap-0.5 px-1.5 py-0.5 cursor-pointer rounded-md transition-colors hover:bg-primary/10 border-r border-border/30 mr-0.5 pr-1.5"
+                        whileHover={{ scale: 1.1 }}>
+                        <Cog className="w-3 h-3 text-muted-foreground" /><span className="text-[7px] font-mono text-muted-foreground">+{secondaryIcons.length}</span>
+                      </motion.div>
+                    </TooltipTrigger><TooltipContent side="bottom" className="text-xs max-w-[200px]">
+                      <div className="grid grid-cols-2 gap-1">
+                        {secondaryIcons.map(si => (
+                          <div key={si.label} className="flex items-center gap-1 text-[10px]"><si.icon className={cn("w-3 h-3", statusColors[si.status])} />{si.tooltip}</div>
+                        ))}
+                      </div>
+                    </TooltipContent></Tooltip>
                   </div>
                 </TooltipProvider>
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary"><Sparkles className="w-2 h-2" /> v5.0</Badge>
@@ -293,15 +307,17 @@ const DashboardV2Header = memo(({
                 <div className="flex items-center gap-1"><Radio className="w-2.5 h-2.5 text-primary animate-pulse" /><span className="text-[7px] font-mono text-muted-foreground">RADAR</span></div>
               </div>
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5">
-                {radarStats!.map((stat, i) => (
+                {radarStats!.map((stat, i) => {
+                  const trendDotColor = stat.trend === 'down' ? 'bg-destructive' : stat.trend === 'up' ? 'bg-emerald-500' : 'bg-muted-foreground';
+                  return (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
                     onClick={() => stat.route && navigate(stat.route)}
                     className={cn("group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden", stat.route ? "cursor-pointer active:scale-[0.97]" : "cursor-default")}>
                     <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center justify-between mb-1 relative z-10">
                       <div className="flex items-center gap-0.5">
-                        <motion.span className="w-1.5 h-1.5 rounded-full bg-emerald-500" animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }} />
-                        <MiniSpark />
+                        <motion.span className={cn("w-1.5 h-1.5 rounded-full", trendDotColor)} animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }} />
+                        <MiniSpark color={stat.trend === 'down' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'} />
                       </div>
                       <motion.div className="w-6 h-6 rounded-md flex items-center justify-center bg-muted/30" whileHover={{ scale: 1.15, rotate: 10 }}>
                         <stat.icon className={cn("w-3 h-3", stat.color)} />
@@ -309,16 +325,17 @@ const DashboardV2Header = memo(({
                     </div>
                     <div className="text-right relative z-10">
                       <div className="flex items-baseline gap-0.5 justify-end">
-                        <p className={cn("text-base sm:text-xl font-black tabular-nums tracking-tight leading-none font-mono", stat.color)} dir="ltr"><AnimDigit value={stat.value} suffix={stat.suffix} /></p>
+                        <p className={cn("text-base sm:text-xl font-black tabular-nums tracking-tight leading-none font-mono", stat.trend === 'down' ? 'text-destructive' : stat.color)} dir="ltr"><AnimDigit value={stat.value} suffix={stat.suffix} /></p>
                         {stat.trend && <TrendIcon trend={stat.trend} />}
                       </div>
                       <p className="text-[8px] sm:text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{stat.label}</p>
                     </div>
                     <div className="mt-1 h-[2px] w-full bg-border/20 rounded-full overflow-hidden">
-                      <motion.div className="h-full bg-primary/40 rounded-full" initial={{ width: '0%' }} animate={{ width: `${Math.min((stat.value / (stat.max || Math.max(stat.value, 1))) * 100, 100)}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.04, ease: 'easeOut' }} />
+                      <motion.div className={cn("h-full rounded-full", stat.trend === 'down' ? 'bg-destructive/40' : 'bg-primary/40')} initial={{ width: '0%' }} animate={{ width: `${Math.min((stat.value / (stat.max || Math.max(stat.value, 1))) * 100, 100)}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.04, ease: 'easeOut' }} />
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
               {heatmapData && heatmapData.length > 0 && (
                 <div className="hidden lg:flex flex-col gap-1 shrink-0 justify-center">
