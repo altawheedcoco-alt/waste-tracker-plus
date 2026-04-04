@@ -204,6 +204,17 @@ export function useTransporterLicenseGate() {
 
       const overallStatus: GateStatus = blockReasons.length > 0 ? 'blocked' : warnings.length > 0 ? 'warning' : 'clear';
 
+      const geographicScope = (org as any)?.license_geographic_scope || null;
+      const licensedGovernorates: string[] = (org as any)?.licensed_governorates || [];
+      const hasEnvironmentalRegister = !!(org as any)?.environmental_register_number;
+      const hasHazardousRegister = !!(org as any)?.hazardous_materials_register_number;
+
+      if (!geographicScope || geographicScope === 'single_governorate') {
+        if (licensedGovernorates.length === 0) {
+          warnings.push('النطاق الجغرافي للترخيص غير محدد — حدد المحافظات المصرح بها');
+        }
+      }
+
       return {
         overallStatus,
         canCreateShipment: blockReasons.length === 0,
@@ -214,6 +225,10 @@ export function useTransporterLicenseGate() {
         drivers: driverCheck,
         complianceScore,
         lastChecked: new Date(),
+        geographicScope,
+        licensedGovernorates,
+        hasEnvironmentalRegister,
+        hasHazardousRegister,
       };
     },
     enabled: !!orgId && isTransporter,
