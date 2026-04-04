@@ -7,7 +7,10 @@ import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat, AlertTriangle, Link2 } from 'lucide-react';
+import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat, AlertTriangle, Link2, Truck, BarChart3 } from 'lucide-react';
+
+const TransporterComplianceDashboard = lazy(() => import('@/components/compliance/TransporterComplianceDashboard'));
+const CertifiedFleetManager = lazy(() => import('@/components/compliance/CertifiedFleetManager'));
 
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const LegalArchiveWidget = lazy(() => import('@/components/dashboard/generator/LegalArchiveWidget'));
