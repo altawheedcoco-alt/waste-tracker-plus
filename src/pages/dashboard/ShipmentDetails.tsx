@@ -77,6 +77,7 @@ const UnifiedShipmentTracker = lazy(() => import('@/components/tracking/UnifiedS
 const NotesPanel = lazy(() => import('@/components/notes/NotesPanel'));
 const ShipmentChatTab = lazy(() => import('@/components/shipments/ShipmentChatTab'));
 const SupervisorComplianceDashboard = lazy(() => import('@/components/supervisors/SupervisorComplianceDashboard'));
+const ShipmentFullCircle = lazy(() => import('@/components/shipments/ShipmentFullCircle'));
 
 type ShipmentDetails = EnrichedShipment;
 
