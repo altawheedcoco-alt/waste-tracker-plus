@@ -98,5 +98,7 @@ export const extendedRoutes = (
     <Route path="/dashboard/help-center" element={<SmartHelpCenter />} />
     <Route path="/dashboard/environmental-passport" element={<EnvironmentalPassport />} />
     <Route path="/dashboard/iot-fill-prediction" element={<IoTFillPrediction />} />
+    <Route path="/dashboard/circular-matcher" element={<CircularMatcher />} />
+    <Route path="/dashboard/developer-portal" element={<DeveloperPortal />} />
   </>
 );
