@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { offlineStorage } from '@/lib/offlineStorage';
 import { getTabChannelName } from '@/lib/tabSession';
 import { getCachedProfiles, getCachedProfile } from '@/lib/profileCache';
 import { initReadSync, broadcastRead, onReadSync, destroyReadSync } from '@/lib/readSync';
