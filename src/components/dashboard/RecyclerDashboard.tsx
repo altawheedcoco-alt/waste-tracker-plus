@@ -33,6 +33,11 @@ import GlobalCommodityTicker from './shared/GlobalCommodityTicker';
 import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
 import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
+const RecyclerPerformanceStrip = lazy(() => import('./recycler/RecyclerPerformanceStrip'));
+const RecyclerTodayProgress = lazy(() => import('./recycler/RecyclerTodayProgress'));
+const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
+const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
+
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const GamificationWidget = lazy(() => import('@/components/gamification/GamificationWidget'));
