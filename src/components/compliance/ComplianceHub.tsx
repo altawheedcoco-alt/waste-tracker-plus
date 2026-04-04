@@ -37,6 +37,7 @@ export default function ComplianceHub() {
   const [activeTab, setActiveTab] = useState('soft');
   const { data: softReport, isLoading: softLoading } = useSoftComplianceAnalyzer();
   const aiAnalyzer = useAIComplianceAnalyzer();
+  const { generateReport, hasData } = useCompliancePDFReport();
 
   return (
     <div className="space-y-6" dir="rtl">
