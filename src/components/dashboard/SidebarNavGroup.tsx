@@ -88,15 +88,18 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
           </div>
           <AnimatePresence>
             {!isCollapsed && (
-              <motion.span
+              <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.15 }}
-                className="overflow-hidden whitespace-nowrap text-sm flex-1 leading-tight"
+                className="overflow-hidden whitespace-nowrap flex-1 leading-tight"
               >
-               {item.label}
-              </motion.span>
+                <span className="text-sm">{item.label}</span>
+                {item.labelEn && (
+                  <span className="block text-[9px] text-primary/60 font-normal leading-none mt-0.5">{item.labelEn}</span>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
           {!isCollapsed && item.bindingType && (
