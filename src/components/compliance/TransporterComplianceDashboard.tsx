@@ -219,7 +219,60 @@ export default function TransporterComplianceDashboard() {
         </Card>
       </div>
 
-      {/* Track Record - Clean Record Proof */}
+      {/* Geographic Scope & Registers */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              النطاق الجغرافي للترخيص
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Badge variant={gate.geographicScope === 'nationwide' ? 'default' : 'outline'} className="text-xs">
+              {gate.geographicScope === 'nationwide' ? 'عموم الجمهورية' : gate.geographicScope === 'five_governorates' ? 'داخل 5 محافظات' : 'محافظة واحدة'}
+            </Badge>
+            {gate.licensedGovernorates.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {gate.licensedGovernorates.map((gov) => (
+                  <Badge key={gov} variant="outline" className="text-[10px]">{gov}</Badge>
+                ))}
+              </div>
+            )}
+            {gate.licensedGovernorates.length === 0 && (
+              <p className="text-xs text-muted-foreground">لم يتم تحديد المحافظات المصرح بها</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary" />
+              السجلات البيئية
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span>السجل البيئي (EEAA)</span>
+              {gate.hasEnvironmentalRegister ? (
+                <Badge variant="default" className="text-[10px]">مسجل ✓</Badge>
+              ) : (
+                <Badge variant="outline" className="text-[10px]">غير مسجل</Badge>
+              )}
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span>سجل المواد الخطرة</span>
+              {gate.hasHazardousRegister ? (
+                <Badge variant="default" className="text-[10px]">مسجل ✓</Badge>
+              ) : (
+                <Badge variant="outline" className="text-[10px]">غير مسجل</Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {trackRecord && (
         <Card>
           <CardHeader className="pb-2">
