@@ -988,10 +988,23 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Trophy, labelAr: 'نظام الإنجازات', labelEn: 'Gamification', path: '/dashboard/gamification', key: 'gamification', bindingType: 'internal' as const },
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Pride Certs', path: '/dashboard/pride-certificates', key: 'pride-certificates', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'منشئ السيرة', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder', bindingType: 'internal' as const },
+      { icon: Star, labelAr: 'المكافآت المجتمعية', labelEn: 'Community Rewards', path: '/dashboard/community-rewards', key: 'community-rewards', bindingType: 'internal' as const },
     ],
   },
 
-  // ═══════════════ مركز القيادة (أدمن) ═══════════════
+  // ═══════════════ بوابة المطورين ═══════════════
+  {
+    id: 'developer-portal',
+    icon: Code,
+    labelAr: 'بوابة المطورين',
+    labelEn: 'Developer Portal',
+    visibleFor: ['admin'],
+    items: [
+      { icon: Blocks, labelAr: 'API المرجع', labelEn: 'API Reference', path: '/dashboard/developer-portal', key: 'dev-api-ref', bindingType: 'admin' as const },
+      { icon: LinkIcon, labelAr: 'Webhooks', labelEn: 'Webhooks', path: '/dashboard/webhooks', key: 'dev-webhooks', bindingType: 'admin' as const },
+    ],
+  },
+
   {
     id: 'admin-command-center',
     icon: Zap,
