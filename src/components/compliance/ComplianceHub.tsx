@@ -50,6 +50,15 @@ export default function ComplianceHub() {
         </AlertDescription>
       </Alert>
 
+      {/* PDF Export Button */}
+      {hasData && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={generateReport} className="gap-2">
+            <FileText className="h-4 w-4" /> طباعة تقرير الامتثال (PDF)
+          </Button>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="soft" className="gap-2">
