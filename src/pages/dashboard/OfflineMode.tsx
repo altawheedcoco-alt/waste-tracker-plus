@@ -64,9 +64,10 @@ const OfflineMode = () => {
 
   useEffect(() => {
     refreshStats();
+    preloader.loadMeta();
     const interval = setInterval(refreshStats, 5000);
     return () => clearInterval(interval);
-  }, [refreshStats]);
+  }, [refreshStats, preloader.loadMeta]);
 
   // Check storage quota
   useEffect(() => {
