@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Scale, Upload, CheckCircle, AlertTriangle, Camera, History, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import BackButton from '@/components/navigation/BackButton';
+import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 
 interface VerificationResult {

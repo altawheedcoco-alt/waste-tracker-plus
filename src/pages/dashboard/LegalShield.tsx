@@ -8,7 +8,7 @@ import { Shield, FileText, AlertTriangle, CheckCircle, Download, Clock, Scale, B
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import BackButton from '@/components/navigation/BackButton';
+import BackButton from '@/components/ui/back-button';
 
 const LAW_ARTICLES = [
   { number: 'المادة 27', title: 'التزامات مولد المخلفات', description: 'يلتزم مولد المخلفات بفصلها من المنبع وفقاً للأنواع المحددة' },

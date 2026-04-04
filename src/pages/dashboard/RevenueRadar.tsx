@@ -7,7 +7,7 @@ import { DollarSign, TrendingUp, AlertCircle, Package, Zap, BarChart3 } from 'lu
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import BackButton from '@/components/navigation/BackButton';
+import BackButton from '@/components/ui/back-button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Approximate market prices per ton (EGP)
