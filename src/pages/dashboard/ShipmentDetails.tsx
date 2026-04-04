@@ -763,6 +763,15 @@ const ShipmentDetailsPage = () => {
             </ErrorBoundary>
           </TabsContent>
 
+          {/* ===== الدائرة الكاملة ===== */}
+          <TabsContent value="fullcircle">
+            <ErrorBoundary fallbackTitle="خطأ في التحليل">
+              <Suspense fallback={<TabFallback />}>
+                <ShipmentFullCircle shipmentId={shipment.id} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
           {/* ===== الملاحظات ===== */}
           <TabsContent value="notes">
             <ErrorBoundary fallbackTitle="خطأ في الملاحظات">
