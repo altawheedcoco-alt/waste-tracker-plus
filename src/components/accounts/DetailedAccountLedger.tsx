@@ -366,9 +366,8 @@ export default function DetailedAccountLedger({
         setConfirmDeleteId={setConfirmDeleteId}
         handleDeleteDeposit={handleDeleteDeposit}
       />
-                <p className="text-xs text-muted-foreground mb-1">الشحنات</p>
-                <p className="text-lg font-bold">{totals.shipmentCount}</p>
-                <p className="text-xs text-blue-600">{formatCurrency(totals.totalShipmentValue)} ج.م</p>
+
+
               </CardContent>
             </Card>
           </DialogTrigger>
