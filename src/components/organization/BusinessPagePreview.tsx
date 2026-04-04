@@ -14,7 +14,7 @@ import {
   MapPin, Clock, Phone, Globe, ShoppingBag, Info, Calendar,
   Pin, Heart, MessageCircle, Share2, ImageIcon, CheckCircle,
   ExternalLink, Navigation, Copy, Link2, Users, Eye,
-  Building2, Settings, ShieldCheck
+  Building2, Settings, ShieldCheck, Trophy
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -25,6 +25,8 @@ import StoryCircles from '@/components/stories/StoryCircles';
 import PostInteractions from './PostInteractions';
 import PostShareActions from '@/components/content-generator/PostShareActions';
 import BusinessPageSharePanel from './BusinessPageSharePanel';
+import OrgImpactCounter from './OrgImpactCounter';
+import OrgAchievementBadges from './OrgAchievementBadges';
 
 interface BusinessPagePreviewProps {
   organizationId: string;
