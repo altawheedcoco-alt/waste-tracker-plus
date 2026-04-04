@@ -36,6 +36,8 @@ const routeLabels: Record<string, string> = {
   'iot-fill-prediction': 'رادار التنبؤ بالامتلاء',
   'community-rewards': 'المكافآت المجتمعية',
   'secondary-materials': 'سوق السلع الثانوية',
+  'circular-matcher': 'المطابق الدائري',
+  'developer-portal': 'بوابة المطورين',
   'system-overview': 'نظرة عامة على النظام',
   'admin-revenue': 'الإيرادات والاشتراكات',
   'company-management': 'إدارة الشركات',
