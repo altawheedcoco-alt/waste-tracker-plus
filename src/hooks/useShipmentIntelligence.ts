@@ -210,7 +210,7 @@ function checkCompliance(shipment: any, custody: any[], orgs: any[], driver: any
   const recyclerLicense = !!recyclerOrg?.license_number;
   const driverLicense = !!driver;
   const wasteClassified = !!shipment.waste_type && shipment.waste_type !== 'other';
-  const qrScanned = !!shipment.qr_code || custody.some((e: any) => e.event_type === 'qr_scan');
+  const qrScanned = !!shipment.generator_qr_code || !!shipment.transporter_pickup_qr || !!shipment.recycler_receipt_qr || custody.some((e: any) => e.event_type === 'qr_scan');
   const gpsTracked = !!(shipment.pickup_latitude && shipment.delivery_latitude);
   const weighbridgeVerified = !!shipment.actual_weight;
   const manifestComplete = ['delivered', 'confirmed'].includes(shipment.status);
