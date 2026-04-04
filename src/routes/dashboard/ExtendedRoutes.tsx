@@ -45,6 +45,8 @@ const RecurringServices = lazyRetry(() => import('@/pages/dashboard/RecurringSer
 const Benchmarking = lazyRetry(() => import('@/pages/dashboard/Benchmarking'));
 const PredictiveFailure = lazyRetry(() => import('@/pages/dashboard/PredictiveFailure'));
 const SmartHelpCenter = lazyRetry(() => import('@/pages/dashboard/SmartHelpCenter'));
+const EnvironmentalPassport = lazyRetry(() => import('@/pages/dashboard/EnvironmentalPassport'));
+const IoTFillPrediction = lazyRetry(() => import('@/pages/dashboard/IoTFillPrediction'));
 
 export const extendedRoutes = (
   <>
