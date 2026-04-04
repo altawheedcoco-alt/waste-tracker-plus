@@ -32,5 +32,6 @@ export const essentialCommonRoutes = (
     <Route path="/dashboard/platform-terms" element={<PlatformTermsAndPolicies />} />
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
     <Route path="/dashboard/gamification" element={<GamificationPage />} />
+    <Route path="/dashboard/compliance-analysis" element={<ComplianceAnalysis />} />
   </>
 );
