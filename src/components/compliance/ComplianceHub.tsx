@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { useSoftComplianceAnalyzer, CATEGORY_LABELS, type ComplianceLevel, type StandardCategory } from '@/hooks/useSoftComplianceAnalyzer';
 import { useAIComplianceAnalyzer, type AIComplianceReport } from '@/hooks/useAIComplianceAnalyzer';
+import { useCompliancePDFReport } from '@/hooks/useCompliancePDFReport';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
