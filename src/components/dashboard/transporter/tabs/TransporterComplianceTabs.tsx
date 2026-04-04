@@ -38,9 +38,11 @@ interface ComplianceTabsProps {
   organizationId?: string;
 }
 
-type ComplianceSection = 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government' | 'ohs' | 'risk' | 'custody';
+type ComplianceSection = 'gate' | 'fleet_cert' | 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government' | 'ohs' | 'risk' | 'custody';
 
 const COMPLIANCE_SECTIONS: { id: ComplianceSection; labelAr: string; icon: React.ElementType }[] = [
+  { id: 'gate', labelAr: 'بوابة الامتثال', icon: BarChart3 },
+  { id: 'fleet_cert', labelAr: 'الأسطول المعتمد', icon: Truck },
   { id: 'compliance', labelAr: 'الامتثال', icon: Shield },
   { id: 'licenses', labelAr: 'التراخيص', icon: FileCheck },
   { id: 'declarations', labelAr: 'الإقرارات', icon: FileText },
