@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface SidebarNavItemProps {
   icon: LucideIcon;
   label: string;
+  labelEn?: string;
   path: string;
   isCollapsed: boolean;
   badge?: number;
