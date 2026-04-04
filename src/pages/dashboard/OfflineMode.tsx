@@ -411,7 +411,7 @@ const OfflineMode = () => {
                 </Button>
               ) : (
                 <Button
-                  onClick={preloader.preloadAll}
+                  onClick={() => preloader.preloadAll()}
                   disabled={!isOnline}
                   className="flex-1 gap-2"
                 >
