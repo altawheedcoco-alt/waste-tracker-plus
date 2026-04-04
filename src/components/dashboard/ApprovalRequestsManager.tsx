@@ -550,7 +550,7 @@ const ApprovalRequestsManager = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-200 bg-gray-50/50 cursor-pointer hover:shadow-md" onClick={() => setActiveTab('all')}>
+        <Card className="border-border bg-muted/50 cursor-pointer hover:shadow-md" onClick={() => setActiveTab('all')}>
           <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
