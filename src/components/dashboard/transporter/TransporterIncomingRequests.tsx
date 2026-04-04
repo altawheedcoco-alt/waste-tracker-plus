@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Inbox, Check, X, Clock, ExternalLink, Package } from 'lucide-react';
