@@ -44,7 +44,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
       case 'ai': return <Brain className="w-4 h-4 text-purple-500" />;
       case 'auto': return <Zap className="w-4 h-4 text-emerald-500" />;
       case 'hybrid': return <Settings2 className="w-4 h-4 text-blue-500" />;
-      case 'manual': return <Hand className="w-4 h-4 text-gray-500" />;
+      case 'manual': return <Hand className="w-4 h-4 text-muted-foreground" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
