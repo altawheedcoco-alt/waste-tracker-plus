@@ -11,6 +11,8 @@ import BindingIndicator from '@/components/shared/BindingIndicator';
 export interface SidebarMenuItem {
   icon: LucideIcon;
   label: string;
+  /** English subtitle shown below Arabic label */
+  labelEn?: string;
   path: string;
   key: string;
   badge?: number;
