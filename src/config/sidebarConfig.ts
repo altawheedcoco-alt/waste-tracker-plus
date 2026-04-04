@@ -16,7 +16,7 @@ import {
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload, UserCheck,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
-  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
+  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel, Code, GitCompareArrows,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import type { SidebarSectionConfig } from '@/config/sidebar/sidebarTypes';
