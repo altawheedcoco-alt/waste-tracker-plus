@@ -52,7 +52,7 @@ const soundConfigs: SoundConfig[] = [
   { type: 'approval_request', icon: ClipboardCheck, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
   { type: 'chat_message', icon: MessageSquare, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
   { type: 'warning', icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-500/10' },
-  { type: 'default', icon: Bell, color: 'text-gray-500', bgColor: 'bg-gray-500/10' },
+  { type: 'default', icon: Bell, color: 'text-muted-foreground', bgColor: 'bg-muted-foreground/10' },
 ];
 
 const NotificationSoundSettings = () => {

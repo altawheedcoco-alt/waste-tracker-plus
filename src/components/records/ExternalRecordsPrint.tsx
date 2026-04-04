@@ -48,8 +48,8 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
         {/* Header */}
         <div className="text-center border-b-2 border-gray-800 pb-4 mb-4">
           <h1 className="text-xl font-bold mb-1">سجل الكميات {roleLabel} الخارجية</h1>
-          <p className="text-sm text-gray-600">{organizationName}</p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground">{organizationName}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             تاريخ الطباعة: {format(new Date(), 'PPP', { locale: ar })}
           </p>
         </div>
@@ -57,27 +57,27 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
         {/* Summary Stats */}
         <div className="grid grid-cols-4 gap-2 mb-4 text-center">
           <div className="border rounded p-2">
-            <p className="text-xs text-gray-500">إجمالي السجلات</p>
+            <p className="text-xs text-muted-foreground">إجمالي السجلات</p>
             <p className="text-lg font-bold">{records.length}</p>
           </div>
           <div className="border rounded p-2">
-            <p className="text-xs text-gray-500">إجمالي الكميات</p>
+            <p className="text-xs text-muted-foreground">إجمالي الكميات</p>
             <p className="text-lg font-bold">{(totalQuantityKg / 1000).toFixed(2)} طن</p>
           </div>
           <div className="border rounded p-2 bg-green-50">
-            <p className="text-xs text-gray-500">مرتبطة بالنظام</p>
+            <p className="text-xs text-muted-foreground">مرتبطة بالنظام</p>
             <p className="text-lg font-bold text-green-700">{linkedCount}</p>
           </div>
           <div className="border rounded p-2 bg-orange-50">
-            <p className="text-xs text-gray-500">غير مرتبطة</p>
+            <p className="text-xs text-muted-foreground">غير مرتبطة</p>
             <p className="text-lg font-bold text-orange-600">{unlinkedCount}</p>
           </div>
         </div>
 
         {/* Filter indicator */}
-        <div className="mb-3 text-xs text-gray-600 flex items-center gap-2 flex-wrap">
+        <div className="mb-3 text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
           <span className="font-medium">الفلتر المطبق:</span>
-          <span className="px-2 py-0.5 bg-gray-100 rounded">{filterLabel}</span>
+          <span className="px-2 py-0.5 bg-muted rounded">{filterLabel}</span>
           {selectionLabel && (
             <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded">{selectionLabel}</span>
           )}
@@ -86,7 +86,7 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
         {/* Records Table */}
         <table className="w-full border-collapse text-xs">
           <thead>
-            <tr className="bg-gray-100">
+            <tr className="bg-muted">
               <th className="border border-gray-300 p-1.5 text-right">#</th>
               <th className="border border-gray-300 p-1.5 text-right">الجهة المولدة</th>
               <th className="border border-gray-300 p-1.5 text-right">{partnerLabel}</th>
@@ -128,7 +128,7 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
         </table>
 
         {/* Footer */}
-        <div className="mt-6 pt-4 border-t border-gray-300 text-xs text-gray-500 flex justify-between">
+        <div className="mt-6 pt-4 border-t border-gray-300 text-xs text-muted-foreground flex justify-between">
           <span>عدد السجلات: {records.length}</span>
           <span>تم التوليد بواسطة نظام إدارة المخلفات</span>
         </div>

@@ -28,7 +28,7 @@ const IMPACT_TYPE_CONFIG: Record<string, { icon: React.ElementType; color: strin
   trigger_chain: { icon: Link2, color: 'text-indigo-600 bg-indigo-100', labelAr: 'تشغيل سلسلة', labelEn: 'Chain Trigger' },
   update_compliance: { icon: Shield, color: 'text-teal-600 bg-teal-100', labelAr: 'تحديث امتثال', labelEn: 'Compliance Update' },
   recalculate_esg: { icon: Leaf, color: 'text-green-600 bg-green-100', labelAr: 'تحديث ESG', labelEn: 'ESG Recalculation' },
-  custom: { icon: Activity, color: 'text-gray-600 bg-gray-100', labelAr: 'مخصص', labelEn: 'Custom' },
+  custom: { icon: Activity, color: 'text-muted-foreground bg-muted', labelAr: 'مخصص', labelEn: 'Custom' },
 };
 
 const ORG_TYPE_LABELS: Record<string, { ar: string; en: string }> = {

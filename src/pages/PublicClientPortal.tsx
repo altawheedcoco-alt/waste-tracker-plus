@@ -40,7 +40,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; icon: React.Ele
   arrived: { label: 'وصل', color: 'bg-cyan-100 text-cyan-700', icon: MapPin },
   paid: { label: 'مدفوعة', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
   overdue: { label: 'متأخرة', color: 'bg-red-100 text-red-700', icon: AlertTriangle },
-  draft: { label: 'مسودة', color: 'bg-gray-100 text-gray-700', icon: FileText },
+  draft: { label: 'مسودة', color: 'bg-muted text-foreground', icon: FileText },
 };
 
 const PublicClientPortal: React.FC = () => {
@@ -204,7 +204,7 @@ const PublicClientPortal: React.FC = () => {
 
   // Authenticated portal
   const renderStatus = (status: string) => {
-    const cfg = STATUS_MAP[status] || { label: status, color: 'bg-gray-100 text-gray-700', icon: Clock };
+    const cfg = STATUS_MAP[status] || { label: status, color: 'bg-muted text-foreground', icon: Clock };
     const Icon = cfg.icon;
     return <Badge className={`${cfg.color} gap-1`}><Icon className="w-3 h-3" />{cfg.label}</Badge>;
   };

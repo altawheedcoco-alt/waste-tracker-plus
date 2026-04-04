@@ -181,7 +181,7 @@ const EnhancedDriverPerformance = () => {
                   <div key={score.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow">
                     {/* Rank */}
                     <div className="shrink-0 w-8 text-center">
-                      <RankIcon className={`w-5 h-5 mx-auto ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                      <RankIcon className={`w-5 h-5 mx-auto ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-muted-foreground' : index === 2 ? 'text-amber-600' : 'text-muted-foreground'}`} />
                       <span className="text-[10px] text-muted-foreground">#{index + 1}</span>
                     </div>
 

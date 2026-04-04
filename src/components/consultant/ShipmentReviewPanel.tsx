@@ -15,13 +15,13 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  pending: { label: 'قيد الانتظار', color: 'bg-gray-100 text-gray-700' },
+  pending: { label: 'قيد الانتظار', color: 'bg-muted text-foreground' },
   accepted: { label: 'مقبولة', color: 'bg-blue-100 text-blue-700' },
   in_transit: { label: 'في الطريق', color: 'bg-indigo-100 text-indigo-700' },
   delivered: { label: 'تم التسليم', color: 'bg-emerald-100 text-emerald-700' },
   recycled: { label: 'تم التدوير', color: 'bg-green-100 text-green-700' },
   rejected: { label: 'مرفوضة', color: 'bg-red-100 text-red-700' },
-  cancelled: { label: 'ملغاة', color: 'bg-gray-200 text-gray-600' },
+  cancelled: { label: 'ملغاة', color: 'bg-muted text-muted-foreground' },
 };
 
 const ShipmentReviewPanel = memo(({ assignments }: { assignments: any[] }) => {
@@ -107,7 +107,7 @@ const ShipmentReviewPanel = memo(({ assignments }: { assignments: any[] }) => {
         ) : (
           <div className="space-y-2">
             {shipments.map((shipment: any, i: number) => {
-              const st = statusLabels[shipment.status] || { label: shipment.status, color: 'bg-gray-100 text-gray-700' };
+              const st = statusLabels[shipment.status] || { label: shipment.status, color: 'bg-muted text-foreground' };
               return (
                 <motion.div
                   key={shipment.id}

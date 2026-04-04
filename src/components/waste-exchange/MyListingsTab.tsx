@@ -16,8 +16,8 @@ const STATUS_MAP: Record<string, { ar: string; en: string; color: string }> = {
   active: { ar: 'نشط', en: 'Active', color: 'bg-green-500/10 text-green-600' },
   paused: { ar: 'متوقف', en: 'Paused', color: 'bg-yellow-500/10 text-yellow-600' },
   sold: { ar: 'تم البيع', en: 'Sold', color: 'bg-blue-500/10 text-blue-600' },
-  expired: { ar: 'منتهي', en: 'Expired', color: 'bg-gray-500/10 text-gray-600' },
-  draft: { ar: 'مسودة', en: 'Draft', color: 'bg-gray-500/10 text-gray-500' },
+  expired: { ar: 'منتهي', en: 'Expired', color: 'bg-muted-foreground/10 text-muted-foreground' },
+  draft: { ar: 'مسودة', en: 'Draft', color: 'bg-muted-foreground/10 text-muted-foreground' },
   cancelled: { ar: 'ملغي', en: 'Cancelled', color: 'bg-red-500/10 text-red-600' },
 };
 

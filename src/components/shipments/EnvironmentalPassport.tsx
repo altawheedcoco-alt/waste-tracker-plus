@@ -164,7 +164,7 @@ const EnvironmentalPassport: React.FC<PassportProps> = ({ shipment, carbonResult
                 sub={`${carbonResult.distanceKm} كم`}
               />
               <MetricBox
-                icon={<Factory className="w-3.5 h-3.5 text-gray-500" />}
+                icon={<Factory className="w-3.5 h-3.5 text-muted-foreground" />}
                 label="انبعاثات المعالجة"
                 value={`${carbonResult.processingEmissions.toFixed(3)} طن`}
               />

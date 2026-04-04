@@ -218,7 +218,7 @@ export const CATEGORY_VISUALS: Record<NotificationCategory | 'other', CategoryVi
   identity:     { icon: UserCheck,      color: 'text-teal-600',    bgColor: 'bg-teal-500/10' },
   disputes:     { icon: Gavel,          color: 'text-orange-600',  bgColor: 'bg-orange-500/10' },
   marketplace:  { icon: ShoppingCart,   color: 'text-emerald-600', bgColor: 'bg-emerald-500/10' },
-  system:       { icon: Settings,       color: 'text-gray-500',    bgColor: 'bg-gray-500/10' },
+  system:       { icon: Settings,       color: 'text-muted-foreground',    bgColor: 'bg-muted' },
   emergency:    { icon: Siren,          color: 'text-red-500',     bgColor: 'bg-red-500/10' },
   other:        { icon: Info,           color: 'text-muted-foreground', bgColor: 'bg-muted' },
 };

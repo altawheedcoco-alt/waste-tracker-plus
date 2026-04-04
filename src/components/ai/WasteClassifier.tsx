@@ -17,7 +17,7 @@ interface WasteClassification {
 const wasteTypeColors: Record<string, string> = {
   plastic: 'bg-blue-500',
   paper: 'bg-amber-500',
-  metal: 'bg-gray-500',
+  metal: 'bg-muted-foreground',
   glass: 'bg-cyan-500',
   electronic: 'bg-purple-500',
   organic: 'bg-green-500',

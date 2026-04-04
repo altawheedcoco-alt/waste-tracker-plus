@@ -290,7 +290,7 @@ const StationeryTemplates = () => {
             </div>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(95vh-80px)]">
-            <div className="p-4 bg-gray-100 flex justify-center">
+            <div className="p-4 bg-muted flex justify-center">
               {selectedTemplate && org && (
                 <SecureLetterhead
                   ref={printRef}
@@ -323,7 +323,7 @@ const StationeryTemplates = () => {
                   }}
                 >
                   {/* Sample content area */}
-                  <div className="space-y-4 py-6 text-[11pt] leading-relaxed text-gray-700">
+                  <div className="space-y-4 py-6 text-[11pt] leading-relaxed text-foreground">
                     <Textarea
                       placeholder="اكتب محتوى المستند هنا..."
                       value={documentContent}

@@ -27,11 +27,11 @@ const statusConfig = {
   in_progress: { label: 'قيد المعالجة', color: 'bg-yellow-500' },
   waiting_response: { label: 'انتظار الرد', color: 'bg-orange-500' },
   resolved: { label: 'تم الحل', color: 'bg-green-500' },
-  closed: { label: 'مغلقة', color: 'bg-gray-500' },
+  closed: { label: 'مغلقة', color: 'bg-muted-foreground' },
 };
 
 const priorityColors = {
-  low: 'text-gray-500',
+  low: 'text-muted-foreground',
   medium: 'text-blue-500',
   high: 'text-orange-500',
   urgent: 'text-red-500',

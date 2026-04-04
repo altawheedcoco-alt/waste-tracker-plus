@@ -244,7 +244,7 @@ const LeafletMultiDriverMap = memo(({
               في مهمة
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full bg-gray-400 border border-white shadow-sm" />
+              <span className="w-3 h-3 rounded-full bg-muted-foreground border border-white shadow-sm" />
               غير متصل
             </span>
           </div>

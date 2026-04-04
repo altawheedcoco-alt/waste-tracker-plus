@@ -107,7 +107,7 @@ const InjuriesTab = () => {
               <CardContent className="p-3">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">{inj.employee_name}</span></div>
-                  <Badge className={`text-[9px] ${severityColors[inj.severity] || 'bg-gray-100'}`}>{severityLabels[inj.severity] || inj.severity}</Badge>
+                  <Badge className={`text-[9px] ${severityColors[inj.severity] || 'bg-muted'}`}>{severityLabels[inj.severity] || inj.severity}</Badge>
                 </div>
                 <p className="text-xs mb-1">{inj.injury_type} {inj.body_part && `- ${inj.body_part}`}</p>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">

@@ -29,7 +29,7 @@ const WASTE_TYPES = [
 ];
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  draft: { label: 'مسودة', color: 'bg-gray-100 text-gray-700' },
+  draft: { label: 'مسودة', color: 'bg-muted text-foreground' },
   pending_approval: { label: 'بانتظار الموافقة', color: 'bg-yellow-100 text-yellow-700' },
   active: { label: 'مزاد نشط', color: 'bg-green-100 text-green-700' },
   ended: { label: 'انتهى', color: 'bg-blue-100 text-blue-700' },

@@ -67,7 +67,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   paid: { label: 'مدفوعة', color: 'bg-green-100 text-green-800' },
   pending: { label: 'معلقة', color: 'bg-yellow-100 text-yellow-800' },
   overdue: { label: 'متأخرة', color: 'bg-red-100 text-red-800' },
-  draft: { label: 'مسودة', color: 'bg-gray-100 text-gray-800' },
+  draft: { label: 'مسودة', color: 'bg-muted text-foreground' },
   valid: { label: 'صالحة', color: 'bg-green-100 text-green-800' },
 };
 
@@ -304,7 +304,7 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
                       <div>
                         <span className="text-xs text-muted-foreground">الحالة</span>
                         <div className="mt-1">
-                          <Badge className={statusLabels[result.status]?.color || 'bg-gray-100'}>
+                          <Badge className={statusLabels[result.status]?.color || 'bg-muted'}>
                             {statusLabels[result.status]?.label || result.status}
                           </Badge>
                         </div>
@@ -436,7 +436,7 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
                     {result.data.invoice_number && <div><span className="text-xs text-muted-foreground">رقم الفاتورة</span><p className="font-mono font-bold text-sm">{result.data.invoice_number}</p></div>}
-                    {result.status && <div><span className="text-xs text-muted-foreground">الحالة</span><div className="mt-1"><Badge className={statusLabels[result.status]?.color || 'bg-gray-100'}>{statusLabels[result.status]?.label || result.status}</Badge></div></div>}
+                    {result.status && <div><span className="text-xs text-muted-foreground">الحالة</span><div className="mt-1"><Badge className={statusLabels[result.status]?.color || 'bg-muted'}>{statusLabels[result.status]?.label || result.status}</Badge></div></div>}
                     {result.data.total_amount && <div><span className="text-xs text-muted-foreground">المبلغ الإجمالي</span><p className="font-bold text-primary">{Number(result.data.total_amount).toLocaleString('ar-EG')} {result.data.currency || 'ج.م'}</p></div>}
                     {result.data.organization_name && <div><span className="text-xs text-muted-foreground">الجهة المصدرة</span><p className="font-semibold text-sm">{result.data.organization_name}</p></div>}
                     {result.data.partner_name && <div><span className="text-xs text-muted-foreground">العميل</span><p className="font-semibold text-sm">{result.data.partner_name}</p></div>}

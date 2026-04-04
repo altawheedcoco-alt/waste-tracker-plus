@@ -27,7 +27,7 @@ const getStatusColor = (status: IntegrationStatus) => {
     case 'moderate': return 'bg-yellow-500 text-white';
     case 'weak': return 'bg-red-500 text-white';
     case 'planned': return 'bg-blue-500 text-white';
-    default: return 'bg-gray-500 text-white';
+    default: return 'bg-muted-foreground text-white';
   }
 };
 

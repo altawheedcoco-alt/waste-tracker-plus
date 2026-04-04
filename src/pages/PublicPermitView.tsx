@@ -9,7 +9,7 @@ import { FileText, Clock, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'l
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: 'نشط', color: 'bg-green-100 text-green-800' },
   expired: { label: 'منتهي', color: 'bg-red-100 text-red-800' },
-  draft: { label: 'مسودة', color: 'bg-gray-100 text-gray-800' },
+  draft: { label: 'مسودة', color: 'bg-muted text-foreground' },
   cancelled: { label: 'ملغي', color: 'bg-red-100 text-red-800' },
   superseded: { label: 'مُعدّل', color: 'bg-yellow-100 text-yellow-800' },
 };

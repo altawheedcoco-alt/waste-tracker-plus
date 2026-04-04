@@ -137,7 +137,7 @@ const SafetyInspectionsPanel = memo(() => {
                         <button onClick={() => updateCheckItem(i, 'status', 'fail')} className={`w-7 h-7 rounded flex items-center justify-center ${item.status === 'fail' ? 'bg-red-500 text-white' : 'bg-muted hover:bg-red-100'}`}>
                           <XCircle className="w-4 h-4" />
                         </button>
-                        <button onClick={() => updateCheckItem(i, 'status', 'na')} className={`w-7 h-7 rounded flex items-center justify-center ${item.status === 'na' ? 'bg-gray-500 text-white' : 'bg-muted hover:bg-gray-100'}`}>
+                        <button onClick={() => updateCheckItem(i, 'status', 'na')} className={`w-7 h-7 rounded flex items-center justify-center ${item.status === 'na' ? 'bg-muted-foreground text-white' : 'bg-muted hover:bg-muted'}`}>
                           <Minus className="w-4 h-4" />
                         </button>
                       </div>

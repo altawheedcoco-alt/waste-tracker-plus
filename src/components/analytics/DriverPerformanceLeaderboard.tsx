@@ -81,7 +81,7 @@ export default function DriverPerformanceLeaderboard() {
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;
+    if (rank === 2) return <Medal className="h-4 w-4 text-muted-foreground" />;
     if (rank === 3) return <Medal className="h-4 w-4 text-amber-600" />;
     return <span className="text-xs text-muted-foreground w-4 text-center">{rank}</span>;
   };

@@ -54,11 +54,11 @@ const statusConfig: Record<TicketStatus, { label: string; color: string }> = {
   in_progress: { label: 'قيد المعالجة', color: 'bg-yellow-500' },
   waiting_response: { label: 'في انتظار الرد', color: 'bg-orange-500' },
   resolved: { label: 'تم الحل', color: 'bg-green-500' },
-  closed: { label: 'مغلقة', color: 'bg-gray-500' },
+  closed: { label: 'مغلقة', color: 'bg-muted-foreground' },
 };
 
 const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
-  low: { label: 'منخفضة', color: 'bg-gray-500' },
+  low: { label: 'منخفضة', color: 'bg-muted-foreground' },
   medium: { label: 'متوسطة', color: 'bg-blue-500' },
   high: { label: 'عالية', color: 'bg-orange-500' },
   urgent: { label: 'عاجلة', color: 'bg-red-500' },
@@ -284,7 +284,7 @@ const EnhancedTicketDialog = ({ ticketId, open, onOpenChange, onUpdate }: Enhanc
                     <button key={i} onClick={() => setRating(i + 1)} className="focus:outline-none">
                       <Star
                         className={`w-6 h-6 transition-colors ${
-                          i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-yellow-400'
+                          i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-muted hover:text-yellow-400'
                         }`}
                       />
                     </button>
@@ -310,7 +310,7 @@ const EnhancedTicketDialog = ({ ticketId, open, onOpenChange, onUpdate }: Enhanc
                     <Star
                       key={i}
                       className={`w-4 h-4 ${
-                        i < ticket.satisfaction_rating! ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                        i < ticket.satisfaction_rating! ? 'text-yellow-500 fill-yellow-500' : 'text-muted'
                       }`}
                     />
                   ))}

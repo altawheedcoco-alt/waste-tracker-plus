@@ -33,10 +33,10 @@ const colorThemes = [
 const avatarPresets = [
   { id: 'fox', emoji: '🦊', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   { id: 'cat', emoji: '🐱', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-  { id: 'wolf', emoji: '🐺', bg: 'bg-gray-100 dark:bg-gray-900/30' },
+  { id: 'wolf', emoji: '🐺', bg: 'bg-muted dark:bg-card/30' },
   { id: 'tiger', emoji: '🐯', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
   { id: 'bear', emoji: '🐻', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-  { id: 'panda', emoji: '🐼', bg: 'bg-gray-100 dark:bg-gray-900/30' },
+  { id: 'panda', emoji: '🐼', bg: 'bg-muted dark:bg-card/30' },
   { id: 'eagle', emoji: '🦅', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
   { id: 'dolphin', emoji: '🐬', bg: 'bg-blue-100 dark:bg-blue-900/30' },
   { id: 'butterfly', emoji: '🦋', bg: 'bg-purple-100 dark:bg-purple-900/30' },

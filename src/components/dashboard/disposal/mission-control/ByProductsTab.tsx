@@ -67,7 +67,7 @@ const ByProductsTab = ({ facilityId, organizationId }: ByProductsTabProps) => {
   const totalStoredTons = stored.reduce((s: number, b: any) => s + (b.quantity || 0), 0);
 
   const typeLabels: Record<string, { label: string; icon: any; color: string }> = {
-    ash: { label: 'رماد', icon: Flame, color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30' },
+    ash: { label: 'رماد', icon: Flame, color: 'text-muted-foreground bg-muted' },
     leachate: { label: 'سائل رشح', icon: Droplets, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
     slag: { label: 'خبث', icon: Package, color: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30' },
     sludge: { label: 'حمأة', icon: Trash2, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' },

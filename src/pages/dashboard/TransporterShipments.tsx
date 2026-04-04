@@ -96,7 +96,7 @@ const TransporterShipments = () => {
       delivered: { label: t('shipments.delivered'), className: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300' },
       confirmed: { label: t('shipments.confirmed'), className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300' },
     };
-    const config = statusConfig[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
+    const config = statusConfig[status] || { label: status, className: 'bg-muted text-foreground' };
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 

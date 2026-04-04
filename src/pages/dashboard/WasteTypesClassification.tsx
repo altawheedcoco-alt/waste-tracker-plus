@@ -510,8 +510,8 @@ const nonHazardousWasteCategories = [
     id: 'rubber',
     name: 'مخلفات المطاط',
     icon: Package,
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-100 dark:bg-gray-900/30',
+    color: 'text-foreground',
+    bgColor: 'bg-muted dark:bg-card/30',
     description: 'المطاط والإطارات',
     subcategories: [
       { name: 'إطارات سيارات صغيرة', code: 'RB-01', recyclable: true },
@@ -530,8 +530,8 @@ const nonHazardousWasteCategories = [
     id: 'other',
     name: 'مخلفات أخرى',
     icon: Trash2,
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100 dark:bg-gray-900/30',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted dark:bg-card/30',
     description: 'مخلفات متنوعة غير مصنفة',
     subcategories: [
       { name: 'مخلفات مختلطة', code: 'OT-01', recyclable: false },
@@ -943,7 +943,7 @@ const WasteTypesClassification = () => {
                                   قابل
                                 </Badge>
                               ) : (
-                                <Badge className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+                                <Badge className="text-xs bg-muted text-foreground dark:bg-card/30 dark:text-gray-300">
                                   <XCircle className="w-3 h-3 ml-1" />
                                   غير قابل
                                 </Badge>
@@ -1136,7 +1136,7 @@ const WasteTypesClassification = () => {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+                      <Badge className="bg-muted text-foreground dark:bg-card/30 dark:text-gray-300">
                         <XCircle className="w-3 h-3 ml-1" />
                         غير قابل للتدوير
                       </Badge>
@@ -1182,7 +1182,7 @@ const WasteTypesClassification = () => {
                                     قابل
                                   </Badge>
                                 ) : (
-                                  <Badge className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+                                  <Badge className="text-xs bg-muted text-foreground dark:bg-card/30 dark:text-gray-300">
                                     <XCircle className="w-3 h-3 ml-1" />
                                     غير قابل
                                   </Badge>
@@ -1208,7 +1208,7 @@ const WasteTypesClassification = () => {
                                     قابل
                                   </Badge>
                                 ) : (
-                                  <Badge className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+                                  <Badge className="text-xs bg-muted text-foreground dark:bg-card/30 dark:text-gray-300">
                                     <XCircle className="w-3 h-3 ml-1" />
                                     غير قابل
                                   </Badge>

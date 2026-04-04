@@ -120,7 +120,7 @@ export function CreateApiKeyDialog({ open, onOpenChange }: CreateApiKeyDialogPro
                 <Input
                   value={generatedKey}
                   readOnly
-                  className="font-mono text-sm bg-white dark:bg-gray-900"
+                  className="font-mono text-sm bg-white dark:bg-card"
                 />
                 <Button variant="outline" size="icon" onClick={handleCopy}>
                   {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}

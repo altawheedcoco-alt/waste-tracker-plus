@@ -14,7 +14,7 @@ const levelThresholds = [0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000];
 const levelNames = ['مبتدئ', 'نشط', 'متقدم', 'خبير', 'محترف', 'ماهر', 'متميز', 'أسطوري', 'أسطوري+', 'الأعلى'];
 
 const rarityColors: Record<string, string> = {
-  common: 'bg-gray-100 text-gray-700 border-gray-300',
+  common: 'bg-muted text-foreground border-gray-300',
   uncommon: 'bg-green-100 text-green-700 border-green-300',
   rare: 'bg-blue-100 text-blue-700 border-blue-300',
   epic: 'bg-purple-100 text-purple-700 border-purple-300',
@@ -269,7 +269,7 @@ const GamificationDashboard: React.FC = () => {
                 <div className="space-y-2">
                   {leaderboard?.map((entry, i) => (
                     <div key={entry.id} className={`flex items-center gap-3 p-3 rounded-lg ${i < 3 ? 'bg-primary/5 border border-primary/20' : 'bg-muted/50'}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-yellow-400 text-yellow-900' : i === 1 ? 'bg-gray-300 text-gray-700' : i === 2 ? 'bg-orange-300 text-orange-800' : 'bg-muted text-muted-foreground'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-yellow-400 text-yellow-900' : i === 1 ? 'bg-muted text-foreground' : i === 2 ? 'bg-orange-300 text-orange-800' : 'bg-muted text-muted-foreground'}`}>
                         {i + 1}
                       </div>
                       <div className="flex-1">

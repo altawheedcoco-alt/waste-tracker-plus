@@ -46,7 +46,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   in_progress: { label: 'قيد المعالجة', color: 'bg-yellow-500' },
   waiting_response: { label: 'انتظار الرد', color: 'bg-orange-500' },
   resolved: { label: 'تم الحل', color: 'bg-green-500' },
-  closed: { label: 'مغلقة', color: 'bg-gray-500' },
+  closed: { label: 'مغلقة', color: 'bg-muted-foreground' },
 };
 
 const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
@@ -413,7 +413,7 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <Badge 
-                                  className={`${statusConfig[ticket.status]?.color || 'bg-gray-500'} text-white text-[10px] px-1.5 py-0`}
+                                  className={`${statusConfig[ticket.status]?.color || 'bg-muted-foreground'} text-white text-[10px] px-1.5 py-0`}
                                 >
                                   {statusConfig[ticket.status]?.label || ticket.status}
                                 </Badge>

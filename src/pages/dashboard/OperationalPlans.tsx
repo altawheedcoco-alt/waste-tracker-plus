@@ -320,7 +320,7 @@ const OperationalPlans = () => {
       delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       confirmed: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-muted text-foreground';
   };
 
   const getWasteTypeLabel = (type: string) => {
@@ -368,7 +368,7 @@ const OperationalPlans = () => {
   };
 
   const getHazardColor = (level: string | null) => {
-    if (!level) return 'bg-gray-100 text-gray-800';
+    if (!level) return 'bg-muted text-foreground';
     const colors: Record<string, string> = {
       low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
@@ -376,7 +376,7 @@ const OperationalPlans = () => {
       critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
       none: 'bg-green-100 text-green-800',
     };
-    return colors[level] || 'bg-gray-100 text-gray-800';
+    return colors[level] || 'bg-muted text-foreground';
   };
 
   const totalQuantity = shipments.reduce((sum, s) => sum + (s.quantity || 0), 0);
@@ -1135,7 +1135,7 @@ const OperationalPlans = () => {
                     </p>
                     <p>تم إنشاء هذه الخطة التشغيلية بواسطة نظام إدارة المخلفات</p>
                     <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</p>
-                    <p className="text-[7px] mt-1 text-gray-400">مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي</p>
+                    <p className="text-[7px] mt-1 text-muted-foreground">مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي</p>
                   </div>
                 </div>
               )}

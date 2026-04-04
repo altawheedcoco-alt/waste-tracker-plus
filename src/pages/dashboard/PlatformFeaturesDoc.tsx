@@ -326,7 +326,7 @@ const featureCategories: FeatureCategory[] = [
     id: 'platform',
     title: 'إدارة المنصة',
     icon: Settings,
-    color: 'text-gray-500',
+    color: 'text-muted-foreground',
     description: 'أدوات إدارية وتخصيص المنصة',
     features: [
       { name: 'الإعلانات', description: 'نظام إعلانات داخلية مع خطط وإحصائيات', status: 'live', path: '/dashboard/advertiser' },

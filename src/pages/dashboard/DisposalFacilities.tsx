@@ -87,12 +87,12 @@ const facilityTypeLabels: Record<string, { label: string; icon: any; color: stri
   incinerator: { label: 'محرقة', icon: Flame, color: 'bg-red-100 text-red-700' },
   treatment_plant: { label: 'محطة معالجة', icon: Factory, color: 'bg-blue-100 text-blue-700' },
   hazardous_disposal: { label: 'تخلص آمن للخطرة', icon: AlertTriangle, color: 'bg-purple-100 text-purple-700' },
-  industrial_waste: { label: 'مخلفات صناعية', icon: Building2, color: 'bg-gray-100 text-gray-700' },
+  industrial_waste: { label: 'مخلفات صناعية', icon: Building2, color: 'bg-muted text-foreground' },
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   active: { label: 'نشط', color: 'bg-green-100 text-green-700' },
-  inactive: { label: 'غير نشط', color: 'bg-gray-100 text-gray-600' },
+  inactive: { label: 'غير نشط', color: 'bg-muted text-muted-foreground' },
   under_maintenance: { label: 'صيانة', color: 'bg-amber-100 text-amber-700' },
   full: { label: 'ممتلئ', color: 'bg-red-100 text-red-700' },
   closed: { label: 'مغلق', color: 'bg-red-200 text-red-800' },

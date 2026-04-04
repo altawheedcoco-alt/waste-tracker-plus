@@ -33,12 +33,12 @@ interface InvoicesAccountViewProps {
 }
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
-  draft: { label: 'مسودة', icon: FileText, color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  draft: { label: 'مسودة', icon: FileText, color: 'bg-muted text-foreground dark:bg-card dark:text-gray-300' },
   pending: { label: 'معلقة', icon: Clock, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
   partial: { label: 'مدفوعة جزئياً', icon: AlertTriangle, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
   paid: { label: 'مدفوعة', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
   overdue: { label: 'متأخرة', icon: XCircle, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-  cancelled: { label: 'ملغاة', icon: XCircle, color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500' },
+  cancelled: { label: 'ملغاة', icon: XCircle, color: 'bg-muted text-muted-foreground dark:bg-card dark:text-muted-foreground' },
 };
 
 export default function InvoicesAccountView({ 

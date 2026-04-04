@@ -52,7 +52,7 @@ interface Message {
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   active: { label: 'نشطة', color: 'bg-green-500' },
-  closed: { label: 'مغلقة', color: 'bg-gray-500' },
+  closed: { label: 'مغلقة', color: 'bg-muted-foreground' },
   escalated: { label: 'مُصعَّدة', color: 'bg-red-500' },
 };
 
@@ -165,7 +165,7 @@ const AIConversationsPanel = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <Badge 
-                            className={`${statusConfig[conv.status]?.color || 'bg-gray-500'} text-white text-xs`}
+                            className={`${statusConfig[conv.status]?.color || 'bg-muted-foreground'} text-white text-xs`}
                           >
                             {statusConfig[conv.status]?.label || conv.status}
                           </Badge>

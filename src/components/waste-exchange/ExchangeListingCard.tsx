@@ -64,11 +64,11 @@ const QUALITY_LABELS: Record<string, { ar: string; en: string; color: string }> 
   premium: { ar: 'ممتاز', en: 'Premium', color: 'bg-emerald-500/10 text-emerald-600' },
   standard: { ar: 'قياسي', en: 'Standard', color: 'bg-blue-500/10 text-blue-600' },
   economy: { ar: 'اقتصادي', en: 'Economy', color: 'bg-amber-500/10 text-amber-600' },
-  mixed: { ar: 'مختلط', en: 'Mixed', color: 'bg-gray-500/10 text-gray-600' },
+  mixed: { ar: 'مختلط', en: 'Mixed', color: 'bg-muted-foreground/10 text-muted-foreground' },
 };
 
 export const ExchangeListingCard = ({ listing, isRTL, onView, onBid, onWatchlist, isWatched }: ListingCardProps) => {
-  const wasteColor = WASTE_TYPE_COLORS[listing.waste_type] || 'bg-gray-500/10 text-gray-600 border-gray-500/30';
+  const wasteColor = WASTE_TYPE_COLORS[listing.waste_type] || 'bg-muted-foreground/10 text-muted-foreground border-gray-500/30';
   const wasteLabel = WASTE_TYPE_LABELS[listing.waste_type];
   const qualityInfo = listing.quality_grade ? QUALITY_LABELS[listing.quality_grade] : null;
 

@@ -193,7 +193,7 @@ const ESGReports = () => {
                   </div>
                   {item.isRating ? (
                     <div className="flex items-center gap-3">
-                      <div className={`text-3xl font-black text-white px-3 py-1 rounded-lg ${RATING_COLORS[item.value as string] || 'bg-gray-500'}`}>
+                      <div className={`text-3xl font-black text-white px-3 py-1 rounded-lg ${RATING_COLORS[item.value as string] || 'bg-muted-foreground'}`}>
                         {item.value}
                       </div>
                       <div className="text-sm text-muted-foreground">{item.score}/100</div>

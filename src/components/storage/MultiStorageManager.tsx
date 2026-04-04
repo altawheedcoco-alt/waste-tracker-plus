@@ -151,7 +151,7 @@ export default function MultiStorageManager() {
               className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${location.connected ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                <div className={`p-2 rounded-full ${location.connected ? 'bg-green-100 text-green-600' : 'bg-muted text-muted-foreground'}`}>
                   {location.icon}
                 </div>
                 <div>

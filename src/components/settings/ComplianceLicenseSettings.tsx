@@ -44,12 +44,12 @@ const categoryIcons: Record<string, React.ReactNode> = {
   organic: <Leaf className="h-4 w-4 text-green-500" />,
   plastic: <Recycle className="h-4 w-4 text-blue-500" />,
   paper: <Package className="h-4 w-4 text-amber-500" />,
-  metal: <Package className="h-4 w-4 text-gray-500" />,
+  metal: <Package className="h-4 w-4 text-muted-foreground" />,
   glass: <Package className="h-4 w-4 text-cyan-500" />,
   construction: <Package className="h-4 w-4 text-orange-400" />,
   textile: <Package className="h-4 w-4 text-pink-400" />,
   liquid_non_hazardous: <Droplets className="h-4 w-4 text-blue-400" />,
-  municipal: <Trash2 className="h-4 w-4 text-gray-400" />,
+  municipal: <Trash2 className="h-4 w-4 text-muted-foreground" />,
   extended: <Package className="h-4 w-4 text-primary" />,
 };
 

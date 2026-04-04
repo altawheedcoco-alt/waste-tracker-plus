@@ -49,12 +49,12 @@ const getCategoryConfig = (t: (key: string) => string) => ({
   complaint: { label: t('callLog.complaint'), color: 'bg-red-500' },
   service_request: { label: t('callLog.serviceRequest'), color: 'bg-purple-500' },
   follow_up: { label: t('callLog.followUp'), color: 'bg-orange-500' },
-  other: { label: t('callLog.other'), color: 'bg-gray-500' },
+  other: { label: t('callLog.other'), color: 'bg-muted-foreground' },
 });
 
 const getSentimentConfig = (t: (key: string) => string) => ({
   positive: { label: t('callLog.positive'), color: 'text-green-500' },
-  neutral: { label: t('callLog.neutral'), color: 'text-gray-500' },
+  neutral: { label: t('callLog.neutral'), color: 'text-muted-foreground' },
   negative: { label: t('callLog.negative'), color: 'text-red-500' },
 });
 

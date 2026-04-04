@@ -169,7 +169,7 @@ const WasteTypeCategoryView = ({
 
   const renderCategoryCard = (category: WasteCategoryInfo) => {
     const Icon = categoryIconMap[category.id] || Layers;
-    const color = categoryColorMap[category.id] || 'bg-gray-500';
+    const color = categoryColorMap[category.id] || 'bg-muted-foreground';
     const count = categorizedTemplates[category.id]?.length || 0;
     const isExpanded = expandedCategories.has(category.id);
     const categoryTemplates = filterBySearch(categorizedTemplates[category.id] || []);

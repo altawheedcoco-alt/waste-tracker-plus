@@ -261,7 +261,7 @@ const AdminSystemOverview = () => {
       case 'generator': return 'bg-amber-500';
       case 'transporter': return 'bg-blue-500';
       case 'recycler': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      default: return 'bg-muted-foreground';
     }
   };
 

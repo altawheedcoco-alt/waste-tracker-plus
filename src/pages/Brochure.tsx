@@ -65,15 +65,15 @@ const SectionPage = ({ section, lang }: { section: BrochureSection; lang: 'ar' |
             <div key={i} className="flex gap-2 p-3 rounded-lg border border-gray-100 bg-gray-50/50">
               <CheckCircle2 className={`w-4 h-4 shrink-0 mt-1 ${section.category === 'environment' ? 'text-emerald-600' : 'text-blue-600'}`} />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-gray-900">{isAr ? f.name : f.nameEn}</p>
-                <p className="text-xs text-gray-500 leading-relaxed">{isAr ? f.desc : f.descEn}</p>
+                <p className="text-sm font-bold text-foreground">{isAr ? f.name : f.nameEn}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{isAr ? f.desc : f.descEn}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
       {/* Page footer */}
-      <div className="absolute bottom-0 left-0 right-0 px-6 py-2 bg-gray-50 border-t flex items-center justify-between text-[10px] text-gray-400">
+      <div className="absolute bottom-0 left-0 right-0 px-6 py-2 bg-gray-50 border-t flex items-center justify-between text-[10px] text-muted-foreground">
         <span>iRecycle — {isAr ? 'نظام التشغيل الصناعي لإدارة المخلفات' : 'Industrial Operating System for Waste Management'}</span>
         <span>{isAr ? section.titleEn : section.title}</span>
       </div>
@@ -98,16 +98,16 @@ export default function FullBrochure() {
   const totalFeatures = sections.reduce((sum, s) => sum + s.features.length, 0);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-muted">
       {/* Toolbar */}
       <div className="no-print sticky top-0 z-50 bg-white/95 backdrop-blur border-b shadow-sm">
         <div className="max-w-[210mm] mx-auto flex items-center justify-between p-3">
-          <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
             <ArrowLeft className="w-4 h-4" />
             العودة للموقع
           </button>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 hidden sm:inline">
+            <span className="text-sm text-muted-foreground hidden sm:inline">
               ~{sections.length * 2 + 12} صفحة A4 | {totalFeatures}+ وظيفة
             </span>
             <Button onClick={handlePrint} size="sm" className="gap-2">
@@ -188,8 +188,8 @@ export default function FullBrochure() {
         {/* ═══ PAGE 3: TABLE OF CONTENTS AR ═══ */}
         <Page>
           <div className="p-8" dir="rtl">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">فهرس المحتويات</h2>
-            <p className="text-gray-500 mb-6">Table of Contents</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">فهرس المحتويات</h2>
+            <p className="text-muted-foreground mb-6">Table of Contents</p>
             <div className="w-16 h-1 bg-primary rounded-full mb-8" />
             
             <div className="space-y-1">
@@ -199,9 +199,9 @@ export default function FullBrochure() {
               </div>
               {envSections.map((s, i) => (
                 <div key={i} className="flex items-center gap-3 py-1.5 border-b border-dashed border-gray-200">
-                  <span className="text-xs text-gray-400 w-6">{i + 1}</span>
+                  <span className="text-xs text-muted-foreground w-6">{i + 1}</span>
                   <span className="text-sm font-semibold flex-1">{s.title}</span>
-                  <span className="text-xs text-gray-400">{s.features.length} وظيفة</span>
+                  <span className="text-xs text-muted-foreground">{s.features.length} وظيفة</span>
                 </div>
               ))}
 
@@ -211,9 +211,9 @@ export default function FullBrochure() {
               </div>
               {opsSections.map((s, i) => (
                 <div key={i} className="flex items-center gap-3 py-1.5 border-b border-dashed border-gray-200">
-                  <span className="text-xs text-gray-400 w-6">{envSections.length + i + 1}</span>
+                  <span className="text-xs text-muted-foreground w-6">{envSections.length + i + 1}</span>
                   <span className="text-sm font-semibold flex-1">{s.title}</span>
-                  <span className="text-xs text-gray-400">{s.features.length} وظيفة</span>
+                  <span className="text-xs text-muted-foreground">{s.features.length} وظيفة</span>
                 </div>
               ))}
 
@@ -223,7 +223,7 @@ export default function FullBrochure() {
               </div>
               {['ذكاء المستندات | Document AI', 'القطاعات المستهدفة | Industries', 'الأثر والنتائج | Impact', 'لماذا iRecycle؟ | Why Us'].map((t, i) => (
                 <div key={i} className="flex items-center gap-3 py-1.5 border-b border-dashed border-gray-200">
-                  <span className="text-xs text-gray-400 w-6">—</span>
+                  <span className="text-xs text-muted-foreground w-6">—</span>
                   <span className="text-sm font-semibold flex-1">{t}</span>
                 </div>
               ))}
@@ -234,12 +234,12 @@ export default function FullBrochure() {
         {/* ═══ PAGE 4: EXECUTIVE SUMMARY AR ═══ */}
         <Page>
           <div className="p-8" dir="rtl">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">الملخص التنفيذي</h2>
-            <p className="text-gray-500 mb-6">Executive Summary</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">الملخص التنفيذي</h2>
+            <p className="text-muted-foreground mb-6">Executive Summary</p>
             <div className="w-16 h-1 bg-primary rounded-full mb-8" />
             
-            <div className="space-y-4 text-gray-700 leading-relaxed">
-              <p className="text-lg font-semibold text-gray-900">
+            <div className="space-y-4 text-foreground leading-relaxed">
+              <p className="text-lg font-semibold text-foreground">
                 iRecycle هو أول نظام تشغيل صناعي متكامل لقطاع إدارة المخلفات وإعادة التدوير في مصر والشرق الأوسط.
               </p>
               <p>
@@ -261,8 +261,8 @@ export default function FullBrochure() {
                 {impactNumbers.slice(0, 6).map((n) => (
                   <div key={n.label} className="text-center p-4 rounded-xl border-2 border-primary/10 bg-primary/5">
                     <p className="text-3xl font-black text-primary">{n.value}</p>
-                    <p className="text-sm font-bold text-gray-900">{n.label}</p>
-                    <p className="text-xs text-gray-500">{n.desc}</p>
+                    <p className="text-sm font-bold text-foreground">{n.label}</p>
+                    <p className="text-xs text-muted-foreground">{n.desc}</p>
                   </div>
                 ))}
               </div>
@@ -273,12 +273,12 @@ export default function FullBrochure() {
         {/* ═══ PAGE 5: EXECUTIVE SUMMARY EN ═══ */}
         <Page>
           <div className="p-8" dir="ltr">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">Executive Summary</h2>
-            <p className="text-gray-500 mb-6">الملخص التنفيذي</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">Executive Summary</h2>
+            <p className="text-muted-foreground mb-6">الملخص التنفيذي</p>
             <div className="w-16 h-1 bg-emerald-600 rounded-full mb-8" />
             
-            <div className="space-y-4 text-gray-700 leading-relaxed">
-              <p className="text-lg font-semibold text-gray-900">
+            <div className="space-y-4 text-foreground leading-relaxed">
+              <p className="text-lg font-semibold text-foreground">
                 iRecycle is the first integrated Industrial Operating System for the waste management and recycling sector in Egypt and the Middle East.
               </p>
               <p>
@@ -300,8 +300,8 @@ export default function FullBrochure() {
                 {impactNumbers.map((n) => (
                   <div key={n.labelEn} className="text-center p-4 rounded-xl border-2 border-emerald-600/10 bg-emerald-50">
                     <p className="text-3xl font-black text-emerald-600">{n.value}</p>
-                    <p className="text-sm font-bold text-gray-900">{n.labelEn}</p>
-                    <p className="text-xs text-gray-500">{n.descEn}</p>
+                    <p className="text-sm font-bold text-foreground">{n.labelEn}</p>
+                    <p className="text-xs text-muted-foreground">{n.descEn}</p>
                   </div>
                 ))}
               </div>
@@ -367,8 +367,8 @@ export default function FullBrochure() {
                 <div key={i} className="flex gap-3 p-4 rounded-lg border border-purple-100 bg-purple-50/30">
                   <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0 font-bold text-purple-700 text-sm">{i + 1}</div>
                   <div>
-                    <p className="font-bold text-gray-900">{f.name}</p>
-                    <p className="text-sm text-gray-600">{f.desc}</p>
+                    <p className="font-bold text-foreground">{f.name}</p>
+                    <p className="text-sm text-muted-foreground">{f.desc}</p>
                   </div>
                 </div>
               ))}
@@ -388,8 +388,8 @@ export default function FullBrochure() {
                 <div key={i} className="flex gap-3 p-4 rounded-lg border border-purple-100 bg-purple-50/30">
                   <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0 font-bold text-purple-700 text-sm">{i + 1}</div>
                   <div>
-                    <p className="font-bold text-gray-900">{f.nameEn}</p>
-                    <p className="text-sm text-gray-600">{f.descEn}</p>
+                    <p className="font-bold text-foreground">{f.nameEn}</p>
+                    <p className="text-sm text-muted-foreground">{f.descEn}</p>
                   </div>
                 </div>
               ))}
@@ -400,8 +400,8 @@ export default function FullBrochure() {
         {/* ═══ INDUSTRIES AR ═══ */}
         <Page>
           <div className="p-8" dir="rtl">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">القطاعات المستهدفة</h2>
-            <p className="text-gray-500 mb-8">Industries We Serve</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">القطاعات المستهدفة</h2>
+            <p className="text-muted-foreground mb-8">Industries We Serve</p>
             <div className="w-16 h-1 bg-primary rounded-full mb-8" />
             <div className="grid grid-cols-3 gap-4">
               {industries.map((ind, i) => {
@@ -411,8 +411,8 @@ export default function FullBrochure() {
                     <div className="p-4 bg-primary/10 rounded-2xl mb-3">
                       <Icon className="w-8 h-8 text-primary" />
                     </div>
-                    <p className="font-bold text-gray-900 text-sm">{ind.name}</p>
-                    <p className="text-xs text-gray-500">{ind.nameEn}</p>
+                    <p className="font-bold text-foreground text-sm">{ind.name}</p>
+                    <p className="text-xs text-muted-foreground">{ind.nameEn}</p>
                   </div>
                 );
               })}
@@ -423,8 +423,8 @@ export default function FullBrochure() {
         {/* ═══ WHY US AR ═══ */}
         <Page>
           <div className="p-8" dir="rtl">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">لماذا iRecycle؟</h2>
-            <p className="text-gray-500 mb-8">Why Choose iRecycle?</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">لماذا iRecycle؟</h2>
+            <p className="text-muted-foreground mb-8">Why Choose iRecycle?</p>
             <div className="w-16 h-1 bg-primary rounded-full mb-8" />
             <div className="space-y-4">
               {whyChooseUs.map((item, i) => {
@@ -435,9 +435,9 @@ export default function FullBrochure() {
                       <Icon className="w-7 h-7 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg text-gray-900">{item.title}</p>
-                      <p className="text-sm text-gray-600">{item.desc}</p>
-                      <p className="text-xs text-gray-400 mt-1 italic">{item.descEn}</p>
+                      <p className="font-bold text-lg text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <p className="text-xs text-muted-foreground mt-1 italic">{item.descEn}</p>
                     </div>
                   </div>
                 );
@@ -449,8 +449,8 @@ export default function FullBrochure() {
         {/* ═══ WHY US EN ═══ */}
         <Page>
           <div className="p-8" dir="ltr">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">Why Choose iRecycle?</h2>
-            <p className="text-gray-500 mb-8">Our Competitive Advantage</p>
+            <h2 className="text-3xl font-black text-foreground mb-2">Why Choose iRecycle?</h2>
+            <p className="text-muted-foreground mb-8">Our Competitive Advantage</p>
             <div className="w-16 h-1 bg-emerald-600 rounded-full mb-8" />
             <div className="space-y-4">
               {whyChooseUs.map((item, i) => {
@@ -461,8 +461,8 @@ export default function FullBrochure() {
                       <Icon className="w-7 h-7 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg text-gray-900">{item.titleEn}</p>
-                      <p className="text-sm text-gray-600">{item.descEn}</p>
+                      <p className="font-bold text-lg text-foreground">{item.titleEn}</p>
+                      <p className="text-sm text-muted-foreground">{item.descEn}</p>
                     </div>
                   </div>
                 );
@@ -474,16 +474,16 @@ export default function FullBrochure() {
         {/* ═══ SUMMARY STATS ═══ */}
         <Page>
           <div className="p-8 flex flex-col justify-center h-full" dir="rtl">
-            <h2 className="text-3xl font-black text-gray-900 mb-2 text-center">المنصة بالأرقام</h2>
-            <p className="text-gray-500 mb-8 text-center">Platform at a Glance</p>
+            <h2 className="text-3xl font-black text-foreground mb-2 text-center">المنصة بالأرقام</h2>
+            <p className="text-muted-foreground mb-8 text-center">Platform at a Glance</p>
             
             <div className="grid grid-cols-4 gap-4 mb-8">
               {platformStats.map((s) => (
                 <div key={s.label} className="text-center p-5 rounded-xl border-2 border-primary/10 bg-primary/5">
                   <p className="text-4xl font-black text-primary">{s.value}</p>
-                  <p className="text-sm font-bold text-gray-900">{s.label}</p>
-                  <p className="text-xs text-gray-500">{s.labelEn}</p>
-                  <p className="text-[10px] text-gray-400">{s.desc}</p>
+                  <p className="text-sm font-bold text-foreground">{s.label}</p>
+                  <p className="text-xs text-muted-foreground">{s.labelEn}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -492,22 +492,22 @@ export default function FullBrochure() {
               <div className="text-center p-5 rounded-xl bg-emerald-50 border-2 border-emerald-200">
                 <p className="text-4xl font-black text-emerald-600">{envSections.length}</p>
                 <p className="text-sm font-bold">منظومة بيئية</p>
-                <p className="text-xs text-gray-500">Environmental Systems</p>
+                <p className="text-xs text-muted-foreground">Environmental Systems</p>
               </div>
               <div className="text-center p-5 rounded-xl bg-blue-50 border-2 border-blue-200">
                 <p className="text-4xl font-black text-blue-600">{opsSections.length}</p>
                 <p className="text-sm font-bold">منظومة تشغيلية</p>
-                <p className="text-xs text-gray-500">Operational Systems</p>
+                <p className="text-xs text-muted-foreground">Operational Systems</p>
               </div>
               <div className="text-center p-5 rounded-xl bg-purple-50 border-2 border-purple-200">
                 <p className="text-4xl font-black text-purple-600">{totalFeatures}</p>
                 <p className="text-sm font-bold">إجمالي الوظائف</p>
-                <p className="text-xs text-gray-500">Total Functions</p>
+                <p className="text-xs text-muted-foreground">Total Functions</p>
               </div>
               <div className="text-center p-5 rounded-xl bg-amber-50 border-2 border-amber-200">
                 <p className="text-4xl font-black text-amber-600">{sections.length}</p>
                 <p className="text-sm font-bold">قسم رئيسي</p>
-                <p className="text-xs text-gray-500">Main Sections</p>
+                <p className="text-xs text-muted-foreground">Main Sections</p>
               </div>
             </div>
           </div>

@@ -212,7 +212,7 @@ const TermsAcceptances = () => {
       case 'generator': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
       case 'transporter': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
       case 'recycler': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
-      default: return 'bg-gray-100 text-gray-700';
+      default: return 'bg-muted text-foreground';
     }
   };
 
@@ -358,11 +358,11 @@ const TermsAcceptances = () => {
         <Card className={stats.pendingOrganizations > 0 ? 'border-amber-500/50' : ''}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div className={`w-12 h-12 rounded-xl ${stats.pendingOrganizations > 0 ? 'bg-amber-500/10' : 'bg-gray-500/10'} flex items-center justify-center`}>
+              <div className={`w-12 h-12 rounded-xl ${stats.pendingOrganizations > 0 ? 'bg-amber-500/10' : 'bg-muted-foreground/10'} flex items-center justify-center`}>
                 {stats.pendingOrganizations > 0 ? (
                   <AlertTriangle className="w-6 h-6 text-amber-500" />
                 ) : (
-                  <Clock className="w-6 h-6 text-gray-500" />
+                  <Clock className="w-6 h-6 text-muted-foreground" />
                 )}
               </div>
               <div className="text-right">

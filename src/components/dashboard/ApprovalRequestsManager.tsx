@@ -118,7 +118,7 @@ const REQUEST_TYPE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-800',
+  low: 'bg-muted text-muted-foreground',
   normal: 'bg-blue-100 text-blue-800',
   high: 'bg-orange-100 text-orange-800',
   urgent: 'bg-red-100 text-red-800',
@@ -550,14 +550,14 @@ const ApprovalRequestsManager = () => {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-200 bg-gray-50/50 cursor-pointer hover:shadow-md" onClick={() => setActiveTab('all')}>
+        <Card className="border-border bg-muted/50 cursor-pointer hover:shadow-md" onClick={() => setActiveTab('all')}>
           <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">الإجمالي</p>
-                <p className="text-xl font-bold text-gray-600">{requests.length}</p>
+                <p className="text-xl font-bold text-muted-foreground">{requests.length}</p>
               </div>
-              <ClipboardList className="h-6 w-6 text-gray-500" />
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>

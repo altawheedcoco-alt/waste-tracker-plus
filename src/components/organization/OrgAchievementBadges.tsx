@@ -51,7 +51,7 @@ const OrgAchievementBadges = ({ orgId, orgData, compact = false }: OrgAchievemen
       icon: Leaf,
       label: 'صديق البيئة الفضي',
       description: 'دوّر أكثر من 50 طن',
-      color: 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800/50 dark:text-gray-300 dark:border-gray-600',
+      color: 'bg-muted text-foreground border-gray-300 dark:bg-card/50 dark:text-gray-300 dark:border-gray-600',
       earned: (impact?.totalTons || 0) >= 50 && (impact?.totalTons || 0) < 100,
     },
     {

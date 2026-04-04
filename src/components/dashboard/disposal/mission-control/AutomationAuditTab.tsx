@@ -44,7 +44,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
       case 'ai': return <Brain className="w-4 h-4 text-purple-500" />;
       case 'auto': return <Zap className="w-4 h-4 text-emerald-500" />;
       case 'hybrid': return <Settings2 className="w-4 h-4 text-blue-500" />;
-      case 'manual': return <Hand className="w-4 h-4 text-gray-500" />;
+      case 'manual': return <Hand className="w-4 h-4 text-muted-foreground" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
@@ -64,7 +64,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
       case 'ai': return 'bg-purple-500/10 text-purple-600';
       case 'auto': return 'bg-emerald-500/10 text-emerald-600';
       case 'hybrid': return 'bg-blue-500/10 text-blue-600';
-      case 'manual': return 'bg-gray-500/10 text-gray-600';
+      case 'manual': return 'bg-muted text-muted-foreground';
       default: return '';
     }
   };
@@ -77,7 +77,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
           { mode: 'ai', icon: Brain, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', count: modeStats.ai },
           { mode: 'auto', icon: Zap, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30', count: modeStats.auto },
           { mode: 'hybrid', icon: Settings2, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', count: modeStats.hybrid },
-          { mode: 'manual', icon: Hand, color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30', count: modeStats.manual },
+          { mode: 'manual', icon: Hand, color: 'text-muted-foreground bg-muted', count: modeStats.manual },
         ].map((item) => (
           <Card key={item.mode} className="p-3">
             <div className="flex items-center gap-3">
