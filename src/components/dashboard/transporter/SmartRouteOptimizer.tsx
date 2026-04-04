@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { translateWasteType } from '@/lib/shipmentStatusConfig';
 import { useRouteOptimizer } from '@/hooks/useRouteOptimizer';
 import { Route, MapPin, Fuel, Clock, Leaf, Zap, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
