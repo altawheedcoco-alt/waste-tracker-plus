@@ -29121,11 +29121,17 @@ export type Database = {
           can_create_shipments: boolean
           certifications_approvals: Json | null
           city: string | null
+          civil_aviation_approval_expiry: string | null
+          civil_aviation_approval_number: string | null
+          civil_aviation_approval_url: string | null
           client_code: string | null
           commercial_register: string | null
           cover_url: string | null
           created_at: string | null
           cta_type: string | null
+          customs_authority_approval_expiry: string | null
+          customs_authority_approval_number: string | null
+          customs_authority_approval_url: string | null
           delegate_email: string | null
           delegate_name: string | null
           delegate_national_id: string | null
@@ -29133,6 +29139,9 @@ export type Database = {
           description: string | null
           digital_declaration_number: string | null
           documents_submitted: boolean | null
+          drug_authority_approval_expiry: string | null
+          drug_authority_approval_number: string | null
+          drug_authority_approval_url: string | null
           eeaa_license_expiry_date: string | null
           eeaa_license_issue_date: string | null
           email: string
@@ -29146,13 +29155,22 @@ export type Database = {
           environmental_register_url: string | null
           establishment_registration: string | null
           field_of_work: string | null
+          food_safety_approval_expiry: string | null
+          food_safety_approval_number: string | null
+          food_safety_approval_url: string | null
           founded_year: number | null
           hazardous_certified: boolean | null
           hazardous_materials_register_expiry: string | null
           hazardous_materials_register_number: string | null
           hazardous_materials_register_url: string | null
           headquarters: string | null
+          health_ministry_approval_expiry: string | null
+          health_ministry_approval_number: string | null
+          health_ministry_approval_url: string | null
           id: string
+          ida_approval_expiry: string | null
+          ida_approval_number: string | null
+          ida_approval_url: string | null
           ida_license: string | null
           ida_license_expiry_date: string | null
           ida_license_issue_date: string | null
@@ -29163,6 +29181,9 @@ export type Database = {
           is_profile_locked: boolean
           is_suspended: boolean | null
           is_verified: boolean | null
+          land_transport_authority_approval_expiry: string | null
+          land_transport_authority_approval_number: string | null
+          land_transport_authority_approval_url: string | null
           land_transport_license: string | null
           land_transport_license_expiry_date: string | null
           land_transport_license_issue_date: string | null
@@ -29184,11 +29205,17 @@ export type Database = {
           logo_url: string | null
           name: string
           name_en: string | null
+          nuclear_regulatory_approval_expiry: string | null
+          nuclear_regulatory_approval_number: string | null
+          nuclear_regulatory_approval_url: string | null
           onboarding_completed: boolean | null
           onboarding_completed_at: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           page_transparency: Json | null
           partner_code: string
+          petroleum_authority_approval_expiry: string | null
+          petroleum_authority_approval_number: string | null
+          petroleum_authority_approval_url: string | null
           phone: string
           policy: string | null
           price_range: string | null
@@ -29237,11 +29264,17 @@ export type Database = {
           can_create_shipments?: boolean
           certifications_approvals?: Json | null
           city?: string | null
+          civil_aviation_approval_expiry?: string | null
+          civil_aviation_approval_number?: string | null
+          civil_aviation_approval_url?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
           created_at?: string | null
           cta_type?: string | null
+          customs_authority_approval_expiry?: string | null
+          customs_authority_approval_number?: string | null
+          customs_authority_approval_url?: string | null
           delegate_email?: string | null
           delegate_name?: string | null
           delegate_national_id?: string | null
@@ -29249,6 +29282,9 @@ export type Database = {
           description?: string | null
           digital_declaration_number?: string | null
           documents_submitted?: boolean | null
+          drug_authority_approval_expiry?: string | null
+          drug_authority_approval_number?: string | null
+          drug_authority_approval_url?: string | null
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
           email: string
@@ -29262,13 +29298,22 @@ export type Database = {
           environmental_register_url?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          food_safety_approval_expiry?: string | null
+          food_safety_approval_number?: string | null
+          food_safety_approval_url?: string | null
           founded_year?: number | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
           hazardous_materials_register_url?: string | null
           headquarters?: string | null
+          health_ministry_approval_expiry?: string | null
+          health_ministry_approval_number?: string | null
+          health_ministry_approval_url?: string | null
           id?: string
+          ida_approval_expiry?: string | null
+          ida_approval_number?: string | null
+          ida_approval_url?: string | null
           ida_license?: string | null
           ida_license_expiry_date?: string | null
           ida_license_issue_date?: string | null
@@ -29279,6 +29324,9 @@ export type Database = {
           is_profile_locked?: boolean
           is_suspended?: boolean | null
           is_verified?: boolean | null
+          land_transport_authority_approval_expiry?: string | null
+          land_transport_authority_approval_number?: string | null
+          land_transport_authority_approval_url?: string | null
           land_transport_license?: string | null
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
@@ -29300,11 +29348,17 @@ export type Database = {
           logo_url?: string | null
           name: string
           name_en?: string | null
+          nuclear_regulatory_approval_expiry?: string | null
+          nuclear_regulatory_approval_number?: string | null
+          nuclear_regulatory_approval_url?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           page_transparency?: Json | null
           partner_code?: string
+          petroleum_authority_approval_expiry?: string | null
+          petroleum_authority_approval_number?: string | null
+          petroleum_authority_approval_url?: string | null
           phone: string
           policy?: string | null
           price_range?: string | null
@@ -29353,11 +29407,17 @@ export type Database = {
           can_create_shipments?: boolean
           certifications_approvals?: Json | null
           city?: string | null
+          civil_aviation_approval_expiry?: string | null
+          civil_aviation_approval_number?: string | null
+          civil_aviation_approval_url?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
           created_at?: string | null
           cta_type?: string | null
+          customs_authority_approval_expiry?: string | null
+          customs_authority_approval_number?: string | null
+          customs_authority_approval_url?: string | null
           delegate_email?: string | null
           delegate_name?: string | null
           delegate_national_id?: string | null
@@ -29365,6 +29425,9 @@ export type Database = {
           description?: string | null
           digital_declaration_number?: string | null
           documents_submitted?: boolean | null
+          drug_authority_approval_expiry?: string | null
+          drug_authority_approval_number?: string | null
+          drug_authority_approval_url?: string | null
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
           email?: string
@@ -29378,13 +29441,22 @@ export type Database = {
           environmental_register_url?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          food_safety_approval_expiry?: string | null
+          food_safety_approval_number?: string | null
+          food_safety_approval_url?: string | null
           founded_year?: number | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
           hazardous_materials_register_url?: string | null
           headquarters?: string | null
+          health_ministry_approval_expiry?: string | null
+          health_ministry_approval_number?: string | null
+          health_ministry_approval_url?: string | null
           id?: string
+          ida_approval_expiry?: string | null
+          ida_approval_number?: string | null
+          ida_approval_url?: string | null
           ida_license?: string | null
           ida_license_expiry_date?: string | null
           ida_license_issue_date?: string | null
@@ -29395,6 +29467,9 @@ export type Database = {
           is_profile_locked?: boolean
           is_suspended?: boolean | null
           is_verified?: boolean | null
+          land_transport_authority_approval_expiry?: string | null
+          land_transport_authority_approval_number?: string | null
+          land_transport_authority_approval_url?: string | null
           land_transport_license?: string | null
           land_transport_license_expiry_date?: string | null
           land_transport_license_issue_date?: string | null
@@ -29416,11 +29491,17 @@ export type Database = {
           logo_url?: string | null
           name?: string
           name_en?: string | null
+          nuclear_regulatory_approval_expiry?: string | null
+          nuclear_regulatory_approval_number?: string | null
+          nuclear_regulatory_approval_url?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
           page_transparency?: Json | null
           partner_code?: string
+          petroleum_authority_approval_expiry?: string | null
+          petroleum_authority_approval_number?: string | null
+          petroleum_authority_approval_url?: string | null
           phone?: string
           policy?: string | null
           price_range?: string | null
