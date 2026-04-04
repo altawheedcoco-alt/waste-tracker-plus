@@ -98,5 +98,8 @@ export const deferredCommonRoutes = (
     <Route path="/dashboard/legal-shield" element={<LegalShield />} />
     <Route path="/dashboard/revenue-radar" element={<RevenueRadar />} />
     <Route path="/dashboard/smart-scale" element={<SmartScale />} />
+    <Route path="/dashboard/central-document-registry" element={<CentralDocumentRegistry />} />
+    <Route path="/dashboard/smart-document-archive" element={<SmartDocumentArchive />} />
+    <Route path="/dashboard/team-credentials" element={<TeamCredentials />} />
   </>
 );
