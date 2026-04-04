@@ -269,7 +269,7 @@ function assessPartyContributions(shipment: any, orgs: any[], driver: any, custo
     const provided: string[] = [];
     const missing: string[] = [];
     if (transporterOrg?.license_number) provided.push('رخصة النقل'); else missing.push('رخصة النقل');
-    if (shipment.vehicle_id) provided.push('بيانات المركبة'); else missing.push('بيانات المركبة');
+    if (shipment.driver_id) provided.push('بيانات المركبة'); else missing.push('بيانات المركبة');
     if (driver) provided.push('بيانات السائق'); else missing.push('بيانات السائق');
     const completeness = provided.length > 0 ? Math.round((provided.length / (provided.length + missing.length)) * 100) : 0;
     parties.push({ party: 'transporter', partyAr: 'الناقل', orgName: transporterOrg?.name || '—', dataProvided: provided, dataMissing: missing, completeness });
