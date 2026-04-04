@@ -88,7 +88,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     description: 'عرض قائمة شحنات أو فواتير',
     icon: List,
     resourceType: 'list',
-    color: 'text-gray-600 bg-gray-500/10',
+    color: 'text-muted-foreground bg-muted',
   },
   {
     command: '/poll',

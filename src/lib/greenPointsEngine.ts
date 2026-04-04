@@ -135,7 +135,7 @@ export const calculateGreenPoints = (
 export const getGreenLevel = (totalPoints: number): { level: string; label: string; color: string; nextThreshold: number } => {
   if (totalPoints >= 50000) return { level: 'platinum', label: 'بلاتيني ♻️', color: 'text-cyan-600', nextThreshold: 100000 };
   if (totalPoints >= 20000) return { level: 'gold', label: 'ذهبي 🥇', color: 'text-yellow-600', nextThreshold: 50000 };
-  if (totalPoints >= 5000) return { level: 'silver', label: 'فضي 🥈', color: 'text-gray-500', nextThreshold: 20000 };
+  if (totalPoints >= 5000) return { level: 'silver', label: 'فضي 🥈', color: 'text-muted-foreground', nextThreshold: 20000 };
   return { level: 'bronze', label: 'برونزي 🥉', color: 'text-orange-600', nextThreshold: 5000 };
 };
 

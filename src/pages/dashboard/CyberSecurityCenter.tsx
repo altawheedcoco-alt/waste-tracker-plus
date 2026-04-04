@@ -53,7 +53,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   analyzing: { label: 'قيد التحليل', color: 'bg-amber-500' },
   mitigated: { label: 'تم التخفيف', color: 'bg-blue-500' },
   resolved: { label: 'تم الحل', color: 'bg-emerald-500' },
-  false_positive: { label: 'إنذار كاذب', color: 'bg-gray-400' },
+  false_positive: { label: 'إنذار كاذب', color: 'bg-muted-foreground' },
 };
 
 const ACTION_LABELS: Record<string, string> = {

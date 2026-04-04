@@ -27,7 +27,7 @@ const StarRating = ({ value, onChange, readonly = false, size = 'md' }: { value:
       {[1, 2, 3, 4, 5].map(i => (
         <Star
           key={i}
-          className={`${sizeClass} ${i <= value ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} ${!readonly ? 'cursor-pointer hover:text-amber-300' : ''}`}
+          className={`${sizeClass} ${i <= value ? 'fill-amber-400 text-amber-400' : 'text-muted'} ${!readonly ? 'cursor-pointer hover:text-amber-300' : ''}`}
           onClick={() => !readonly && onChange?.(i)}
         />
       ))}

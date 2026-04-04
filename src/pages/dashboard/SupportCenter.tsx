@@ -286,7 +286,7 @@ const UserSupportPage = () => {
                                   className={`w-3 h-3 ${
                                     i < ticket.satisfaction_rating! 
                                       ? 'text-yellow-500 fill-yellow-500' 
-                                      : 'text-gray-300'
+                                      : 'text-muted'
                                   }`}
                                 />
                               ))}

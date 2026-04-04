@@ -276,7 +276,7 @@ const TicketDetailDialog = ({ ticketId, open, onOpenChange, onUpdate }: TicketDe
                       className={`w-6 h-6 transition-colors ${
                         i < rating
                           ? 'text-yellow-500 fill-yellow-500'
-                          : 'text-gray-300 hover:text-yellow-400'
+                          : 'text-muted hover:text-yellow-400'
                       }`}
                     />
                   </button>
@@ -305,7 +305,7 @@ const TicketDetailDialog = ({ ticketId, open, onOpenChange, onUpdate }: TicketDe
                     className={`w-4 h-4 ${
                       i < ticket.satisfaction_rating!
                         ? 'text-yellow-500 fill-yellow-500'
-                        : 'text-gray-300'
+                        : 'text-muted'
                     }`}
                   />
                 ))}
