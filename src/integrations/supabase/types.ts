@@ -19356,10 +19356,15 @@ export type Database = {
           cost_per_liter: number
           created_at: string
           driver_id: string | null
+          fraud_flags: Json | null
           fuel_date: string
           fuel_type: string | null
           id: string
+          km_since_last_fill: number | null
+          l_per_100km: number | null
+          latitude: number | null
           liters: number
+          longitude: number | null
           notes: string | null
           odometer_reading: number | null
           organization_id: string
@@ -19369,15 +19374,21 @@ export type Database = {
           total_cost: number | null
           updated_at: string
           vehicle_id: string | null
+          vehicle_plate: string | null
         }
         Insert: {
           cost_per_liter: number
           created_at?: string
           driver_id?: string | null
+          fraud_flags?: Json | null
           fuel_date?: string
           fuel_type?: string | null
           id?: string
+          km_since_last_fill?: number | null
+          l_per_100km?: number | null
+          latitude?: number | null
           liters: number
+          longitude?: number | null
           notes?: string | null
           odometer_reading?: number | null
           organization_id: string
@@ -19387,15 +19398,21 @@ export type Database = {
           total_cost?: number | null
           updated_at?: string
           vehicle_id?: string | null
+          vehicle_plate?: string | null
         }
         Update: {
           cost_per_liter?: number
           created_at?: string
           driver_id?: string | null
+          fraud_flags?: Json | null
           fuel_date?: string
           fuel_type?: string | null
           id?: string
+          km_since_last_fill?: number | null
+          l_per_100km?: number | null
+          latitude?: number | null
           liters?: number
+          longitude?: number | null
           notes?: string | null
           odometer_reading?: number | null
           organization_id?: string
@@ -19405,6 +19422,7 @@ export type Database = {
           total_cost?: number | null
           updated_at?: string
           vehicle_id?: string | null
+          vehicle_plate?: string | null
         }
         Relationships: [
           {
@@ -19433,6 +19451,127 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fuel_tank_transactions: {
+        Row: {
+          created_at: string
+          driver_id: string | null
+          id: string
+          liters: number
+          notes: string | null
+          organization_id: string
+          recorded_by: string | null
+          tank_id: string
+          transaction_type: string
+          vehicle_plate: string | null
+        }
+        Insert: {
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          liters: number
+          notes?: string | null
+          organization_id: string
+          recorded_by?: string | null
+          tank_id: string
+          transaction_type: string
+          vehicle_plate?: string | null
+        }
+        Update: {
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          liters?: number
+          notes?: string | null
+          organization_id?: string
+          recorded_by?: string | null
+          tank_id?: string
+          transaction_type?: string
+          vehicle_plate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_tank_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fuel_tank_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_tank_transactions_tank_id_fkey"
+            columns: ["tank_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_tanks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fuel_tanks: {
+        Row: {
+          capacity_liters: number
+          created_at: string
+          current_level: number
+          fuel_type: string
+          id: string
+          is_active: boolean
+          last_refill_date: string | null
+          location: string | null
+          low_level_threshold: number
+          organization_id: string
+          tank_name: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_liters?: number
+          created_at?: string
+          current_level?: number
+          fuel_type?: string
+          id?: string
+          is_active?: boolean
+          last_refill_date?: string | null
+          location?: string | null
+          low_level_threshold?: number
+          organization_id: string
+          tank_name: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_liters?: number
+          created_at?: string
+          current_level?: number
+          fuel_type?: string
+          id?: string
+          is_active?: boolean
+          last_refill_date?: string | null
+          location?: string | null
+          low_level_threshold?: number
+          organization_id?: string
+          tank_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_tanks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fuel_tanks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
