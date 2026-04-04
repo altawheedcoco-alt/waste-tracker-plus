@@ -34,7 +34,7 @@ import {
   User, Phone, Mail, FileText, AlertTriangle, Scale, Box, Loader2,
   Edit, Navigation, Lock, Route, Eye, Star, Shield, Users2,
   RefreshCw, ChevronDown, Settings2, Download, FileCheck, CheckCircle2,
-  EyeOff, XCircle, StickyNote, MessageSquare,
+  EyeOff, XCircle, StickyNote, MessageSquare, Globe,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
@@ -77,6 +77,7 @@ const UnifiedShipmentTracker = lazy(() => import('@/components/tracking/UnifiedS
 const NotesPanel = lazy(() => import('@/components/notes/NotesPanel'));
 const ShipmentChatTab = lazy(() => import('@/components/shipments/ShipmentChatTab'));
 const SupervisorComplianceDashboard = lazy(() => import('@/components/supervisors/SupervisorComplianceDashboard'));
+const ShipmentFullCircle = lazy(() => import('@/components/shipments/ShipmentFullCircle'));
 
 type ShipmentDetails = EnrichedShipment;
 
@@ -107,6 +108,7 @@ const TABS: TabItem[] = [
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
+  { value: 'fullcircle', label: 'الدائرة الكاملة', icon: Globe },
   { value: 'notes', label: 'الملاحظات', icon: StickyNote },
   { value: 'chat', label: 'المحادثات', icon: MessageSquare },
   { value: 'actions', label: 'الإجراءات', icon: Settings2 },
@@ -757,6 +759,15 @@ const ShipmentDetailsPage = () => {
             <ErrorBoundary fallbackTitle="خطأ في الامتثال">
               <Suspense fallback={<TabFallback />}>
                 <SupervisorComplianceDashboard shipment={shipment} compact={false} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* ===== الدائرة الكاملة ===== */}
+          <TabsContent value="fullcircle">
+            <ErrorBoundary fallbackTitle="خطأ في التحليل">
+              <Suspense fallback={<TabFallback />}>
+                <ShipmentFullCircle shipmentId={shipment.id} />
               </Suspense>
             </ErrorBoundary>
           </TabsContent>
