@@ -88,7 +88,7 @@ export function useTransporterLicenseGate() {
       // 1. Check organization licenses
       const { data: org } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, license_expiry_date, wmra_license_expiry_date, wmra_permit_expiry, eeaa_license_expiry_date, env_approval_expiry, ida_license_expiry_date, land_transport_license_expiry_date')
+        .select('id, name, organization_type, license_expiry_date, wmra_license_expiry_date, wmra_permit_expiry, eeaa_license_expiry_date, env_approval_expiry, ida_license_expiry_date, land_transport_license_expiry_date, environmental_register_number, environmental_register_expiry, hazardous_materials_register_number, hazardous_materials_register_expiry, license_geographic_scope, licensed_governorates')
         .eq('id', orgId)
         .single();
 
