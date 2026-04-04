@@ -830,7 +830,7 @@ export function getWidgetsByOrgType(
  * Get default pinned widget IDs for an org type
  */
 export function getDefaultPinnedWidgets(
-  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
+  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver'
 ): string[] {
   return getWidgetsByOrgType(orgType)
     .filter(w => w.defaultPinned)
