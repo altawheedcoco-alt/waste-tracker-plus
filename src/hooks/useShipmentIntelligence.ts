@@ -282,7 +282,7 @@ function assessPartyContributions(shipment: any, orgs: any[], driver: any, custo
     const hasCustody = custody.length > 0;
     if (hasCustody) provided.push('سلسلة الحراسة'); else missing.push('سلسلة الحراسة');
     if (shipment.pickup_latitude && shipment.delivery_latitude) provided.push('مسار GPS'); else missing.push('مسار GPS');
-    if (shipment.qr_code) provided.push('مسح QR'); else missing.push('مسح QR');
+    if (shipment.transporter_pickup_qr || shipment.recycler_receipt_qr) provided.push('مسح QR'); else missing.push('مسح QR');
     const completeness = provided.length > 0 ? Math.round((provided.length / (provided.length + missing.length)) * 100) : 0;
     parties.push({ party: 'driver', partyAr: 'السائق', orgName: driver?.full_name || '—', dataProvided: provided, dataMissing: missing, completeness });
   }
