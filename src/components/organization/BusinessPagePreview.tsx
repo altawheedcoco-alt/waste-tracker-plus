@@ -268,6 +268,9 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
               <TabsTrigger value="about" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
                 حول
               </TabsTrigger>
+              <TabsTrigger value="achievements" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
+                الإنجازات
+              </TabsTrigger>
               <TabsTrigger value="photos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 text-sm">
                 الصور
               </TabsTrigger>
