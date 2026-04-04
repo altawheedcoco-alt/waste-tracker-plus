@@ -100,7 +100,7 @@ const TransporterTodayPlan = () => {
                     </Badge>
                     <div className="text-right flex-1 mr-2">
                       <div className="flex items-center gap-1 justify-end">
-                        <span className="text-[10px] text-muted-foreground">{s.waste_type || 'نفايات'}</span>
+                        <span className="text-[10px] text-muted-foreground">{translateWasteType(s.waste_type)}</span>
                         <span className="text-xs font-bold text-foreground">
                           {s.quantity ? `${Number(s.quantity).toLocaleString('ar-SA')} طن` : '—'}
                         </span>

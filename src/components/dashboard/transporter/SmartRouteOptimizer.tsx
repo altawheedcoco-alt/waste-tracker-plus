@@ -112,7 +112,7 @@ const SmartRouteOptimizer = () => {
                   <div key={s.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-xs">
                     <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
                     <span className="truncate">{s.delivery_address || s.shipment_number}</span>
-                    <Badge variant="outline" className="text-[10px] shrink-0">{s.waste_type}</Badge>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{translateWasteType(s.waste_type)}</Badge>
                   </div>
                 ))}
               </div>

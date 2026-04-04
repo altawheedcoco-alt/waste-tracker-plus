@@ -69,7 +69,7 @@ export default function DailyPulseWidget() {
 
       // Top waste type
       const wasteCount: Record<string, number> = {};
-      today.forEach(s => { const wt = s.waste_type || 'أخرى'; wasteCount[wt] = (wasteCount[wt] || 0) + 1; });
+      today.forEach(s => { const wt = translateWasteType(s.waste_type); wasteCount[wt] = (wasteCount[wt] || 0) + 1; });
       const topWaste = Object.entries(wasteCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
 
       // Streak: consecutive days with activity (simplified)

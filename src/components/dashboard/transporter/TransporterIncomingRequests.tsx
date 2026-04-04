@@ -167,7 +167,7 @@ const TransporterIncomingRequests = () => {
             </div>
             <div className="text-right flex-1">
               <div className="flex items-center gap-2 justify-end">
-                <Badge variant="outline" className="text-[10px]">{req.waste_type}</Badge>
+                <Badge variant="outline" className="text-[10px]">{translateWasteType(req.waste_type)}</Badge>
                 <span className="font-medium text-sm">{req.shipment_number}</span>
                 <Package className="w-4 h-4 text-primary" />
               </div>
