@@ -49,7 +49,9 @@ const ExecutiveSummaryPage = lazyRetry(() => import('@/pages/dashboard/Executive
 const LegalShield = lazyRetry(() => import('@/pages/dashboard/LegalShield'));
 const RevenueRadar = lazyRetry(() => import('@/pages/dashboard/RevenueRadar'));
 const SmartScale = lazyRetry(() => import('@/pages/dashboard/SmartScale'));
-
+const CentralDocumentRegistry = lazyRetry(() => import('@/pages/dashboard/CentralDocumentRegistry'));
+const SmartDocumentArchive = lazyRetry(() => import('@/pages/dashboard/SmartDocumentArchive'));
+const TeamCredentials = lazyRetry(() => import('@/pages/dashboard/TeamCredentials'));
 export const deferredCommonRoutes = (
   <>
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
