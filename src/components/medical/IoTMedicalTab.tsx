@@ -51,7 +51,7 @@ const IoTMedicalTab = () => {
                   </div>
                 </div>
                 <div className="text-left">
-                  <Badge className={`text-[9px] mb-1 ${device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  <Badge className={`text-[9px] mb-1 ${device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground'}`}>
                     {device.status === 'online' ? <><Wifi className="h-2.5 w-2.5 mr-0.5" />متصل</> : <><WifiOff className="h-2.5 w-2.5 mr-0.5" />غير متصل</>}
                   </Badge>
                   <p className="text-xs font-bold text-foreground">{device.lastReading}</p>

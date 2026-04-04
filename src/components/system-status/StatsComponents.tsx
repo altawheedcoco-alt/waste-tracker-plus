@@ -76,7 +76,7 @@ export const LiveStatsGrid = ({ stats, isLoading }: LiveStatsGridProps) => {
     { label: 'تقييم الدعم', value: stats?.avgTicketRating || 0, subValue: 'من 5', icon: Star, color: 'text-yellow-500', bgColor: 'bg-yellow-500/10' },
     { label: 'الوثائق', value: stats?.totalDocuments || 0, subValue: `${stats?.pendingDocuments || 0} معلقة`, icon: FileCheck, color: 'text-teal-500', bgColor: 'bg-teal-500/10' },
     { label: 'شهادات التدوير', value: stats?.totalRecyclingReports || 0, icon: Recycle, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
-    { label: 'طلبات معلقة', value: stats?.pendingApprovals || 0, icon: AlertTriangle, color: stats?.pendingApprovals && stats.pendingApprovals > 0 ? 'text-red-500' : 'text-gray-500', bgColor: stats?.pendingApprovals && stats.pendingApprovals > 0 ? 'bg-red-500/10' : 'bg-gray-500/10' },
+    { label: 'طلبات معلقة', value: stats?.pendingApprovals || 0, icon: AlertTriangle, color: stats?.pendingApprovals && stats.pendingApprovals > 0 ? 'text-red-500' : 'text-muted-foreground', bgColor: stats?.pendingApprovals && stats.pendingApprovals > 0 ? 'bg-red-500/10' : 'bg-muted-foreground/10' },
   ];
 
   return (

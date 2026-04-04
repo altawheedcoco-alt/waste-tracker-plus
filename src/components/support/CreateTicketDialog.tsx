@@ -47,7 +47,7 @@ const categoryOptions: { value: TicketCategory; label: string; icon: React.Eleme
 ];
 
 const priorityOptions: { value: TicketPriority; label: string; color: string }[] = [
-  { value: 'low', label: 'منخفضة', color: 'text-gray-500' },
+  { value: 'low', label: 'منخفضة', color: 'text-muted-foreground' },
   { value: 'medium', label: 'متوسطة', color: 'text-blue-500' },
   { value: 'high', label: 'عالية', color: 'text-orange-500' },
   { value: 'urgent', label: 'عاجلة', color: 'text-red-500' },

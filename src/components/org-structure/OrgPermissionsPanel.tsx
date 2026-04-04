@@ -326,8 +326,8 @@ const permissionGroups: { title: string; icon: string; color: string; bg: string
   {
     title: 'متقدم',
     icon: '⚡',
-    color: 'text-gray-600',
-    bg: 'bg-gray-500/10',
+    color: 'text-muted-foreground',
+    bg: 'bg-muted-foreground/10',
     permissions: [
       { key: 'can_manage_insurance', label: 'إدارة التأمين', tier: 'optional', description: 'إدارة وثائق التأمين' },
       { key: 'can_view_insurance', label: 'عرض التأمين', tier: 'optional', description: 'الاطلاع على التأمين' },

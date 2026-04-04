@@ -89,7 +89,7 @@ const DriverLeaderboard = () => {
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="w-5 h-5 text-amber-400" />;
-    if (rank === 2) return <Medal className="w-5 h-5 text-gray-400" />;
+    if (rank === 2) return <Medal className="w-5 h-5 text-muted-foreground" />;
     if (rank === 3) return <Medal className="w-5 h-5 text-orange-600" />;
     return <span className="text-xs font-bold text-muted-foreground">#{rank}</span>;
   };

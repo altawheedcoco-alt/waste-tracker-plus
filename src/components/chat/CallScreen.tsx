@@ -232,7 +232,7 @@ const CallScreen = memo(({
               </div>
             )}
             {!callInfo.isVideoEnabled && (
-              <div className="absolute inset-0 bg-gray-900/90 flex items-center justify-center">
+              <div className="absolute inset-0 bg-card/90 flex items-center justify-center">
                 <VideoOff className="w-5 h-5 text-white/60" />
               </div>
             )}
@@ -675,7 +675,7 @@ function CallControlBtn({ active, onClick, icon: Icon, label, activeColor, badge
     if (!active) return "bg-white/15 hover:bg-white/25 text-white";
     if (activeColor === 'red') return "bg-red-500 text-white shadow-lg shadow-red-500/30";
     if (activeColor === 'blue') return "bg-blue-500 text-white shadow-lg shadow-blue-500/30";
-    return "bg-white dark:bg-card text-gray-900 dark:text-foreground shadow-lg";
+    return "bg-white dark:bg-card text-foreground dark:text-foreground shadow-lg";
   };
 
   const size = small ? "w-12 h-12" : "w-14 h-14";

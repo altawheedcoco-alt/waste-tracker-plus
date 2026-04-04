@@ -48,7 +48,7 @@ const categoryColors: Record<string, string> = {
   'قيد المعالجة': 'bg-yellow-500',
   'طلب معلومات': 'bg-orange-500',
   'حل المشكلة': 'bg-emerald-500',
-  'إغلاق التذكرة': 'bg-gray-500',
+  'إغلاق التذكرة': 'bg-muted-foreground',
   'تقني': 'bg-purple-500',
   'مالي': 'bg-teal-500',
 };
@@ -193,7 +193,7 @@ interface ReplyItemProps {
 
 const ReplyItem = ({ reply, onSelect, showCount }: ReplyItemProps) => {
   const Icon = categoryIcons[reply.category] || MessageSquare;
-  const color = categoryColors[reply.category] || 'bg-gray-500';
+  const color = categoryColors[reply.category] || 'bg-muted-foreground';
 
   return (
     <button

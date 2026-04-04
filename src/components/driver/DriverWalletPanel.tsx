@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const levelConfig = {
   bronze: { name: 'برونزي', icon: '🥉', color: 'text-orange-600', next: 200, multiplier: 1 },
-  silver: { name: 'فضي', icon: '🥈', color: 'text-gray-400', next: 500, multiplier: 1.2 },
+  silver: { name: 'فضي', icon: '🥈', color: 'text-muted-foreground', next: 500, multiplier: 1.2 },
   gold: { name: 'ذهبي', icon: '🥇', color: 'text-amber-400', next: 1000, multiplier: 1.5 },
   diamond: { name: 'ماسي', icon: '💎', color: 'text-cyan-400', next: null, multiplier: 2 },
 };

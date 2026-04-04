@@ -121,13 +121,13 @@ const ReceiptCard = ({
         return { 
           label: 'ملغية', 
           icon: XCircle, 
-          className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' 
+          className: 'bg-muted text-foreground dark:bg-card dark:text-gray-300' 
         };
       default:
         return { 
           label: status, 
           icon: Clock, 
-          className: 'bg-gray-100 text-gray-800' 
+          className: 'bg-muted text-foreground' 
         };
     }
   };

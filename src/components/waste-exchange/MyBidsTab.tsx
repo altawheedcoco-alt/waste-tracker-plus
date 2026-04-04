@@ -16,9 +16,9 @@ const getBidStatusConfig = (t: (key: string) => string) => ({
   pending: { label: t('exchange.bidPending'), color: 'bg-yellow-500/10 text-yellow-600' },
   accepted: { label: t('exchange.bidAccepted'), color: 'bg-green-500/10 text-green-600' },
   rejected: { label: t('exchange.bidRejected'), color: 'bg-red-500/10 text-red-600' },
-  withdrawn: { label: t('exchange.bidWithdrawnStatus'), color: 'bg-gray-500/10 text-gray-600' },
+  withdrawn: { label: t('exchange.bidWithdrawnStatus'), color: 'bg-muted-foreground/10 text-muted-foreground' },
   counter_offered: { label: t('exchange.bidCounterOffered'), color: 'bg-blue-500/10 text-blue-600' },
-  expired: { label: t('exchange.bidExpired'), color: 'bg-gray-500/10 text-gray-600' },
+  expired: { label: t('exchange.bidExpired'), color: 'bg-muted-foreground/10 text-muted-foreground' },
 });
 
 export const MyBidsTab = ({ isRTL, bids, onRefresh }: MyBidsTabProps) => {

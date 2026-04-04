@@ -125,7 +125,7 @@ const EInvoiceSettings: React.FC = () => {
       {/* Status Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: Shield, label: 'حالة الربط', value: settings?.is_active ? 'مفعّل' : 'غير مفعّل', color: settings?.is_active ? 'text-green-500' : 'text-gray-400' },
+          { icon: Shield, label: 'حالة الربط', value: settings?.is_active ? 'مفعّل' : 'غير مفعّل', color: settings?.is_active ? 'text-green-500' : 'text-muted-foreground' },
           { icon: Building2, label: 'البيئة', value: settings?.environment === 'production' ? 'إنتاج' : 'تجريبي', color: 'text-blue-500' },
           { icon: Send, label: 'فواتير مرسلة', value: submissions?.filter(s => s.status === 'accepted').length || 0, color: 'text-purple-500' },
           { icon: AlertCircle, label: 'فواتير مرفوضة', value: submissions?.filter(s => s.status === 'rejected').length || 0, color: 'text-red-500' },
@@ -230,7 +230,7 @@ const EInvoiceSettings: React.FC = () => {
                         {(sub as any).invoices?.total_amount && (
                           <span className="text-sm font-bold">{(sub as any).invoices.total_amount} ج.م</span>
                         )}
-                        <Badge className={statusColors[sub.status] || 'bg-gray-100'}>
+                        <Badge className={statusColors[sub.status] || 'bg-muted'}>
                           {statusLabels[sub.status] || sub.status}
                         </Badge>
                       </div>

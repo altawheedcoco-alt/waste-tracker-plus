@@ -43,7 +43,7 @@ interface ShipmentsAccountViewProps {
 }
 
 const getStatusConfig = (t: (key: string) => string): Record<string, { label: string; icon: any; color: string }> => ({
-  new: { label: t('shipmentStatus.new'), icon: Clock, color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  new: { label: t('shipmentStatus.new'), icon: Clock, color: 'bg-muted text-foreground dark:bg-card dark:text-gray-300' },
   approved: { label: t('shipmentStatus.approved'), icon: CheckCircle2, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
   collecting: { label: t('shipmentStatus.collecting'), icon: Package, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
   in_transit: { label: t('shipmentStatus.in_transit'), icon: Package, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },

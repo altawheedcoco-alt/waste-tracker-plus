@@ -54,11 +54,11 @@ const statusConfig: Record<TicketStatus, { label: string; color: string }> = {
   in_progress: { label: 'قيد المعالجة', color: 'bg-yellow-500' },
   waiting_response: { label: 'في انتظار الرد', color: 'bg-orange-500' },
   resolved: { label: 'تم الحل', color: 'bg-green-500' },
-  closed: { label: 'مغلقة', color: 'bg-gray-500' },
+  closed: { label: 'مغلقة', color: 'bg-muted-foreground' },
 };
 
 const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
-  low: { label: 'منخفضة', color: 'bg-gray-500' },
+  low: { label: 'منخفضة', color: 'bg-muted-foreground' },
   medium: { label: 'متوسطة', color: 'bg-blue-500' },
   high: { label: 'عالية', color: 'bg-orange-500' },
   urgent: { label: 'عاجلة', color: 'bg-red-500' },

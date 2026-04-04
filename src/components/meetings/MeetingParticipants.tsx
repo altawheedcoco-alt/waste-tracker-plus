@@ -35,7 +35,7 @@ const ROLE_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   joined: 'bg-emerald-500',
   invited: 'bg-amber-500',
-  left: 'bg-gray-500',
+  left: 'bg-muted-foreground',
   declined: 'bg-red-500',
 };
 
@@ -188,7 +188,7 @@ const MeetingParticipants = ({ meetingId, isHost }: { meetingId: string; isHost:
                       {(p.profile?.full_name || '?').charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={cn("absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full border border-[#16213e]", STATUS_COLORS[p.status] || 'bg-gray-500')} />
+                  <div className={cn("absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full border border-[#16213e]", STATUS_COLORS[p.status] || 'bg-muted-foreground')} />
                 </div>
 
                 <div className="flex-1 min-w-0">

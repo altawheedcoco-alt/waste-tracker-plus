@@ -320,7 +320,7 @@ export default function ShipmentApprovalDialog({
                 <span className="text-muted-foreground">
                   {format(new Date(shipment.created_at), 'PPP', { locale: ar })}
                 </span>
-                <Calendar className="w-4 h-4 text-gray-500" />
+                <Calendar className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">التاريخ:</span>
               </div>
             </CardContent>

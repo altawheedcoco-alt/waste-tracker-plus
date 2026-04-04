@@ -90,7 +90,7 @@ const DriverRewardsPanel = () => {
   const level = useMemo(() => {
     if (totalPoints >= 1000) return { name: 'ماسي', color: 'text-cyan-400', next: null, icon: '💎' };
     if (totalPoints >= 500) return { name: 'ذهبي', color: 'text-amber-400', next: 1000, icon: '🥇' };
-    if (totalPoints >= 200) return { name: 'فضي', color: 'text-gray-400', next: 500, icon: '🥈' };
+    if (totalPoints >= 200) return { name: 'فضي', color: 'text-muted-foreground', next: 500, icon: '🥈' };
     return { name: 'برونزي', color: 'text-orange-600', next: 200, icon: '🥉' };
   }, [totalPoints]);
 

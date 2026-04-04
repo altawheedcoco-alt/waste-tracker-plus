@@ -32,7 +32,7 @@ const resultColors: Record<string, string> = {
   fit: 'bg-green-100 text-green-700',
   fit_with_restrictions: 'bg-amber-100 text-amber-700',
   unfit: 'bg-red-100 text-red-700',
-  pending: 'bg-gray-100 text-gray-700',
+  pending: 'bg-muted text-foreground',
 };
 
 const MedicalExaminationsTab = () => {
@@ -170,10 +170,10 @@ const MedicalExaminationsTab = () => {
                     <span className="text-sm font-medium">{exam.employee_name}</span>
                   </div>
                   <div className="flex gap-1">
-                    <Badge className={`text-[9px] ${statusColors[exam.status] || 'bg-gray-100'}`}>
+                    <Badge className={`text-[9px] ${statusColors[exam.status] || 'bg-muted'}`}>
                       {exam.status === 'scheduled' ? 'مجدول' : exam.status === 'completed' ? 'مكتمل' : exam.status === 'in_progress' ? 'جاري' : exam.status}
                     </Badge>
-                    <Badge className={`text-[9px] ${resultColors[exam.overall_result] || 'bg-gray-100'}`}>
+                    <Badge className={`text-[9px] ${resultColors[exam.overall_result] || 'bg-muted'}`}>
                       {exam.overall_result === 'fit' ? 'لائق' : exam.overall_result === 'unfit' ? 'غير لائق' : exam.overall_result === 'fit_with_restrictions' ? 'لائق بقيود' : 'قيد الانتظار'}
                     </Badge>
                   </div>

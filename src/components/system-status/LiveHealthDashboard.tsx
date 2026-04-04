@@ -53,7 +53,7 @@ const getStatusIcon = (status: string) => {
     case 'critical':
       return <XCircle className="w-5 h-5 text-red-500" />;
     default:
-      return <Clock className="w-5 h-5 text-gray-500" />;
+      return <Clock className="w-5 h-5 text-muted-foreground" />;
   }
 };
 

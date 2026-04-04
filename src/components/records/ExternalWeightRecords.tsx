@@ -349,15 +349,15 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
     .bg-blue-50 { background-color: #eff6ff; }
     .bg-blue-100 { background-color: #dbeafe; }
     .bg-gray-50 { background-color: #f9fafb; }
-    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-muted { background-color: #f3f4f6; }
     .text-green-700 { color: #15803d; }
     .text-green-800 { color: #166534; }
     .text-orange-600 { color: #ea580c; }
     .text-orange-800 { color: #9a3412; }
     .text-blue-700 { color: #1d4ed8; }
     .text-blue-800 { color: #1e40af; }
-    .text-gray-500 { color: #6b7280; }
-    .text-gray-600 { color: #4b5563; }
+    .text-muted-foreground { color: #6b7280; }
+    .text-muted-foreground { color: #4b5563; }
     @media print { body { padding: 0; } }
   `;
 

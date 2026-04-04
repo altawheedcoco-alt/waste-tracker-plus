@@ -37,7 +37,7 @@ interface Meeting {
 const STATUS_MAP: Record<string, { label: string; color: string; icon: any }> = {
   active: { label: 'جارٍ الآن', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: Play },
   scheduled: { label: 'مجدول', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: Calendar },
-  ended: { label: 'انتهى', color: 'bg-gray-500/10 text-gray-500 border-gray-500/20', icon: CheckCircle2 },
+  ended: { label: 'انتهى', color: 'bg-muted-foreground/10 text-muted-foreground border-gray-500/20', icon: CheckCircle2 },
   cancelled: { label: 'ملغي', color: 'bg-red-500/10 text-red-500 border-red-500/20', icon: PhoneOff },
 };
 

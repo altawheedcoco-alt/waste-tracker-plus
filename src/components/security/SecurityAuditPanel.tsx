@@ -43,7 +43,7 @@ export const SecurityAuditPanel = memo(function SecurityAuditPanel() {
       case 'passed': return <CheckCircle2 className="w-5 h-5 text-green-500" />;
       case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
       case 'failed': return <XCircle className="w-5 h-5 text-red-500" />;
-      default: return <Shield className="w-5 h-5 text-gray-500" />;
+      default: return <Shield className="w-5 h-5 text-muted-foreground" />;
     }
   };
   

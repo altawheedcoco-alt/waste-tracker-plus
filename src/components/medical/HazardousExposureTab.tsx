@@ -97,7 +97,7 @@ const HazardousExposureTab = () => {
               <CardContent className="p-3">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">{exp.employee_name}</span></div>
-                  <Badge className={`text-[9px] ${exposureLevelColors[exp.exposure_level] || 'bg-gray-100'}`}>{exposureLevelLabels[exp.exposure_level] || exp.exposure_level}</Badge>
+                  <Badge className={`text-[9px] ${exposureLevelColors[exp.exposure_level] || 'bg-muted'}`}>{exposureLevelLabels[exp.exposure_level] || exp.exposure_level}</Badge>
                 </div>
                 <p className="text-xs mb-1 font-medium">{exp.hazardous_material}</p>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">

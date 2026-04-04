@@ -282,7 +282,7 @@ const PostShareActions = ({
             <ExternalLink className="h-3 w-3 mr-auto opacity-50" />
           </DropdownMenuItem>
           <DropdownMenuItem onClick={shareByEmail} className="gap-2">
-            <Mail className="h-4 w-4 text-gray-500" />
+            <Mail className="h-4 w-4 text-muted-foreground" />
             البريد الإلكتروني
           </DropdownMenuItem>
           
@@ -312,7 +312,7 @@ const PostShareActions = ({
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="p-4 bg-white rounded-lg">
-              <QrCode className="h-48 w-48 text-gray-800" />
+              <QrCode className="h-48 w-48 text-foreground" />
             </div>
             <div className="flex items-center gap-2 w-full">
               <Input value={shareUrl} readOnly className="flex-1" />

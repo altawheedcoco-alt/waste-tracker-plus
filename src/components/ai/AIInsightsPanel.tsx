@@ -32,7 +32,7 @@ const SentimentDisplay: React.FC<{ result: SentimentResult }> = ({ result }) => 
     switch (sentiment) {
       case 'positive': return <ThumbsUp className="h-5 w-5 text-green-500" />;
       case 'negative': return <ThumbsDown className="h-5 w-5 text-red-500" />;
-      case 'neutral': return <Minus className="h-5 w-5 text-gray-500" />;
+      case 'neutral': return <Minus className="h-5 w-5 text-muted-foreground" />;
       default: return <Brain className="h-5 w-5 text-blue-500" />;
     }
   };
@@ -96,7 +96,7 @@ const SentimentDisplay: React.FC<{ result: SentimentResult }> = ({ result }) => 
               <div key={i} className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950 rounded">
                 <AlertTriangle className={`h-4 w-4 ${
                   concern.severity === 'high' ? 'text-red-500' : 
-                  concern.severity === 'medium' ? 'text-yellow-500' : 'text-gray-500'
+                  concern.severity === 'medium' ? 'text-yellow-500' : 'text-muted-foreground'
                 }`} />
                 <span className="text-sm">{concern.issue}</span>
               </div>
@@ -127,7 +127,7 @@ const PredictionDisplay: React.FC<{ result: PredictionResult }> = ({ result }) =
     switch (trend) {
       case 'increasing': return <ArrowUp className="h-4 w-4 text-green-500" />;
       case 'decreasing': return <ArrowDown className="h-4 w-4 text-red-500" />;
-      default: return <ArrowRight className="h-4 w-4 text-gray-500" />;
+      default: return <ArrowRight className="h-4 w-4 text-muted-foreground" />;
     }
   };
 

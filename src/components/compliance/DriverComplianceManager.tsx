@@ -40,7 +40,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   valid: { label: 'ساري', color: 'bg-green-100 text-green-800' },
   expired: { label: 'منتهي', color: 'bg-red-100 text-red-800' },
   expiring_soon: { label: 'ينتهي قريباً', color: 'bg-yellow-100 text-yellow-800' },
-  pending: { label: 'قيد المراجعة', color: 'bg-gray-100 text-gray-800' },
+  pending: { label: 'قيد المراجعة', color: 'bg-muted text-foreground' },
   rejected: { label: 'مرفوض', color: 'bg-red-100 text-red-800' },
 };
 

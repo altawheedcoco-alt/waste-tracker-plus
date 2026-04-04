@@ -92,9 +92,9 @@ const ReceiptDetailsDialog = ({
       case 'disputed':
         return { label: 'متنازع عليها', icon: AlertCircle, className: 'bg-red-100 text-red-800' };
       case 'cancelled':
-        return { label: 'ملغية', icon: XCircle, className: 'bg-gray-100 text-gray-800' };
+        return { label: 'ملغية', icon: XCircle, className: 'bg-muted text-foreground' };
       default:
-        return { label: status, icon: Clock, className: 'bg-gray-100 text-gray-800' };
+        return { label: status, icon: Clock, className: 'bg-muted text-foreground' };
     }
   };
 
