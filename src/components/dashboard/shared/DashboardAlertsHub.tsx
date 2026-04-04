@@ -16,7 +16,7 @@ const OperationalAlertsWidget = lazy(() => import('@/components/dashboard/operat
 const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/TransporterDeliveryApproval'));
 
 interface DashboardAlertsHubProps {
-  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   extraSections?: Array<{
     id: string;
     label: string;

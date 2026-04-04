@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 
 interface DashboardWidgetCustomizerProps {
-  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+  orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   trigger?: React.ReactNode;
 }
 
