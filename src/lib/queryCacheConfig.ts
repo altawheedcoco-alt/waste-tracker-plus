@@ -131,27 +131,54 @@ export const getCacheOptions = (queryKey: readonly unknown[]) => {
 /**
  * إنشاء QueryClient ذكي مع تخزين مؤقت تكيّفي
  */
-export const createSmartQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: CACHE_PROFILES.operational.staleTime,
-      gcTime: CACHE_PROFILES.operational.gcTime,
-      retry: (failureCount, error: any) => {
-        // لا إعادة محاولة عند 401/403
-        if (error?.status === 401 || error?.status === 403) return false;
-        // لا إعادة محاولة عند 404
-        if (error?.status === 404) return false;
-        return failureCount < 2;
+export const createSmartQueryClient = () => {
+  const handleQueryError = (error: unknown) => {
+    const err = error as any;
+    const status = err?.status || err?.code;
+    // تجاهل أخطاء المصادقة (يعالجها AuthContext)
+    if (status === 401 || status === 403 || status === 'PGRST301') return;
+    // تسجيل الخطأ بدون إزعاج المستخدم بتنبيهات متكررة
+    console.error('[QueryError]', err?.message || err);
+  };
+
+  const handleMutationError = (error: unknown) => {
+    const err = error as any;
+    const msg = err?.message || 'حدث خطأ غير متوقع';
+    console.error('[MutationError]', msg);
+    // عرض تنبيه للمستخدم فقط عند فشل العمليات الكتابية
+    import('sonner').then(({ toast }) => {
+      toast.error('فشلت العملية', { description: msg, duration: 4000 });
+    });
+  };
+
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: CACHE_PROFILES.operational.staleTime,
+        gcTime: CACHE_PROFILES.operational.gcTime,
+        retry: (failureCount, error: any) => {
+          if (error?.status === 401 || error?.status === 403) return false;
+          if (error?.status === 404) return false;
+          return failureCount < 2;
+        },
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: true,
+        meta: { errorHandler: handleQueryError },
       },
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: true,
+      mutations: {
+        retry: 1,
+        onError: handleMutationError,
+      },
     },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
+    queryCache: new QueryCache({
+      onError: handleQueryError,
+    }),
+    mutationCache: new MutationCache({
+      onError: handleMutationError,
+    }),
+  });
+};
 
 /**
  * إبطال ذكي للكاش - يبطل فقط الاستعلامات المرتبطة
