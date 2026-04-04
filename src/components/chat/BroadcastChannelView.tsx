@@ -1,1274 +1,43 @@
 import { useState, memo, useRef, useCallback, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio, Plus, Send, Users, ChevronRight, Search,
-  Share2, Forward, Eye, Globe, ShieldCheck,
-  Camera, X, Loader2, MessageCircle, BadgeCheck,
+  Share2, Loader2, BadgeCheck,
   Bell, BellOff, MoreVertical, Image as ImageIcon, Video,
-  Link2, FileText, Heart, Pin, Trash2,
-  Check, Settings, BarChart3, UserPlus, Shield,
-  Copy, Flag, AlertTriangle, Crown, UserX, Edit3,
-  TrendingUp, MessageSquare, Activity, Clock, Play
+  FileText, Pin, Check, Crown, UserPlus, Shield,
+  Flag, AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBroadcastChannels, type BroadcastChannel } from '@/hooks/useBroadcastChannels';
 import { useBroadcastPosts } from '@/hooks/useBroadcastPosts';
-import { useBroadcastComments } from '@/hooks/useBroadcastComments';
-import { useBroadcastAdmin, useBroadcastNotificationSettings } from '@/hooks/useBroadcastAdmin';
-import { usePrivateChat } from '@/hooks/usePrivateChat';
+import { useBroadcastNotificationSettings } from '@/hooks/useBroadcastAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-const REACTIONS = [
-  { type: 'heart', emoji: '❤️' },
-  { type: 'thumbsup', emoji: '👍' },
-  { type: 'laugh', emoji: '😂' },
-  { type: 'fire', emoji: '🔥' },
-  { type: 'clap', emoji: '👏' },
-  { type: 'flag', emoji: '🇵🇸' },
-];
+// Extracted sub-components
+import ShareToChatDialog from './broadcast/ShareToChatDialog';
+import type { InternalSharePayload } from './broadcast/ShareToChatDialog';
+import OwnerAdminPanel from './broadcast/OwnerAdminPanel';
+import PostCard from './broadcast/PostCard';
 
 interface BroadcastChannelViewProps {
   onBack?: () => void;
 }
 
-interface InternalSharePayload {
-  title: string;
-  preview: string;
-  message: string;
-  link?: string;
-}
-
-const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  payload: InternalSharePayload | null;
-}) => {
-  const { user } = useAuth();
-  const { conversations, conversationsLoading, sendMessage, getOrCreateConversation } = usePrivateChat();
-  const [search, setSearch] = useState('');
-  const [sendingId, setSendingId] = useState<string | null>(null);
-  const [tab, setTab] = useState<'social' | 'internal'>('social');
-  const [internalTab, setInternalTab] = useState<'conversations' | 'members'>('conversations');
-
-  // Fetch all system members grouped by organization
-  const { data: allMembers = [], isLoading: membersLoading } = useQuery({
-    queryKey: ['all-system-members-for-share'],
-    queryFn: async () => {
-      const { data: profiles } = await (supabase as any)
-        .from('profiles')
-        .select('user_id, full_name, avatar_url, organization_id')
-        .neq('user_id', user?.id || '');
-      if (!profiles?.length) return [];
-      const orgIds = [...new Set(profiles.map((p: any) => p.organization_id).filter(Boolean))];
-      const { data: orgs } = await (supabase as any)
-        .from('organizations')
-        .select('id, name')
-        .in('id', orgIds);
-      const orgMap = new Map((orgs || []).map((o: any) => [o.id, o.name]));
-      return profiles.map((p: any) => ({
-        ...p,
-        organization_name: orgMap.get(p.organization_id) || '',
-      }));
-    },
-    enabled: open && internalTab === 'members',
-  });
-
-  useEffect(() => {
-    if (!open) { setSearch(''); setSendingId(null); setTab('social'); setInternalTab('conversations'); }
-  }, [open]);
-
-  const filteredConversations = conversations.filter((c) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (c.partner?.full_name || '').toLowerCase().includes(q) || (c.partner?.organization_name || '').toLowerCase().includes(q);
-  });
-
-  const filteredMembers = allMembers.filter((m: any) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (m.full_name || '').toLowerCase().includes(q) || (m.organization_name || '').toLowerCase().includes(q);
-  });
-
-  // Group members by organization
-  const membersByOrg = filteredMembers.reduce((acc: Record<string, any[]>, m: any) => {
-    const orgName = m.organization_name || 'بدون جهة';
-    if (!acc[orgName]) acc[orgName] = [];
-    acc[orgName].push(m);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  const handleShareToConversation = async (conversationId: string) => {
-    if (!payload) return;
-    setSendingId(conversationId);
-    try {
-      await sendMessage(conversationId, payload.message);
-      toast.success('تمت المشاركة داخل المحادثة');
-      onOpenChange(false);
-    } catch { toast.error('تعذر إرسال المشاركة'); }
-    finally { setSendingId(null); }
-  };
-
-  const handleShareToMember = async (memberId: string) => {
-    if (!payload) return;
-    setSendingId(memberId);
-    try {
-      const convoId = await getOrCreateConversation(memberId);
-      if (!convoId) throw new Error('Failed');
-      await sendMessage(convoId, payload.message);
-      toast.success('تمت المشاركة بنجاح');
-      onOpenChange(false);
-    } catch { toast.error('تعذر إرسال المشاركة'); }
-    finally { setSendingId(null); }
-  };
-
-  const shareLink = payload?.link || '';
-  const shareText = encodeURIComponent(payload?.message || '');
-  const shareUrl = encodeURIComponent(shareLink);
-  const shareTitle = encodeURIComponent(payload?.title || '');
-
-  const socialPlatforms = [
-    { name: 'واتساب', icon: '💬', url: `https://wa.me/?text=${shareText}` },
-    { name: 'فيسبوك', icon: '📘', url: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareTitle}` },
-    { name: 'تويتر / X', icon: '🐦', url: `https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}` },
-    { name: 'تيليجرام', icon: '✈️', url: `https://t.me/share/url?url=${shareUrl}&text=${shareText}` },
-    { name: 'لينكدإن', icon: '💼', url: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}` },
-    { name: 'بريد إلكتروني', icon: '📧', url: `mailto:?subject=${shareTitle}&body=${shareText}` },
-  ];
-
-  const handleCopyLink = () => {
-    if (!shareLink) return;
-    navigator.clipboard.writeText(shareLink).then(() => toast.success('تم نسخ الرابط')).catch(() => {
-      const ta = document.createElement('textarea'); ta.value = shareLink; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast.success('تم نسخ الرابط');
-    });
-  };
-
-  const handleNativeShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: payload?.title, text: payload?.preview, url: shareLink }).catch(() => {});
-    }
-  };
-
-  const renderMemberButton = (member: any) => {
-    const isSending = sendingId === member.user_id;
-    return (
-      <button key={member.user_id} type="button" onClick={() => handleShareToMember(member.user_id)}
-        disabled={!!sendingId}
-        className="w-full flex items-center gap-3 rounded-xl border border-border/50 p-2.5 text-right hover:bg-muted/40 transition-colors disabled:opacity-60">
-        <Avatar className="w-8 h-8 shrink-0">
-          {member.avatar_url && <AvatarImage src={member.avatar_url} />}
-          <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">{(member.full_name || '?').charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{member.full_name}</p>
-        </div>
-        {isSending ? <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" /> : <Send className="w-4 h-4 text-primary shrink-0" />}
-      </button>
-    );
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-sm">
-            <Share2 className="w-4 h-4 text-primary" />
-            مشاركة المنشور
-          </DialogTitle>
-        </DialogHeader>
-
-        {payload && (
-          <div className="rounded-xl border border-border/50 bg-muted/30 p-3 mb-2">
-            <p className="text-sm font-semibold line-clamp-1">{payload.title}</p>
-            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-1">{payload.preview}</p>
-          </div>
-        )}
-
-        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-3">
-            <TabsTrigger value="social" className="text-xs">مواقع التواصل</TabsTrigger>
-            <TabsTrigger value="internal" className="text-xs">مشاركة داخلية</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="social" className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
-              {socialPlatforms.map((p) => (
-                <button key={p.name} onClick={() => window.open(p.url, '_blank', 'noopener,noreferrer')}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-                  <span className="text-2xl">{p.icon}</span>
-                  <span className="text-[10px] font-medium text-muted-foreground">{p.name}</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 gap-2 text-xs" onClick={handleCopyLink}>
-                <Copy className="w-3.5 h-3.5" /> نسخ الرابط
-              </Button>
-              {typeof navigator !== 'undefined' && 'share' in navigator && (
-                <Button variant="outline" size="sm" className="flex-1 gap-2 text-xs" onClick={handleNativeShare}>
-                  <Share2 className="w-3.5 h-3.5" /> مشاركة أخرى
-                </Button>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="internal" className="space-y-3">
-            {/* Sub-tabs: conversations vs members */}
-            <div className="flex gap-1 p-1 rounded-lg bg-muted/50">
-              <button onClick={() => setInternalTab('conversations')}
-                className={cn("flex-1 text-xs py-1.5 rounded-md font-medium transition-colors",
-                  internalTab === 'conversations' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}>
-                محادثات حالية
-              </button>
-              <button onClick={() => setInternalTab('members')}
-                className={cn("flex-1 text-xs py-1.5 rounded-md font-medium transition-colors",
-                  internalTab === 'members' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}>
-                أعضاء الجهات
-              </button>
-            </div>
-
-            <Input value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder={internalTab === 'conversations' ? 'ابحث عن محادثة...' : 'ابحث عن عضو أو جهة...'}
-              className="text-sm" />
-
-            <div className="max-h-60 overflow-y-auto space-y-1.5">
-              {internalTab === 'conversations' ? (
-                conversationsLoading ? (
-                  <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
-                ) : filteredConversations.length > 0 ? (
-                  filteredConversations.map((conversation) => {
-                    const partnerName = conversation.partner?.full_name || 'محادثة';
-                    const orgName = conversation.partner?.organization_name || '';
-                    const isSending = sendingId === conversation.id;
-                    return (
-                      <button key={conversation.id} type="button" onClick={() => handleShareToConversation(conversation.id)}
-                        disabled={!!sendingId}
-                        className="w-full flex items-center gap-3 rounded-xl border border-border/50 p-2.5 text-right hover:bg-muted/40 transition-colors disabled:opacity-60">
-                        <Avatar className="w-9 h-9 shrink-0">
-                          {conversation.partner?.avatar_url && <AvatarImage src={conversation.partner.avatar_url} />}
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{partnerName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{partnerName}</p>
-                          {orgName && <p className="text-[11px] text-muted-foreground truncate">{orgName}</p>}
-                        </div>
-                        {isSending ? <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" /> : <Send className="w-4 h-4 text-primary shrink-0" />}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border/60 p-5 text-center">
-                    <p className="text-sm font-medium">لا توجد محادثات متاحة</p>
-                  </div>
-                )
-              ) : (
-                membersLoading ? (
-                  <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
-                ) : Object.keys(membersByOrg).length > 0 ? (
-                  Object.entries(membersByOrg).map(([orgName, members]) => (
-                    <div key={orgName} className="space-y-1">
-                      <p className="text-[11px] font-semibold text-muted-foreground px-1 py-1 sticky top-0 bg-background/95 backdrop-blur-sm flex items-center gap-1.5">
-                        <Users className="w-3 h-3" /> {orgName}
-                      </p>
-                      {(members as any[]).map(renderMemberButton)}
-                    </div>
-                  ))
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border/60 p-5 text-center">
-                    <p className="text-sm font-medium">لا يوجد أعضاء</p>
-                  </div>
-                )
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
-  );
-});
-ShareToChatDialog.displayName = 'ShareToChatDialog';
-
 // ═══════════════════════════════════════════════════════════════
-// 🔵 OWNER SECTION: Analytics Dashboard
-// ═══════════════════════════════════════════════════════════════
-const OwnerAnalytics = memo(({ channelId }: { channelId: string }) => {
-  const { analytics } = useBroadcastAdmin(channelId);
-  if (!analytics) return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
-
-  const stats = [
-    { icon: Eye, label: 'إجمالي المشاهدات', value: analytics.totalViews.toLocaleString('ar-EG'), color: 'text-blue-600' },
-    { icon: Heart, label: 'التفاعلات', value: analytics.totalReactions.toLocaleString('ar-EG'), color: 'text-red-500' },
-    { icon: MessageCircle, label: 'التعليقات', value: analytics.totalComments.toLocaleString('ar-EG'), color: 'text-emerald-600' },
-    { icon: TrendingUp, label: 'متابعين جدد (30 يوم)', value: analytics.newSubscribers30d.toLocaleString('ar-EG'), color: 'text-primary' },
-  ];
-
-  return (
-    <div className="space-y-4 p-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
-        <BarChart3 className="w-4 h-4 text-primary" />
-        تحليلات القناة
-      </h3>
-
-      <div className="grid grid-cols-2 gap-2">
-        {stats.map((s, i) => (
-          <div key={i} className="p-3 rounded-xl border border-border/40 bg-card">
-            <div className="flex items-center gap-2 mb-1">
-              <s.icon className={cn('w-4 h-4', s.color)} />
-              <span className="text-[10px] text-muted-foreground">{s.label}</span>
-            </div>
-            <p className="text-lg font-bold">{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Engagement Rate */}
-      <div className="p-3 rounded-xl border border-border/40 bg-card">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium">معدل التفاعل</span>
-          <span className="text-sm font-bold text-primary">{analytics.engagementRate}%</span>
-        </div>
-        <Progress value={Math.min(analytics.engagementRate, 100)} className="h-2" />
-      </div>
-
-      {/* Per post average */}
-      <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card">
-        <span className="text-xs text-muted-foreground">متوسط المشاهدات لكل منشور</span>
-        <span className="text-sm font-bold">{analytics.avgViewsPerPost.toLocaleString('ar-EG')}</span>
-      </div>
-
-      {/* Top posts */}
-      {analytics.topPosts.length > 0 && (
-        <div>
-          <h4 className="text-xs font-semibold text-muted-foreground mb-2">أفضل المنشورات أداءً</h4>
-          <div className="space-y-1.5">
-            {analytics.topPosts.map((p: any, i: number) => (
-              <div key={p.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 text-xs">
-                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {i + 1}
-                </span>
-                <span className="flex-1 truncate text-muted-foreground">
-                  {format(new Date(p.created_at), 'dd MMM', { locale: ar })}
-                </span>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Eye className="w-3 h-3" /> {p.views_count || 0}
-                </span>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Heart className="w-3 h-3" /> {p.reactions_count || 0}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
-OwnerAnalytics.displayName = 'OwnerAnalytics';
-
-// ═══════════════════════════════════════════════════════════════
-// 🔵 OWNER SECTION: Channel Settings
-// ═══════════════════════════════════════════════════════════════
-const OwnerSettings = memo(({ channel }: { channel: BroadcastChannel }) => {
-  const { updateSettings, uploadChannelImage, generateInviteLink, isUpdating } = useBroadcastAdmin(channel.id);
-  const [editName, setEditName] = useState(channel.name);
-  const [editDesc, setEditDesc] = useState(channel.description || '');
-  const [editRules, setEditRules] = useState((channel as any).rules || '');
-  const [inviteLink, setInviteLink] = useState((channel as any).invite_link || '');
-  const avatarRef = useRef<HTMLInputElement>(null);
-  const coverRef = useRef<HTMLInputElement>(null);
-
-  const handleSave = () => {
-    updateSettings({
-      name: editName,
-      description: editDesc,
-      rules: editRules,
-    });
-  };
-
-  const handleGenerateLink = async () => {
-    const link = await generateInviteLink();
-    setInviteLink(link);
-    navigator.clipboard.writeText(link);
-    toast.success('تم نسخ رابط الدعوة');
-  };
-
-  return (
-    <div className="space-y-4 p-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
-        <Settings className="w-4 h-4 text-primary" />
-        إعدادات القناة
-      </h3>
-
-      {/* Images */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="w-7 h-7 cursor-pointer ring-2 ring-border" onClick={() => avatarRef.current?.click()}>
-            {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-              {channel.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => avatarRef.current?.click()}>
-              <Camera className="w-3 h-3" /> تغيير صورة القناة
-            </Button>
-            <p className="text-[10px] text-muted-foreground mt-1">يفضل 1:1 مربعة</p>
-          </div>
-        </div>
-
-        <Button variant="outline" size="sm" className="w-full text-xs gap-1" onClick={() => coverRef.current?.click()}>
-          <ImageIcon className="w-3 h-3" /> تغيير صورة الغلاف (3:1)
-        </Button>
-
-        <input ref={avatarRef} type="file" accept="image/*" className="hidden"
-          onChange={e => e.target.files?.[0] && uploadChannelImage(e.target.files[0], 'avatar')} />
-        <input ref={coverRef} type="file" accept="image/*" className="hidden"
-          onChange={e => e.target.files?.[0] && uploadChannelImage(e.target.files[0], 'cover')} />
-      </div>
-
-      {/* Name & Description */}
-      <div className="space-y-3">
-        <div>
-          <Label className="text-xs mb-1 block">اسم القناة</Label>
-          <Input value={editName} onChange={e => setEditName(e.target.value)} className="text-sm" />
-        </div>
-        <div>
-          <Label className="text-xs mb-1 block">وصف القناة</Label>
-          <Textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} className="text-sm min-h-[60px]" />
-        </div>
-        <div>
-          <Label className="text-xs mb-1 block">قواعد القناة (اختياري)</Label>
-          <Textarea value={editRules} onChange={e => setEditRules(e.target.value)} className="text-sm min-h-[60px]" placeholder="اكتب قواعد المشاركة في القناة..." />
-        </div>
-      </div>
-
-      {/* Toggles */}
-      <div className="space-y-3 border-t border-border/30 pt-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium">السماح بالتعليقات</p>
-            <p className="text-[10px] text-muted-foreground">يمكن للمتابعين التعليق على المنشورات</p>
-          </div>
-          <Switch
-            checked={(channel as any).allow_comments !== false}
-            onCheckedChange={v => updateSettings({ allow_comments: v })}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium">السماح بالتفاعلات</p>
-            <p className="text-[10px] text-muted-foreground">يمكن للمتابعين التفاعل بالإيموجي</p>
-          </div>
-          <Switch
-            checked={(channel as any).allow_reactions !== false}
-            onCheckedChange={v => updateSettings({ allow_reactions: v })}
-          />
-        </div>
-        <div className="space-y-2">
-          <p className="text-xs font-medium">رؤية القناة</p>
-          <p className="text-[10px] text-muted-foreground mb-2">تحديد من يمكنه رؤية القناة واكتشافها</p>
-          <div className="space-y-2">
-            {[
-              { value: 'public', label: 'عامة', desc: 'يمكن للجميع اكتشافها ومتابعتها', icon: '🌍' },
-              { value: 'internal', label: 'خاصة — جميع الجهات', desc: 'مرئية لجميع الجهات داخل المنصة فقط', icon: '🏢' },
-              { value: 'partners_only', label: 'خاصة — الجهات المرتبطة', desc: 'مرئية فقط للجهات المرتبطة بكم', icon: '🤝' },
-            ].map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => updateSettings({ channel_visibility: opt.value })}
-                className={cn(
-                  "w-full flex items-center gap-3 p-2.5 rounded-xl border text-right transition-all",
-                  ((channel as any).channel_visibility || 'public') === opt.value
-                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                    : "border-border/50 hover:bg-muted/50"
-                )}
-              >
-                <span className="text-lg">{opt.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium">{opt.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{opt.desc}</p>
-                </div>
-                {((channel as any).channel_visibility || 'public') === opt.value && (
-                  <Check className="w-4 h-4 text-primary shrink-0" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Invite Link */}
-      <div className="border-t border-border/30 pt-3">
-        <Label className="text-xs mb-1.5 block">رابط الدعوة</Label>
-        {inviteLink ? (
-          <div className="flex items-center gap-2">
-            <Input value={inviteLink} readOnly className="text-xs flex-1" dir="ltr" />
-            <Button size="icon" variant="outline" className="shrink-0 h-9 w-9"
-              onClick={() => { navigator.clipboard.writeText(inviteLink); toast.success('تم النسخ'); }}>
-              <Copy className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        ) : (
-          <Button variant="outline" size="sm" className="w-full text-xs gap-1" onClick={handleGenerateLink}>
-            <Link2 className="w-3 h-3" /> إنشاء رابط دعوة
-          </Button>
-        )}
-      </div>
-
-      <Button className="w-full" onClick={handleSave} disabled={isUpdating}>
-        {isUpdating ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Check className="w-4 h-4 ml-2" />}
-        حفظ التغييرات
-      </Button>
-    </div>
-  );
-});
-OwnerSettings.displayName = 'OwnerSettings';
-
-// ═══════════════════════════════════════════════════════════════
-// 🔵 OWNER SECTION: Members Management
-// ═══════════════════════════════════════════════════════════════
-const OwnerMembers = memo(({ channelId }: { channelId: string }) => {
-  const { admins, subscribers, subsLoading, addAdmin, removeAdmin, blockUser } = useBroadcastAdmin(channelId);
-  const [searchQ, setSearchQ] = useState('');
-
-  const filteredSubs = subscribers.filter((s: any) =>
-    !searchQ || (s.user_name || '').includes(searchQ)
-  );
-
-  const roleLabel = (role: string) => {
-    switch (role) {
-      case 'owner': return 'مالك';
-      case 'admin': return 'مشرف';
-      case 'moderator': return 'مراقب';
-      default: return role;
-    }
-  };
-
-  const roleColor = (role: string) => {
-    switch (role) {
-      case 'owner': return 'bg-amber-500/10 text-amber-700 border-amber-500/20';
-      case 'admin': return 'bg-blue-500/10 text-blue-700 border-blue-500/20';
-      case 'moderator': return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20';
-      default: return '';
-    }
-  };
-
-  return (
-    <div className="space-y-4 p-4">
-      <h3 className="text-sm font-bold flex items-center gap-2">
-        <Users className="w-4 h-4 text-primary" />
-        إدارة الأعضاء
-      </h3>
-
-      {/* Admins */}
-      <div>
-        <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-          <Crown className="w-3 h-3" /> المشرفون ({admins.length})
-        </h4>
-        <div className="space-y-1.5">
-          {admins.map(admin => (
-            <div key={admin.id} className="flex items-center gap-2 p-2 rounded-xl border border-border/30">
-              <Avatar className="w-8 h-8">
-                {admin.user_avatar && <AvatarImage src={admin.user_avatar} />}
-                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                  {(admin.user_name || '?').charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate">{admin.user_name}</p>
-              </div>
-              <Badge variant="outline" className={cn('text-[9px] h-4', roleColor(admin.role))}>
-                {roleLabel(admin.role)}
-              </Badge>
-              {admin.role !== 'owner' && (
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeAdmin(admin.id)}>
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Subscribers */}
-      <div className="border-t border-border/30 pt-3">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-xs font-semibold text-muted-foreground">
-            المتابعون ({subscribers.length})
-          </h4>
-        </div>
-        <Input
-          value={searchQ}
-          onChange={e => setSearchQ(e.target.value)}
-          placeholder="بحث في المتابعين..."
-          className="text-xs h-8 mb-2"
-        />
-
-        {subsLoading ? (
-          <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>
-        ) : (
-          <div className="space-y-1 max-h-60 overflow-y-auto custom-scrollbar">
-            {filteredSubs.map((sub: any) => (
-              <div key={sub.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/30 transition-colors">
-                <Avatar className="w-7 h-7">
-                  {sub.user_avatar && <AvatarImage src={sub.user_avatar} />}
-                  <AvatarFallback className="text-[9px] bg-muted">{(sub.user_name || '?').charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs flex-1 truncate">{sub.user_name}</span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <MoreVertical className="w-3 h-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => addAdmin({ userId: sub.user_id, role: 'admin' })}>
-                      <UserPlus className="w-3.5 h-3.5 ml-2" /> ترقية لمشرف
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addAdmin({ userId: sub.user_id, role: 'moderator' })}>
-                      <Shield className="w-3.5 h-3.5 ml-2" /> ترقية لمراقب
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => blockUser({ userId: sub.user_id })} className="text-destructive">
-                      <UserX className="w-3.5 h-3.5 ml-2" /> حظر المتابع
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-});
-OwnerMembers.displayName = 'OwnerMembers';
-
-// ═══════════════════════════════════════════════════════════════
-// 🔵 OWNER: Full Admin Panel
-// ═══════════════════════════════════════════════════════════════
-const OwnerAdminPanel = memo(({ channel, onBack }: { channel: BroadcastChannel; onBack: () => void }) => {
-  return (
-    <div className="flex flex-col h-full" dir="rtl">
-      <div className="flex items-center gap-2 p-3 border-b border-border/50 sticky top-0 bg-background z-10">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-        <Crown className="w-4 h-4 text-amber-500" />
-        <span className="text-sm font-bold">لوحة إدارة القناة</span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <Tabs defaultValue="analytics" dir="rtl">
-          <TabsList className="w-full justify-start px-3 pt-2 bg-transparent">
-            <TabsTrigger value="analytics" className="text-xs gap-1">
-              <BarChart3 className="w-3.5 h-3.5" /> التحليلات
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs gap-1">
-              <Settings className="w-3.5 h-3.5" /> الإعدادات
-            </TabsTrigger>
-            <TabsTrigger value="members" className="text-xs gap-1">
-              <Users className="w-3.5 h-3.5" /> الأعضاء
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="analytics">
-            <OwnerAnalytics channelId={channel.id} />
-          </TabsContent>
-          <TabsContent value="settings">
-            <OwnerSettings channel={channel} />
-          </TabsContent>
-          <TabsContent value="members">
-            <OwnerMembers channelId={channel.id} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-});
-OwnerAdminPanel.displayName = 'OwnerAdminPanel';
-
-// ═══════════════════════════════════════════════════════════════
-// Comment Section
-// ═══════════════════════════════════════════════════════════════
-const CommentSection = memo(({ postId, isOpen }: { postId: string; isOpen: boolean }) => {
-  const { user } = useAuth();
-  const { comments, isLoading, addComment, deleteComment, toggleLike, isAdding } = useBroadcastComments(postId);
-  const [text, setText] = useState('');
-
-  if (!isOpen) return null;
-
-  const handleSubmit = () => {
-    if (!text.trim()) return;
-    addComment({ content: text.trim() });
-    setText('');
-  };
-
-  const topLevel = comments.filter(c => !c.parent_comment_id);
-  const replies = (parentId: string) => comments.filter(c => c.parent_comment_id === parentId);
-
-  return (
-    <motion.div
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 'auto', opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      className="border-t border-border/30 bg-muted/20"
-    >
-      <div className="max-h-60 overflow-y-auto px-4 py-2 space-y-2">
-        {isLoading ? (
-          <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
-        ) : topLevel.length === 0 ? (
-          <p className="text-[11px] text-muted-foreground text-center py-2">لا توجد تعليقات بعد</p>
-        ) : (
-          topLevel.map(comment => (
-            <div key={comment.id} className="space-y-1">
-              <div className="flex items-start gap-2">
-                <Avatar className="w-6 h-6 mt-0.5">
-                  {comment.user_avatar && <AvatarImage src={comment.user_avatar} />}
-                  <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
-                    {(comment.user_name || '?').charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="bg-background rounded-xl px-3 py-1.5">
-                    <p className="text-[11px] font-semibold">{comment.user_name}</p>
-                    <p className="text-xs leading-relaxed">{comment.content}</p>
-                  </div>
-                  <div className="flex items-center gap-3 mt-0.5 px-1">
-                    <button onClick={() => toggleLike(comment.id)} className="text-[10px] text-muted-foreground hover:text-primary transition-colors">
-                      إعجاب {comment.likes_count > 0 && `(${comment.likes_count})`}
-                    </button>
-                    <span className="text-[10px] text-muted-foreground">
-                      {format(new Date(comment.created_at), 'h:mm a', { locale: ar })}
-                    </span>
-                    {comment.user_id === user?.id && (
-                      <button onClick={() => deleteComment(comment.id)} className="text-[10px] text-destructive">حذف</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {replies(comment.id).map(reply => (
-                <div key={reply.id} className="flex items-start gap-2 mr-8">
-                  <Avatar className="w-5 h-5 mt-0.5">
-                    {reply.user_avatar && <AvatarImage src={reply.user_avatar} />}
-                    <AvatarFallback className="text-[8px] bg-secondary text-secondary-foreground">
-                      {(reply.user_name || '?').charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="bg-background rounded-xl px-2.5 py-1">
-                      <p className="text-[10px] font-semibold">{reply.user_name}</p>
-                      <p className="text-[11px]">{reply.content}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))
-        )}
-      </div>
-      <div className="flex items-center gap-2 px-4 py-2 border-t border-border/20">
-        <Input value={text} onChange={e => setText(e.target.value)} placeholder="أضف تعليقاً..."
-          className="text-xs h-8 flex-1 rounded-full" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-        <Button size="icon" className="h-8 w-8 rounded-full shrink-0"
-          disabled={!text.trim() || isAdding} onClick={handleSubmit}>
-          {isAdding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-        </Button>
-      </div>
-    </motion.div>
-  );
-});
-CommentSection.displayName = 'CommentSection';
-
-// ═══════════════════════════════════════════════════════════════
-// AutoPlay Video — plays on scroll into view, pauses when out
-const AutoPlayVideo = ({ src }: { src: string }) => {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true); // Start muted for autoplay policy
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    setHasError(false);
-    el.muted = muted;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.play().catch(() => {});
-        } else {
-          el.pause();
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [src, muted]);
-
-  if (hasError) {
-    return (
-      <a href={src} target="_blank" rel="noreferrer"
-        className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/30 hover:bg-muted/40 transition-colors">
-        <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-          <Play className="w-6 h-6 text-red-500" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">فيديو مرفق</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">اضغط لتشغيل الفيديو في نافذة جديدة</p>
-        </div>
-        <Forward className="w-4 h-4 text-primary rotate-90 shrink-0" />
-      </a>
-    );
-  }
-
-  return (
-    <div className="relative group">
-      <video
-        ref={ref}
-        src={src}
-        className="w-full object-contain max-h-[500px]"
-        muted={muted}
-        loop
-        playsInline
-        preload="metadata"
-        controls
-        onError={() => setHasError(true)}
-      />
-      <button
-        type="button"
-        onClick={() => setMuted((m) => !m)}
-        className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white transition-opacity text-[10px] px-2.5"
-      >
-        {muted ? '🔇 اضغط لتشغيل الصوت' : '🔊 صوت'}
-      </button>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════
-// Inline PDF Viewer — uses Google Docs viewer for universal compatibility (mobile + desktop)
-const InlinePdfViewer = ({ url, name, height = '500px' }: { url: string; name: string; height?: string }) => {
-  const googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
-
-  return (
-    <div className="rounded-xl border border-border/50 overflow-hidden">
-      <iframe
-        src={googleViewerUrl}
-        className="w-full border-0"
-        style={{ height }}
-        title={name || 'PDF'}
-        allow="autoplay"
-        sandbox="allow-scripts allow-same-origin allow-popups"
-      />
-      <a href={url} target="_blank" rel="noreferrer"
-        className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
-        <FileText className="w-4 h-4 text-red-500" />
-        <span className="text-xs font-medium truncate flex-1">{name || 'ملف PDF'}</span>
-        <span className="text-[10px] text-muted-foreground">فتح في نافذة جديدة</span>
-      </a>
-    </div>
-  );
-};
-
-// Post Card (Shared — adapts per role) — Enhanced Design
-// ═══════════════════════════════════════════════════════════════
-const PostCard = memo(({ post, channelId, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport, onView, onShare }: {
-  post: any;
-  channelId: string;
-  channelName: string;
-  channelAvatar?: string | null;
-  onReact: (postId: string, type: string) => void;
-  myReactions: Set<string>;
-  isMine: boolean;
-  allowComments: boolean;
-  allowReactions: boolean;
-  onPin?: (postId: string) => void;
-  onDelete?: (postId: string) => void;
-  onReport?: (postId: string) => void;
-  onView?: (postId: string) => void;
-  onShare?: (payload: InternalSharePayload) => void;
-}) => {
-  const [showReactions, setShowReactions] = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [fullscreenMedia, setFullscreenMedia] = useState(false);
-  const [fullscreenUrl, setFullscreenUrl] = useState('');
-  const postRef = useRef<HTMLDivElement>(null);
-
-  // Track view via IntersectionObserver
-  useEffect(() => {
-    const el = postRef.current;
-    if (!el || !onView) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { onView(post.id); observer.disconnect(); } },
-      { threshold: 0.5 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [post.id, onView]);
-  const reactionsData: Record<string, number> = post.reactions_summary || {};
-  const totalReactions = post.reactions_count || 0;
-  const topReactions = Object.entries(reactionsData)
-    .sort(([, a], [, b]) => (b as number) - (a as number))
-    .slice(0, 4);
-
-  const renderContent = (text: string) => {
-    if (!text) return null;
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
-    return parts.map((part, i) =>
-      urlRegex.test(part) ? (
-        <a key={i} href={part} target="_blank" rel="noreferrer"
-          className="text-primary hover:underline break-all" dir="ltr">{part}</a>
-      ) : part
-    );
-  };
-
-  // Collect all media (support both legacy single file and new multi-media)
-  const allMediaUrls: string[] = (post as any).media_urls?.length > 0 ? (post as any).media_urls : (post.file_url ? [post.file_url] : []);
-  const allMediaTypes: string[] = (post as any).media_types?.length > 0 ? (post as any).media_types : (post.file_url ? [post.post_type] : []);
-  const allMediaNames: string[] = (post as any).media_names?.length > 0 ? (post as any).media_names : (post.file_name ? [post.file_name] : []);
-
-  const mediaImages = allMediaUrls.filter((_, i) => allMediaTypes[i] === 'image');
-  const mediaVideos = allMediaUrls.filter((_, i) => allMediaTypes[i] === 'video');
-  const mediaDocs = allMediaUrls.filter((_, i) => allMediaTypes[i] !== 'image' && allMediaTypes[i] !== 'video');
-  const mediaDocNames = allMediaNames.filter((_, i) => allMediaTypes[i] !== 'image' && allMediaTypes[i] !== 'video');
-
-  const openFullscreen = (url: string) => {
-    setFullscreenUrl(url);
-    setFullscreenMedia(true);
-  };
-
-  const isMultiMedia = allMediaUrls.length > 1;
-  const isImagePost = !isMultiMedia && post.post_type === 'image' && post.file_url;
-  const isVideoPost = !isMultiMedia && post.post_type === 'video' && post.file_url;
-  const isDocPost = !isMultiMedia && post.file_url && !isImagePost && !isVideoPost;
-  const fileExt = post.file_name?.split('.').pop()?.toLowerCase() || '';
-  const isPdf = fileExt === 'pdf';
-  const isDocFile = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExt);
-
-  const getImageGridClass = (count: number) => {
-    if (count === 1) return 'grid-cols-1';
-    if (count === 2) return 'grid-cols-2';
-    if (count <= 4) return 'grid-cols-2';
-    if (count <= 9) return 'grid-cols-3';
-    return 'grid-cols-4';
-  };
-
-  return (
-    <>
-      <motion.div ref={postRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        data-post-id={post.id}
-        className={cn(
-          "bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-shadow",
-          post.is_pinned ? "border-primary/40 ring-2 ring-primary/10" : "border-border/30"
-        )}
-      >
-        {post.is_pinned && (
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-l from-primary/5 to-primary/10 border-b border-primary/10">
-            <Pin className="w-3 h-3 text-primary fill-primary/20" />
-            <span className="text-[10px] font-semibold text-primary">منشور مثبت</span>
-          </div>
-        )}
-
-        {/* Channel Header */}
-        <div className="flex items-center gap-2.5 px-4 pt-3 pb-1">
-          <Avatar className="w-9 h-9 ring-2 ring-primary/10">
-            {channelAvatar && <AvatarImage src={channelAvatar} />}
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary text-sm font-bold">
-              {channelName.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold truncate">{channelName}</p>
-            <p className="text-[10px] text-muted-foreground">
-              {format(new Date(post.created_at), 'dd MMM yyyy • h:mm a', { locale: ar })}
-            </p>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted/50 transition-colors">
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-[140px]">
-              {isMine ? (
-                <>
-                  <DropdownMenuItem onClick={() => onPin?.(post.id)}>
-                    <Pin className="w-3.5 h-3.5 ml-2" />
-                    {post.is_pinned ? 'إلغاء التثبيت' : 'تثبيت المنشور'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(post.content || ''); toast.success('تم النسخ'); }}>
-                    <Copy className="w-3.5 h-3.5 ml-2" /> نسخ النص
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDelete?.(post.id)} className="text-destructive">
-                    <Trash2 className="w-3.5 h-3.5 ml-2" /> حذف المنشور
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(post.content || ''); toast.success('تم النسخ'); }}>
-                    <Copy className="w-3.5 h-3.5 ml-2" /> نسخ النص
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onReport?.(post.id)} className="text-destructive">
-                    <Flag className="w-3.5 h-3.5 ml-2" /> إبلاغ عن المحتوى
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Text */}
-        {post.content && (
-          <div className="px-4 py-2" dir="rtl">
-            <p className="text-sm leading-[1.8] whitespace-pre-wrap text-foreground/90">
-              {renderContent(post.content)}
-            </p>
-          </div>
-        )}
-
-        {/* === MULTI-MEDIA: Images Gallery === */}
-        {isMultiMedia && mediaImages.length > 0 && (
-          <div className={cn("grid gap-0.5 mt-1", getImageGridClass(mediaImages.length))}>
-            {mediaImages.map((url, i) => (
-              <div key={`img-${i}`} className="relative group cursor-pointer overflow-hidden" onClick={() => openFullscreen(url)}>
-                <img src={url} alt={`صورة ${i + 1}`} className="w-full object-cover aspect-square" loading="lazy" />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <div className="bg-black/50 backdrop-blur-sm rounded-full p-1.5"><Eye className="w-4 h-4 text-white" /></div>
-                </div>
-                {i === 0 && mediaImages.length > 1 && (
-                  <Badge className="absolute top-1.5 right-1.5 text-[9px] bg-black/60 text-white border-0">
-                    📷 {mediaImages.length}
-                  </Badge>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* === MULTI-MEDIA: Videos === */}
-        {isMultiMedia && mediaVideos.length > 0 && (
-          <div className="space-y-1 mt-1">
-            {mediaVideos.map((url, i) => (
-              <div key={`vid-${i}`} className="relative bg-black">
-                <AutoPlayVideo src={url} />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* === MULTI-MEDIA: Documents === */}
-        {isMultiMedia && mediaDocs.length > 0 && (
-          <div className="px-4 mt-2 space-y-1.5">
-            {mediaDocs.map((url, i) => {
-              const name = mediaDocNames[i] || 'ملف مرفق';
-              const ext = name.split('.').pop()?.toLowerCase() || '';
-              const docIsPdf = ext === 'pdf';
-              const docIsOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
-              return (
-                <div key={`doc-${i}`}>
-                  {docIsPdf ? (
-                    <InlinePdfViewer url={url} name={name} height="350px" />
-                  ) : (
-                    <a href={url} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/30 bg-muted/10 transition-colors">
-                      <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                        docIsOffice ? "bg-blue-500/10" : "bg-primary/10")}>
-                        <FileText className={cn("w-5 h-5", docIsOffice ? "text-blue-500" : "text-primary")} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{name}</p>
-                        <p className="text-[9px] text-muted-foreground uppercase" dir="ltr">{ext.toUpperCase()}</p>
-                      </div>
-                      <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
-                    </a>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* === LEGACY SINGLE: Image === */}
-        {!isMultiMedia && isImagePost && (
-          <div className="relative group cursor-pointer mt-1" onClick={() => openFullscreen(post.file_url!)}>
-            {!imageLoaded && (
-              <div className="aspect-video bg-muted/30 animate-pulse flex items-center justify-center">
-                <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
-              </div>
-            )}
-            <img src={post.file_url!} alt={post.file_name || 'صورة'}
-              className={cn("w-full object-contain transition-transform", !imageLoaded && "hidden")}
-              onLoad={() => setImageLoaded(true)} />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-              <div className="bg-black/50 backdrop-blur-sm rounded-full p-2"><Eye className="w-5 h-5 text-white" /></div>
-            </div>
-          </div>
-        )}
-
-        {/* === LEGACY SINGLE: Video === */}
-        {!isMultiMedia && isVideoPost && (
-          <div className="relative mt-1 bg-black">
-            <AutoPlayVideo src={post.file_url!} />
-          </div>
-        )}
-
-        {/* === LEGACY SINGLE: Document === */}
-        {!isMultiMedia && isDocPost && (
-          <div className="mx-4 my-2">
-            {isPdf ? (
-              <InlinePdfViewer url={post.file_url!} name={post.file_name || 'ملف PDF'} height="400px" />
-            ) : (
-              <a href={post.file_url!} target="_blank" rel="noreferrer"
-                className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
-                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-                  isDocFile ? "bg-blue-500/10" : "bg-primary/10")}>
-                  <FileText className={cn("w-6 h-6", isDocFile ? "text-blue-500" : "text-primary")} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{post.file_name || 'ملف مرفق'}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 uppercase" dir="ltr">{fileExt.toUpperCase()} • اضغط للتحميل</p>
-                </div>
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Forward className="w-4 h-4 text-primary rotate-90" />
-                </div>
-              </a>
-            )}
-          </div>
-        )}
-
-        {/* Link Preview */}
-        {post.link_url && (
-          <a href={post.link_url} target="_blank" rel="noreferrer"
-            className="block mx-4 my-2 rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-all group">
-            {post.link_preview_image && (
-              <div className="aspect-video bg-muted/20 overflow-hidden">
-                <img src={post.link_preview_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-            )}
-            <div className="p-3 bg-gradient-to-l from-muted/30 to-transparent">
-              <p className="text-sm font-semibold truncate">{post.link_title || 'رابط خارجي'}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <Link2 className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] text-muted-foreground truncate" dir="ltr">
-                  {(() => { try { return new URL(post.link_url).hostname; } catch { return post.link_url; } })()}
-                </span>
-              </div>
-            </div>
-          </a>
-        )}
-
-        {/* Stats & Action Bar */}
-        <div className="px-4 pb-2 mt-1">
-          {(totalReactions > 0 || (post.comments_count || 0) > 0 || (post.views_count || 0) > 0) && (
-            <div className="flex items-center justify-between py-1.5 border-b border-border/20 mb-1">
-              <div className="flex items-center gap-1.5">
-                {topReactions.length > 0 && (
-                  <>
-                    <div className="flex -space-x-0.5 rtl:space-x-reverse">
-                      {topReactions.map(([type]) => { const r = REACTIONS.find(r => r.type === type); return r ? <span key={type} className="text-sm">{r.emoji}</span> : null; })}
-                    </div>
-                    <span className="text-[10px] font-medium text-muted-foreground">{totalReactions.toLocaleString('ar-EG')}</span>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                {(post.comments_count || 0) > 0 && <span className="flex items-center gap-0.5"><MessageCircle className="w-3 h-3" /> {post.comments_count}</span>}
-                <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" /> {(post.views_count || 0).toLocaleString('ar-EG')}</span>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-around">
-            {allowReactions && (
-              <button onClick={() => setShowReactions(!showReactions)}
-                className={cn("flex items-center gap-1.5 text-[11px] font-medium py-2 px-3 rounded-lg transition-all",
-                  showReactions ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>
-                <Heart className={cn("w-[18px] h-[18px]", showReactions && "fill-primary/20")} /><span>تفاعل</span>
-              </button>
-            )}
-            {allowComments && (
-              <button onClick={() => setShowComments(!showComments)}
-                className={cn("flex items-center gap-1.5 text-[11px] font-medium py-2 px-3 rounded-lg transition-all",
-                  showComments ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>
-                <MessageCircle className={cn("w-[18px] h-[18px]", showComments && "fill-primary/20")} /><span>تعليق</span>
-              </button>
-            )}
-            <button onClick={() => {
-              const postLink = `${window.location.origin}/dashboard/broadcast-channels?channel=${channelId}&post=${post.id}`;
-              const previewText = post.content?.trim() || post.file_name || 'منشور من قناة البث';
-              onShare?.({
-                title: `منشور من ${channelName}`,
-                preview: previewText,
-                message: `📢 تمت مشاركة منشور من قناة "${channelName}"\n\n${previewText}\n\n${postLink}`,
-                link: postLink,
-              });
-            }}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
-              <Share2 className="w-[18px] h-[18px]" /><span>مشاركة</span>
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {showReactions && (
-              <motion.div initial={{ opacity: 0, scale: 0.9, y: 6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 6 }}
-                className="flex items-center gap-0.5 mt-1.5 p-2 rounded-2xl bg-card border border-border/50 shadow-lg w-fit mx-auto">
-                {REACTIONS.map(r => (
-                  <motion.button key={r.type} whileHover={{ scale: 1.35, y: -4 }} whileTap={{ scale: 0.95 }}
-                    onClick={() => { onReact(post.id, r.type); setShowReactions(false); }}
-                    className={cn('text-xl px-2 py-1 rounded-full transition-colors',
-                      myReactions.has(`${post.id}-${r.type}`) && 'bg-primary/10 ring-2 ring-primary/30')}>
-                    {r.emoji}
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <AnimatePresence>
-          {showComments && <CommentSection postId={post.id} isOpen={showComments} />}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Fullscreen Image Viewer */}
-      <Dialog open={fullscreenMedia} onOpenChange={setFullscreenMedia}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-0 bg-black/95 overflow-hidden">
-          <button onClick={() => setFullscreenMedia(false)}
-            className="absolute top-3 right-3 z-50 bg-black/60 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/80">
-            <X className="w-5 h-5" />
-          </button>
-          {fullscreenUrl && <img src={fullscreenUrl} alt="" className="w-full h-full object-contain max-h-[90vh]" />}
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-});
-PostCard.displayName = 'PostCard';
-
-// ═══════════════════════════════════════════════════════════════
-// Post Composer (Owner only) — Multi-Media Enhanced
+// Post Composer (Owner only)
 // ═══════════════════════════════════════════════════════════════
 const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMultiple }: {
   channelId: string;
@@ -1289,43 +58,23 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
   const handleSubmit = () => {
     if (!content.trim() && attachedFiles.length === 0) return;
     if (attachedFiles.length <= 1) {
-      onPost({
-        content,
-        postType: attachedFiles[0]?.type || 'text',
-        fileUrl: attachedFiles[0]?.url,
-        fileName: attachedFiles[0]?.name,
-      });
+      onPost({ content, postType: attachedFiles[0]?.type || 'text', fileUrl: attachedFiles[0]?.url, fileName: attachedFiles[0]?.name });
     } else {
-      onPost({
-        content,
-        mediaUrls: attachedFiles.map(f => f.url),
-        mediaTypes: attachedFiles.map(f => f.type),
-        mediaNames: attachedFiles.map(f => f.name),
-      });
+      onPost({ content, mediaUrls: attachedFiles.map(f => f.url), mediaTypes: attachedFiles.map(f => f.type), mediaNames: attachedFiles.map(f => f.name) });
     }
-    setContent('');
-    setAttachedFiles([]);
-    setExpanded(false);
+    setContent(''); setAttachedFiles([]); setExpanded(false);
   };
 
   const handleMultipleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    setUploading(true);
-    setUploadProgress(`جاري رفع ${files.length} ملف...`);
-
+    setUploading(true); setUploadProgress(`جاري رفع ${files.length} ملف...`);
     const results = await onUploadMultiple(files);
-    if (results.length > 0) {
-      setAttachedFiles(prev => [...prev, ...results]);
-    }
-    setUploading(false);
-    setUploadProgress('');
-    e.target.value = '';
+    if (results.length > 0) setAttachedFiles(prev => [...prev, ...results]);
+    setUploading(false); setUploadProgress(''); e.target.value = '';
   };
 
-  const removeFile = (index: number) => {
-    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeFile = (index: number) => setAttachedFiles(prev => prev.filter((_, i) => i !== index));
 
   const images = attachedFiles.filter(f => f.type === 'image');
   const videos = attachedFiles.filter(f => f.type === 'video');
@@ -1337,7 +86,6 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
         {attachedFiles.length > 0 && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="px-3 pt-2 max-h-60 overflow-y-auto custom-scrollbar">
-            {/* Images grid */}
             {images.length > 0 && (
               <div className="mb-2">
                 <p className="text-[10px] text-muted-foreground mb-1">📷 {images.length} صورة</p>
@@ -1347,14 +95,13 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
                       <img src={f.url} alt="" className="w-full h-full object-cover" />
                       <button onClick={() => removeFile(attachedFiles.indexOf(f))}
                         className="absolute top-0.5 left-0.5 bg-black/60 rounded-full p-0.5 text-white">
-                        <X className="w-2.5 h-2.5" />
+                        <Pin className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            {/* Videos */}
             {videos.length > 0 && (
               <div className="mb-2">
                 <p className="text-[10px] text-muted-foreground mb-1">🎬 {videos.length} فيديو</p>
@@ -1364,14 +111,13 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
                       <Video className="w-5 h-5 text-muted-foreground" />
                       <button onClick={() => removeFile(attachedFiles.indexOf(f))}
                         className="absolute top-0.5 left-0.5 bg-black/60 rounded-full p-0.5 text-white">
-                        <X className="w-2.5 h-2.5" />
+                        <Pin className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            {/* Documents */}
             {docs.length > 0 && (
               <div className="mb-2 space-y-1">
                 <p className="text-[10px] text-muted-foreground">📄 {docs.length} مستند</p>
@@ -1380,7 +126,7 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
                     <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="text-[10px] truncate flex-1">{f.name}</span>
                     <button onClick={() => removeFile(attachedFiles.indexOf(f))} className="text-muted-foreground hover:text-destructive">
-                      <X className="w-3 h-3" />
+                      <Pin className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
@@ -1424,11 +170,7 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
             className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-amber-600 px-2.5 py-1.5 rounded-lg hover:bg-amber-500/10 transition-colors">
             <FileText className="w-3.5 h-3.5" /><span>مستند</span>
           </button>
-          {attachedFiles.length > 0 && (
-            <Badge variant="secondary" className="text-[9px] h-5 mr-auto">
-              {attachedFiles.length} مرفق
-            </Badge>
-          )}
+          {attachedFiles.length > 0 && <Badge variant="secondary" className="text-[9px] h-5 mr-auto">{attachedFiles.length} مرفق</Badge>}
         </div>
       </div>
       <input ref={imgInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMultipleFiles} />
@@ -1440,13 +182,10 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMul
 PostComposer.displayName = 'PostComposer';
 
 // ═══════════════════════════════════════════════════════════════
-// 🟢 SUBSCRIBER: Channel Profile View
+// Channel Profile View
 // ═══════════════════════════════════════════════════════════════
 const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }: {
-  channel: BroadcastChannel;
-  onBack: () => void;
-  onSubscribeToggle: () => void;
-  isMine: boolean;
+  channel: BroadcastChannel; onBack: () => void; onSubscribeToggle: () => void; isMine: boolean;
 }) => {
   const { isMuted, toggleMute, report } = useBroadcastNotificationSettings(channel.id);
   const [showReport, setShowReport] = useState(false);
@@ -1463,30 +202,20 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
   return (
     <div className="flex flex-col h-full overflow-y-auto" dir="rtl">
       <div className="flex items-center gap-2 p-3 border-b border-border/50 sticky top-0 bg-background z-10">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}><ChevronRight className="w-4 h-4" /></Button>
         <span className="text-sm font-semibold">معلومات القناة</span>
       </div>
 
-      {/* Cover */}
       <div className="relative w-full aspect-[2.8/1] bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
-        {channel.cover_url ? (
-          <img src={channel.cover_url} alt="غلاف" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Radio className="w-12 h-12 text-primary/20" />
-          </div>
+        {channel.cover_url ? <img src={channel.cover_url} alt="غلاف" className="w-full h-full object-cover" /> : (
+          <div className="w-full h-full flex items-center justify-center"><Radio className="w-12 h-12 text-primary/20" /></div>
         )}
       </div>
 
-      {/* Avatar & Name */}
       <div className="flex flex-col items-center -mt-10 relative z-10 px-4">
         <Avatar className="w-20 h-20 border-[3px] border-background shadow-lg ring-2 ring-primary/10">
           {channel.avatar_url && <AvatarImage src={channel.avatar_url} className="object-cover" />}
-          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-            {channel.name.charAt(0)}
-          </AvatarFallback>
+          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">{channel.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex items-center gap-1.5 mt-2.5">
           <h2 className="text-base font-bold">{channel.name}</h2>
@@ -1497,7 +226,6 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
         </p>
       </div>
 
-      {/* Action buttons */}
       <div className="grid grid-cols-4 gap-2 px-4 mt-4">
         <button onClick={() => setShowSearch(!showSearch)}
           className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors",
@@ -1506,8 +234,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           <span className="text-[11px] font-medium">بحث</span>
         </button>
         <button onClick={() => setShowShareDialog(true)} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-          <Share2 className="w-5 h-5 text-muted-foreground" />
-          <span className="text-[11px] font-medium">مشاركة</span>
+          <Share2 className="w-5 h-5 text-muted-foreground" /><span className="text-[11px] font-medium">مشاركة</span>
         </button>
         <button onClick={() => toggleMute(!isMuted)}
           className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors",
@@ -1523,18 +250,10 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
         </button>
       </div>
 
-      {/* Search panel */}
       <AnimatePresence>
         {showSearch && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            className="px-4 mt-3 overflow-hidden">
-            <Input
-              placeholder="ابحث في منشورات القناة..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="text-sm"
-              autoFocus
-            />
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-4 mt-3 overflow-hidden">
+            <Input placeholder="ابحث في منشورات القناة..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="text-sm" autoFocus />
             {searchQuery.trim() && (
               <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
                 {filteredPosts.length > 0 ? filteredPosts.map(p => (
@@ -1542,52 +261,39 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
                     <p className="line-clamp-2">{p.content}</p>
                     <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(p.created_at), 'yyyy/M/d', { locale: ar })}</p>
                   </div>
-                )) : (
-                  <p className="text-xs text-muted-foreground text-center py-4">لا توجد نتائج</p>
-                )}
+                )) : <p className="text-xs text-muted-foreground text-center py-4">لا توجد نتائج</p>}
               </div>
             )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Description */}
       {channel.description && (
         <div className="px-4 mt-4 py-3 border-t border-border/30">
           <p className="text-sm leading-relaxed">{channel.description}</p>
-          <p className="text-[10px] text-muted-foreground mt-2">
-            أنشئت في {format(new Date(channel.created_at), 'yyyy/M/d', { locale: ar })}
-          </p>
+          <p className="text-[10px] text-muted-foreground mt-2">أنشئت في {format(new Date(channel.created_at), 'yyyy/M/d', { locale: ar })}</p>
         </div>
       )}
 
-      {/* Rules */}
       {(channel as any).rules && (
         <div className="px-4 py-3 border-t border-border/30">
-          <h4 className="text-xs font-semibold mb-1 flex items-center gap-1">
-            <Shield className="w-3.5 h-3.5 text-muted-foreground" /> قواعد القناة
-          </h4>
+          <h4 className="text-xs font-semibold mb-1 flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-muted-foreground" /> قواعد القناة</h4>
           <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">{(channel as any).rules}</p>
         </div>
       )}
 
-      {/* Subscriber-only actions */}
       {!isMine && (
         <div className="px-4 mt-2 border-t border-border/30 py-3">
-          <button onClick={() => setShowReport(true)}
-            className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 w-full py-2">
+          <button onClick={() => setShowReport(true)} className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 w-full py-2">
             <Flag className="w-4 h-4" /> الإبلاغ عن هذه القناة
           </button>
         </div>
       )}
 
-      {/* Report Dialog */}
       <Dialog open={showReport} onOpenChange={setShowReport}>
         <DialogContent className="sm:max-w-sm" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="w-4 h-4 text-destructive" /> الإبلاغ عن القناة
-            </DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-sm"><AlertTriangle className="w-4 h-4 text-destructive" /> الإبلاغ عن القناة</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
@@ -1600,23 +306,15 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
               ))}
             </div>
             <Button className="w-full" size="sm" disabled={!reportReason}
-              onClick={() => { report({ reason: reportReason }); setShowReport(false); setReportReason(''); }}>
-              إرسال البلاغ
-            </Button>
+              onClick={() => { report({ reason: reportReason }); setShowReport(false); setReportReason(''); }}>إرسال البلاغ</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <ShareToChatDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        payload={{
-          title: channel.name,
-          preview: channel.description || 'قناة بث داخلية على المنصة',
+      <ShareToChatDialog open={showShareDialog} onOpenChange={setShowShareDialog}
+        payload={{ title: channel.name, preview: channel.description || 'قناة بث داخلية على المنصة',
           message: `📡 تمت مشاركة قناة بث\n\n${channel.name}\n${channel.description ? `\n${channel.description}\n` : '\n'}${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
-          link: `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
-        }}
-      />
+          link: `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}` }} />
     </div>
   );
 });
@@ -1626,37 +324,24 @@ ChannelProfileView.displayName = 'ChannelProfileView';
 // Channel Feed View
 // ═══════════════════════════════════════════════════════════════
 const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isSystemAdmin }: {
-  channel: BroadcastChannel;
-  onBack: () => void;
-  onShowProfile: () => void;
-  onShowAdmin: () => void;
-  isSystemAdmin?: boolean;
+  channel: BroadcastChannel; onBack: () => void; onShowProfile: () => void; onShowAdmin: () => void; isSystemAdmin?: boolean;
 }) => {
   const { subscribe, unsubscribe } = useBroadcastChannels();
   const { report } = useBroadcastNotificationSettings(channel.id);
   const [sharePayload, setSharePayload] = useState<InternalSharePayload | null>(null);
-  const {
-    posts, isLoading: postsLoading, myReactions,
-    createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, uploadMultipleFiles, isPosting,
-  } = useBroadcastPosts(channel.id);
+  const { posts, isLoading: postsLoading, myReactions, createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, uploadMultipleFiles, isPosting } = useBroadcastPosts(channel.id);
 
   const allowComments = (channel as any).allow_comments !== false;
   const allowReactions = (channel as any).allow_reactions !== false;
 
   return (
     <div className="flex flex-col h-full" dir="rtl">
-      {/* Header */}
       <div className="flex items-center gap-2 p-2.5 border-b border-border/50 bg-background sticky top-0 z-10">
-        <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden" onClick={onBack}>
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-
+        <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden" onClick={onBack}><ChevronRight className="w-4 h-4" /></Button>
         <button onClick={onShowProfile} className="flex items-center gap-2 flex-1 min-w-0">
           <Avatar className="w-9 h-9">
             {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-            <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
-              {channel.name.charAt(0)}
-            </AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{channel.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 text-right">
             <div className="flex items-center gap-1">
@@ -1666,51 +351,30 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
             <p className="text-[10px] text-muted-foreground">{channel.subscriber_count?.toLocaleString('ar-EG')} متابع</p>
           </div>
         </button>
-
         <div className="flex items-center gap-0.5">
-          {/* Owner or Admin: Admin panel */}
           {(channel.is_mine || isSystemAdmin) && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onShowAdmin}>
-              <Crown className="w-4 h-4 text-amber-500" />
-            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onShowAdmin}><Crown className="w-4 h-4 text-amber-500" /></Button>
           )}
-
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="w-4 h-4" /></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={onShowProfile}>معلومات القناة</DropdownMenuItem>
-              {(channel.is_mine || isSystemAdmin) && (
-                <DropdownMenuItem onClick={onShowAdmin}>
-                  <Crown className="w-3.5 h-3.5 ml-2 text-amber-500" /> لوحة الإدارة
-                </DropdownMenuItem>
-              )}
+              {(channel.is_mine || isSystemAdmin) && <DropdownMenuItem onClick={onShowAdmin}><Crown className="w-3.5 h-3.5 ml-2 text-amber-500" /> لوحة الإدارة</DropdownMenuItem>}
               <DropdownMenuSeparator />
               {channel.is_subscribed ? (
-                <DropdownMenuItem onClick={() => unsubscribe(channel.id)} className="text-destructive">
-                  إلغاء المتابعة
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => unsubscribe(channel.id)} className="text-destructive">إلغاء المتابعة</DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => subscribe(channel.id)}>
-                  متابعة القناة
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => subscribe(channel.id)}>متابعة القناة</DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* Date */}
       <div className="flex justify-center py-2">
-        <span className="text-[10px] text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-          {format(new Date(), 'dd MMMM yyyy', { locale: ar })}
-        </span>
+        <span className="text-[10px] text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">{format(new Date(), 'dd MMMM yyyy', { locale: ar })}</span>
       </div>
 
-      {/* Posts */}
       <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-3 custom-scrollbar">
         {postsLoading ? (
           <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
@@ -1722,33 +386,20 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
           </div>
         ) : (
           posts.map((p: any) => (
-            <PostCard
-              key={p.id} post={p} channelId={channel.id} channelName={channel.name}
-              channelAvatar={channel.avatar_url}
-              onReact={(postId, type) => toggleReaction({ postId, type })}
-              myReactions={myReactions}
-              isMine={!!channel.is_mine}
-              allowComments={allowComments}
-              allowReactions={allowReactions}
-              onPin={togglePin} onDelete={deletePost}
-              onReport={(postId) => report({ postId, reason: 'محتوى مسيء' })}
-              onView={recordView}
-              onShare={setSharePayload}
-            />
+            <PostCard key={p.id} post={p} channelId={channel.id} channelName={channel.name}
+              channelAvatar={channel.avatar_url} onReact={(postId, type) => toggleReaction({ postId, type })}
+              myReactions={myReactions} isMine={!!channel.is_mine} allowComments={allowComments} allowReactions={allowReactions}
+              onPin={togglePin} onDelete={deletePost} onReport={(postId) => report({ postId, reason: 'محتوى مسيء' })}
+              onView={recordView} onShare={setSharePayload} />
           ))
         )}
       </div>
 
-      {/* Composer: Owner or System Admin */}
       {(channel.is_mine || isSystemAdmin) && (
         <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} onUploadMultiple={uploadMultipleFiles} />
       )}
 
-      <ShareToChatDialog
-        open={!!sharePayload}
-        onOpenChange={(open) => { if (!open) setSharePayload(null); }}
-        payload={sharePayload}
-      />
+      <ShareToChatDialog open={!!sharePayload} onOpenChange={(open) => { if (!open) setSharePayload(null); }} payload={sharePayload} />
     </div>
   );
 });
@@ -1758,19 +409,12 @@ ChannelFeedView.displayName = 'ChannelFeedView';
 // Channel List
 // ═══════════════════════════════════════════════════════════════
 const ChannelListView = memo(({ channels, isLoading, onSelect, onBack, onCreate }: {
-  channels: BroadcastChannel[];
-  isLoading: boolean;
-  onSelect: (ch: BroadcastChannel) => void;
-  onBack?: () => void;
-  onCreate: () => void;
+  channels: BroadcastChannel[]; isLoading: boolean; onSelect: (ch: BroadcastChannel) => void; onBack?: () => void; onCreate: () => void;
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
-  const filtered = channels.filter(ch =>
-    !searchQuery || ch.name.includes(searchQuery) || ch.description?.includes(searchQuery)
-  );
-
+  const filtered = channels.filter(ch => !searchQuery || ch.name.includes(searchQuery) || ch.description?.includes(searchQuery));
   const myChannels = filtered.filter(ch => ch.is_mine);
   const subscribedChannels = filtered.filter(ch => !ch.is_mine && ch.is_subscribed);
   const discoverChannels = filtered.filter(ch => !ch.is_mine && !ch.is_subscribed);
@@ -1824,22 +468,14 @@ const ChannelListView = memo(({ channels, isLoading, onSelect, onBack, onCreate 
       <div className="p-3 border-b border-border/50">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            {onBack && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            )}
+            {onBack && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}><ChevronRight className="w-4 h-4" /></Button>}
             <Radio className="w-5 h-5 text-primary" />
             <h2 className="text-base font-bold">قنوات البث</h2>
             <Badge variant="secondary" className="text-[10px]">{channels.length}</Badge>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowSearch(!showSearch)}>
-              <Search className="w-4 h-4" />
-            </Button>
-            <Button size="sm" className="h-8 text-xs gap-1" onClick={onCreate}>
-              <Plus className="w-3.5 h-3.5" /> إنشاء قناة
-            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowSearch(!showSearch)}><Search className="w-4 h-4" /></Button>
+            <Button size="sm" className="h-8 text-xs gap-1" onClick={onCreate}><Plus className="w-3.5 h-3.5" /> إنشاء قناة</Button>
           </div>
         </div>
         <AnimatePresence>
@@ -1858,11 +494,7 @@ const ChannelListView = memo(({ channels, isLoading, onSelect, onBack, onCreate 
           <div className="text-center py-16">
             <Radio className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">{searchQuery ? 'لا توجد نتائج' : 'لا توجد قنوات بث بعد'}</p>
-            {!searchQuery && (
-              <Button variant="outline" size="sm" className="mt-3 gap-1" onClick={onCreate}>
-                <Plus className="w-3.5 h-3.5" /> إنشاء أول قناة
-              </Button>
-            )}
+            {!searchQuery && <Button variant="outline" size="sm" className="mt-3 gap-1" onClick={onCreate}><Plus className="w-3.5 h-3.5" /> إنشاء أول قناة</Button>}
           </div>
         ) : (
           <>
@@ -1884,9 +516,7 @@ ChannelListView.displayName = 'ChannelListView';
 // Create Channel Dialog
 // ═══════════════════════════════════════════════════════════════
 const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onCreate: (data: { name: string; description?: string; channel_visibility?: string }) => void;
+  open: boolean; onOpenChange: (v: boolean) => void; onCreate: (data: { name: string; description?: string; channel_visibility?: string }) => void;
 }) => {
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
@@ -1895,10 +525,7 @@ const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
   const handleSubmit = () => {
     if (!name.trim()) return;
     onCreate({ name: name.trim(), description: desc.trim() || undefined, channel_visibility: visibility });
-    setName('');
-    setDesc('');
-    setVisibility('public');
-    onOpenChange(false);
+    setName(''); setDesc(''); setVisibility('public'); onOpenChange(false);
   };
 
   const visibilityOptions = [
@@ -1911,48 +538,26 @@ const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Radio className="w-5 h-5 text-primary" />
-            إنشاء قناة بث جديدة
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Radio className="w-5 h-5 text-primary" />إنشاء قناة بث جديدة</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div>
-            <Label className="text-xs mb-1.5 block">اسم القناة</Label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="مثال: أخبار شركة الناقل" className="text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs mb-1.5 block">الوصف (اختياري)</Label>
-            <Textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="وصف مختصر للقناة..." className="text-sm min-h-[60px]" />
-          </div>
+          <div><Label className="text-xs mb-1.5 block">اسم القناة</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="مثال: أخبار شركة الناقل" className="text-sm" /></div>
+          <div><Label className="text-xs mb-1.5 block">الوصف (اختياري)</Label><Textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="وصف مختصر للقناة..." className="text-sm min-h-[60px]" /></div>
           <div>
             <Label className="text-xs mb-1.5 block">رؤية القناة</Label>
             <div className="space-y-1.5">
               {visibilityOptions.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setVisibility(opt.value)}
-                  className={cn(
-                    "w-full flex items-center gap-2.5 p-2 rounded-lg border text-right transition-all",
-                    visibility === opt.value
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border/50 hover:bg-muted/50"
-                  )}
-                >
+                <button key={opt.value} type="button" onClick={() => setVisibility(opt.value)}
+                  className={cn("w-full flex items-center gap-2.5 p-2 rounded-lg border text-right transition-all",
+                    visibility === opt.value ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/50 hover:bg-muted/50")}>
                   <span className="text-base">{opt.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium">{opt.label}</p>
-                    <p className="text-[9px] text-muted-foreground">{opt.desc}</p>
-                  </div>
+                  <div className="flex-1 min-w-0"><p className="text-xs font-medium">{opt.label}</p><p className="text-[9px] text-muted-foreground">{opt.desc}</p></div>
                   {visibility === opt.value && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
                 </button>
               ))}
             </div>
           </div>
-          <Button onClick={handleSubmit} className="w-full" disabled={!name.trim()}>
-            إنشاء القناة
-          </Button>
+          <Button onClick={handleSubmit} className="w-full" disabled={!name.trim()}>إنشاء القناة</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -1961,7 +566,7 @@ const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
 CreateBroadcastDialog.displayName = 'CreateBroadcastDialog';
 
 // ═══════════════════════════════════════════════════════════════
-// 🎯 MAIN ORCHESTRATOR — Split Panel Layout
+// MAIN ORCHESTRATOR
 // ═══════════════════════════════════════════════════════════════
 const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const { channels, isLoading, createChannel, subscribe, unsubscribe } = useBroadcastChannels();
@@ -1972,7 +577,6 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const [view, setView] = useState<'feed' | 'profile' | 'admin'>('feed');
   const [isMobileListView, setIsMobileListView] = useState(true);
 
-  // Keep selectedChannel in sync with fresh data from channels query
   useEffect(() => {
     if (selectedChannel) {
       const fresh = channels.find(c => c.id === selectedChannel.id);
@@ -1984,115 +588,50 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
 
   useEffect(() => {
     if (!channels.length) return;
-
     const params = new URLSearchParams(window.location.search);
     const channelId = params.get('channel');
     if (!channelId) return;
-
     const linkedChannel = channels.find((channel) => channel.id === channelId);
     if (linkedChannel && selectedChannel?.id !== linkedChannel.id) {
-      setSelectedChannel(linkedChannel);
-      setView('feed');
-      setIsMobileListView(false);
+      setSelectedChannel(linkedChannel); setView('feed'); setIsMobileListView(false);
     }
   }, [channels, selectedChannel?.id]);
 
-  const handleSelectChannel = useCallback((ch: BroadcastChannel) => {
-    setSelectedChannel(ch);
-    setView('feed');
-    setIsMobileListView(false);
-  }, []);
-
+  const handleSelectChannel = useCallback((ch: BroadcastChannel) => { setSelectedChannel(ch); setView('feed'); setIsMobileListView(false); }, []);
   const handleSubscribeToggle = useCallback(() => {
     if (!selectedChannel) return;
-    if (selectedChannel.is_subscribed) unsubscribe(selectedChannel.id);
-    else subscribe(selectedChannel.id);
+    if (selectedChannel.is_subscribed) unsubscribe(selectedChannel.id); else subscribe(selectedChannel.id);
   }, [selectedChannel, subscribe, unsubscribe]);
+  const handleBackToList = useCallback(() => { setSelectedChannel(null); setView('feed'); setIsMobileListView(true); }, []);
 
-  const handleBackToList = useCallback(() => {
-    setSelectedChannel(null);
-    setView('feed');
-    setIsMobileListView(true);
-  }, []);
-
-  // Right panel content
   const renderRightPanel = () => {
     if (!selectedChannel) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-center px-6">
-          <div className="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center mb-4">
-            <Radio className="w-10 h-10 text-primary/30" />
-          </div>
+          <div className="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center mb-4"><Radio className="w-10 h-10 text-primary/30" /></div>
           <h3 className="text-base font-bold text-foreground/70 mb-1">اختر قناة للعرض</h3>
-          <p className="text-xs text-muted-foreground max-w-[220px]">
-            اختر قناة من القائمة لعرض المنشورات والتفاعل معها
-          </p>
+          <p className="text-xs text-muted-foreground max-w-[220px]">اختر قناة من القائمة لعرض المنشورات والتفاعل معها</p>
         </div>
       );
     }
-
-    if (view === 'admin' && (selectedChannel.is_mine || isAdmin)) {
-      return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
-    }
-
-    if (view === 'profile') {
-      return (
-        <ChannelProfileView
-          channel={selectedChannel}
-          onBack={() => setView('feed')}
-          onSubscribeToggle={handleSubscribeToggle}
-          isMine={!!selectedChannel.is_mine}
-        />
-      );
-    }
-
-    return (
-      <ChannelFeedView
-        channel={selectedChannel}
-        onBack={handleBackToList}
-        onShowProfile={() => setView('profile')}
-        onShowAdmin={() => setView('admin')}
-        isSystemAdmin={isAdmin}
-      />
-    );
+    if (view === 'admin' && (selectedChannel.is_mine || isAdmin)) return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
+    if (view === 'profile') return <ChannelProfileView channel={selectedChannel} onBack={() => setView('feed')} onSubscribeToggle={handleSubscribeToggle} isMine={!!selectedChannel.is_mine} />;
+    return <ChannelFeedView channel={selectedChannel} onBack={handleBackToList} onShowProfile={() => setView('profile')} onShowAdmin={() => setView('admin')} isSystemAdmin={isAdmin} />;
   };
 
   return (
     <>
-      {/* Desktop: Split Panel (30% list / 70% content) */}
       <div className="hidden md:flex h-full w-full overflow-hidden border border-border/30 rounded-xl bg-card/50">
-        {/* Channel List — 30% */}
         <div className="w-[320px] lg:w-[360px] xl:w-[380px] shrink-0 border-l border-border/40 h-full overflow-hidden">
-          <ChannelListView
-            channels={channels}
-            isLoading={isLoading}
-            onSelect={handleSelectChannel}
-            onBack={onBack}
-            onCreate={() => setShowCreate(true)}
-          />
+          <ChannelListView channels={channels} isLoading={isLoading} onSelect={handleSelectChannel} onBack={onBack} onCreate={() => setShowCreate(true)} />
         </div>
-
-        {/* Content Area — 70% */}
-        <div className="flex-1 h-full overflow-hidden bg-background/50">
-          {renderRightPanel()}
-        </div>
+        <div className="flex-1 h-full overflow-hidden bg-background/50">{renderRightPanel()}</div>
       </div>
-
-      {/* Mobile: Single View Toggle */}
       <div className="md:hidden h-full w-full overflow-hidden">
         {isMobileListView ? (
-          <ChannelListView
-            channels={channels}
-            isLoading={isLoading}
-            onSelect={handleSelectChannel}
-            onBack={onBack}
-            onCreate={() => setShowCreate(true)}
-          />
-        ) : (
-          renderRightPanel()
-        )}
+          <ChannelListView channels={channels} isLoading={isLoading} onSelect={handleSelectChannel} onBack={onBack} onCreate={() => setShowCreate(true)} />
+        ) : renderRightPanel()}
       </div>
-
       <CreateBroadcastDialog open={showCreate} onOpenChange={setShowCreate} onCreate={createChannel} />
     </>
   );
