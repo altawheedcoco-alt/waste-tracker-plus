@@ -56,10 +56,12 @@ const CRITICAL_LICENSES = [
   { field: 'wmra_permit_expiry', label: 'تصريح WMRA لتداول المخلفات', isCritical: true },
   { field: 'wmra_license_expiry_date', label: 'ترخيص WMRA', isCritical: true },
   { field: 'land_transport_license_expiry_date', label: 'رخصة النقل البري', isCritical: true },
-  { field: 'license_expiry_date', label: 'الترخيص العام', isCritical: true },
-  { field: 'eeaa_license_expiry_date', label: 'ترخيص جهاز شئون البيئة', isCritical: false },
+  { field: 'license_expiry_date', label: 'السجل التجاري', isCritical: true },
+  { field: 'eeaa_license_expiry_date', label: 'ترخيص جهاز شئون البيئة (EEAA)', isCritical: true },
   { field: 'env_approval_expiry', label: 'الموافقة البيئية', isCritical: false },
-  { field: 'ida_license_expiry_date', label: 'ترخيص هيئة التنمية الصناعية', isCritical: false },
+  { field: 'ida_license_expiry_date', label: 'البطاقة الضريبية', isCritical: false },
+  { field: 'environmental_register_expiry', label: 'السجل البيئي (EEAA)', isCritical: false },
+  { field: 'hazardous_materials_register_expiry', label: 'سجل المواد والمخلفات الخطرة', isCritical: false },
 ];
 
 function checkLicenseStatus(expiry: string | null, isCritical: boolean): { status: LicenseCheck['status']; days: number | null } {
