@@ -86,6 +86,14 @@ const PostsHub = () => {
               <LinkButton label="فتح في الملف التجاري" onClick={() => navigate('/dashboard/organization-profile?tab=posts')} />
             </TabsContent>
 
+            {/* Reels */}
+            <TabsContent value="reels" className="mt-0 p-2 sm:p-4">
+              <div className="max-h-[70vh] overflow-y-auto">
+                <PostsHubReels />
+              </div>
+              <LinkButton label="فتح صفحة الريلز" onClick={() => navigate('/dashboard/reels')} />
+            </TabsContent>
+
             {/* Partners Timeline */}
             <TabsContent value="partners" className="mt-0 p-2 sm:p-4">
               <div className="max-h-[70vh] overflow-y-auto">
