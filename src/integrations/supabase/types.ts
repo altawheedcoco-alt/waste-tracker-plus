@@ -29111,6 +29111,9 @@ export type Database = {
           activity_type: string | null
           address: string | null
           address_details: string | null
+          adr_certificate_expiry: string | null
+          adr_certificate_number: string | null
+          adr_certificate_url: string | null
           agent_email: string | null
           agent_name: string | null
           agent_national_id: string | null
@@ -29124,6 +29127,9 @@ export type Database = {
           civil_aviation_approval_expiry: string | null
           civil_aviation_approval_number: string | null
           civil_aviation_approval_url: string | null
+          civil_defense_approval_expiry: string | null
+          civil_defense_approval_number: string | null
+          civil_defense_approval_url: string | null
           client_code: string | null
           commercial_register: string | null
           cover_url: string | null
@@ -29159,6 +29165,9 @@ export type Database = {
           food_safety_approval_number: string | null
           food_safety_approval_url: string | null
           founded_year: number | null
+          governorate_activity_license_expiry: string | null
+          governorate_activity_license_number: string | null
+          governorate_activity_license_url: string | null
           hazardous_certified: boolean | null
           hazardous_materials_register_expiry: string | null
           hazardous_materials_register_number: string | null
@@ -29208,6 +29217,9 @@ export type Database = {
           nuclear_regulatory_approval_expiry: string | null
           nuclear_regulatory_approval_number: string | null
           nuclear_regulatory_approval_url: string | null
+          occupational_safety_approval_expiry: string | null
+          occupational_safety_approval_number: string | null
+          occupational_safety_approval_url: string | null
           onboarding_completed: boolean | null
           onboarding_completed_at: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
@@ -29218,6 +29230,9 @@ export type Database = {
           petroleum_authority_approval_url: string | null
           phone: string
           policy: string | null
+          ports_authority_approval_expiry: string | null
+          ports_authority_approval_number: string | null
+          ports_authority_approval_url: string | null
           price_range: string | null
           production_capacity: string | null
           region: string | null
@@ -29236,7 +29251,13 @@ export type Database = {
           suspension_reason: string | null
           tax_card: string | null
           terms_accepted: boolean | null
+          transport_insurance_expiry: string | null
+          transport_insurance_policy_number: string | null
+          transport_insurance_url: string | null
           updated_at: string | null
+          veterinary_quarantine_approval_expiry: string | null
+          veterinary_quarantine_approval_number: string | null
+          veterinary_quarantine_approval_url: string | null
           vision: string | null
           website_url: string | null
           wmis_enrolled: boolean | null
@@ -29254,6 +29275,9 @@ export type Database = {
           activity_type?: string | null
           address?: string | null
           address_details?: string | null
+          adr_certificate_expiry?: string | null
+          adr_certificate_number?: string | null
+          adr_certificate_url?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
@@ -29267,6 +29291,9 @@ export type Database = {
           civil_aviation_approval_expiry?: string | null
           civil_aviation_approval_number?: string | null
           civil_aviation_approval_url?: string | null
+          civil_defense_approval_expiry?: string | null
+          civil_defense_approval_number?: string | null
+          civil_defense_approval_url?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
@@ -29302,6 +29329,9 @@ export type Database = {
           food_safety_approval_number?: string | null
           food_safety_approval_url?: string | null
           founded_year?: number | null
+          governorate_activity_license_expiry?: string | null
+          governorate_activity_license_number?: string | null
+          governorate_activity_license_url?: string | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
@@ -29351,6 +29381,9 @@ export type Database = {
           nuclear_regulatory_approval_expiry?: string | null
           nuclear_regulatory_approval_number?: string | null
           nuclear_regulatory_approval_url?: string | null
+          occupational_safety_approval_expiry?: string | null
+          occupational_safety_approval_number?: string | null
+          occupational_safety_approval_url?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
@@ -29361,6 +29394,9 @@ export type Database = {
           petroleum_authority_approval_url?: string | null
           phone: string
           policy?: string | null
+          ports_authority_approval_expiry?: string | null
+          ports_authority_approval_number?: string | null
+          ports_authority_approval_url?: string | null
           price_range?: string | null
           production_capacity?: string | null
           region?: string | null
@@ -29379,7 +29415,13 @@ export type Database = {
           suspension_reason?: string | null
           tax_card?: string | null
           terms_accepted?: boolean | null
+          transport_insurance_expiry?: string | null
+          transport_insurance_policy_number?: string | null
+          transport_insurance_url?: string | null
           updated_at?: string | null
+          veterinary_quarantine_approval_expiry?: string | null
+          veterinary_quarantine_approval_number?: string | null
+          veterinary_quarantine_approval_url?: string | null
           vision?: string | null
           website_url?: string | null
           wmis_enrolled?: boolean | null
@@ -29397,6 +29439,9 @@ export type Database = {
           activity_type?: string | null
           address?: string | null
           address_details?: string | null
+          adr_certificate_expiry?: string | null
+          adr_certificate_number?: string | null
+          adr_certificate_url?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
@@ -29410,6 +29455,9 @@ export type Database = {
           civil_aviation_approval_expiry?: string | null
           civil_aviation_approval_number?: string | null
           civil_aviation_approval_url?: string | null
+          civil_defense_approval_expiry?: string | null
+          civil_defense_approval_number?: string | null
+          civil_defense_approval_url?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
@@ -29445,6 +29493,9 @@ export type Database = {
           food_safety_approval_number?: string | null
           food_safety_approval_url?: string | null
           founded_year?: number | null
+          governorate_activity_license_expiry?: string | null
+          governorate_activity_license_number?: string | null
+          governorate_activity_license_url?: string | null
           hazardous_certified?: boolean | null
           hazardous_materials_register_expiry?: string | null
           hazardous_materials_register_number?: string | null
@@ -29494,6 +29545,9 @@ export type Database = {
           nuclear_regulatory_approval_expiry?: string | null
           nuclear_regulatory_approval_number?: string | null
           nuclear_regulatory_approval_url?: string | null
+          occupational_safety_approval_expiry?: string | null
+          occupational_safety_approval_number?: string | null
+          occupational_safety_approval_url?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
@@ -29504,6 +29558,9 @@ export type Database = {
           petroleum_authority_approval_url?: string | null
           phone?: string
           policy?: string | null
+          ports_authority_approval_expiry?: string | null
+          ports_authority_approval_number?: string | null
+          ports_authority_approval_url?: string | null
           price_range?: string | null
           production_capacity?: string | null
           region?: string | null
@@ -29522,7 +29579,13 @@ export type Database = {
           suspension_reason?: string | null
           tax_card?: string | null
           terms_accepted?: boolean | null
+          transport_insurance_expiry?: string | null
+          transport_insurance_policy_number?: string | null
+          transport_insurance_url?: string | null
           updated_at?: string | null
+          veterinary_quarantine_approval_expiry?: string | null
+          veterinary_quarantine_approval_number?: string | null
+          veterinary_quarantine_approval_url?: string | null
           vision?: string | null
           website_url?: string | null
           wmis_enrolled?: boolean | null

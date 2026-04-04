@@ -78,6 +78,15 @@ const ALL_LICENSES: { field: string; numberField: string; label: string; isCriti
   { field: 'land_transport_authority_approval_expiry', numberField: 'land_transport_authority_approval_number', label: 'موافقة هيئة النقل البري', isCritical: true, category: 'transport' },
   { field: 'civil_aviation_approval_expiry', numberField: 'civil_aviation_approval_number', label: 'موافقة الطيران المدني (نقل جوي)', isCritical: false, category: 'transport' },
   { field: 'customs_authority_approval_expiry', numberField: 'customs_authority_approval_number', label: 'موافقة مصلحة الجمارك (بازل)', isCritical: false, category: 'transport' },
+  { field: 'ports_authority_approval_expiry', numberField: 'ports_authority_approval_number', label: 'موافقة هيئة الموانئ (نقل بحري)', isCritical: false, category: 'transport' },
+  { field: 'adr_certificate_expiry', numberField: 'adr_certificate_number', label: 'شهادة ADR (نقل دولي للبضائع الخطرة)', isCritical: false, category: 'transport' },
+  { field: 'transport_insurance_expiry', numberField: 'transport_insurance_policy_number', label: 'تأمين أخطار النقل', isCritical: false, category: 'transport' },
+
+  // ── Safety & Municipal (سلامة وتراخيص محلية) ──
+  { field: 'civil_defense_approval_expiry', numberField: 'civil_defense_approval_number', label: 'موافقة الحماية المدنية', isCritical: false, category: 'sector_specific' },
+  { field: 'occupational_safety_approval_expiry', numberField: 'occupational_safety_approval_number', label: 'السلامة والصحة المهنية', isCritical: false, category: 'sector_specific' },
+  { field: 'governorate_activity_license_expiry', numberField: 'governorate_activity_license_number', label: 'ترخيص المحافظة المختصة', isCritical: false, category: 'sector_specific' },
+  { field: 'veterinary_quarantine_approval_expiry', numberField: 'veterinary_quarantine_approval_number', label: 'موافقة المحاجر البيطرية', isCritical: false, category: 'sector_specific' },
 
   // ── Sector-Specific (قطاعي) ──
   { field: 'ida_license_expiry_date', numberField: 'ida_license', label: 'موافقة هيئة التنمية الصناعية (IDA)', isCritical: false, category: 'sector_specific' },
@@ -99,6 +108,9 @@ const SECTOR_APPROVALS = [
   { numberField: 'ida_approval_number', sector: 'industrial', label: 'نفايات صناعية' },
   { numberField: 'civil_aviation_approval_number', sector: 'aviation', label: 'نقل جوي' },
   { numberField: 'customs_authority_approval_number', sector: 'customs', label: 'نقل عبر الحدود' },
+  { numberField: 'civil_defense_approval_number', sector: 'fire_safety', label: 'الحماية المدنية' },
+  { numberField: 'veterinary_quarantine_approval_number', sector: 'veterinary', label: 'محاجر بيطرية' },
+  { numberField: 'ports_authority_approval_number', sector: 'maritime', label: 'نقل بحري' },
 ];
 
 // Build select string dynamically

@@ -94,6 +94,23 @@ interface ShipmentData {
     establishment_registration?: string | null;
     registered_activity?: string | null;
     land_transport_license?: string | null;
+    wmra_permit_number?: string | null;
+    environmental_register_number?: string | null;
+    hazardous_materials_register_number?: string | null;
+    land_transport_authority_approval_number?: string | null;
+    civil_defense_approval_number?: string | null;
+    occupational_safety_approval_number?: string | null;
+    adr_certificate_number?: string | null;
+    transport_insurance_policy_number?: string | null;
+    health_ministry_approval_number?: string | null;
+    petroleum_authority_approval_number?: string | null;
+    drug_authority_approval_number?: string | null;
+    nuclear_regulatory_approval_number?: string | null;
+    food_safety_approval_number?: string | null;
+    ports_authority_approval_number?: string | null;
+    governorate_activity_license_number?: string | null;
+    customs_authority_approval_number?: string | null;
+    ida_approval_number?: string | null;
   } | null;
   recycler: { 
     name: string;
@@ -115,6 +132,15 @@ interface ShipmentData {
     ida_license?: string | null;
     industrial_registry?: string | null;
     license_number?: string | null;
+    civil_defense_approval_number?: string | null;
+    occupational_safety_approval_number?: string | null;
+    governorate_activity_license_number?: string | null;
+    veterinary_quarantine_approval_number?: string | null;
+    health_ministry_approval_number?: string | null;
+    food_safety_approval_number?: string | null;
+    ida_approval_number?: string | null;
+    environmental_register_number?: string | null;
+    hazardous_materials_register_number?: string | null;
   } | null;
   driver: {
     license_number: string;
@@ -199,8 +225,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
           manual_driver_name,
           manual_vehicle_plate,
           generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity),
-          recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity, ida_license, industrial_registry, license_number),
-          transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, wmra_license, establishment_registration, registered_activity, land_transport_license),
+          recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity, ida_license, industrial_registry, license_number, civil_defense_approval_number, occupational_safety_approval_number, governorate_activity_license_number, veterinary_quarantine_approval_number, health_ministry_approval_number, food_safety_approval_number, ida_approval_number, environmental_register_number, hazardous_materials_register_number),
+          transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, wmra_license, establishment_registration, registered_activity, land_transport_license, wmra_permit_number, environmental_register_number, hazardous_materials_register_number, land_transport_authority_approval_number, civil_defense_approval_number, occupational_safety_approval_number, adr_certificate_number, transport_insurance_policy_number, health_ministry_approval_number, petroleum_authority_approval_number, drug_authority_approval_number, nuclear_regulatory_approval_number, food_safety_approval_number, ports_authority_approval_number, governorate_activity_license_number, customs_authority_approval_number, ida_approval_number),
           driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
         `)
         .eq(filterColumn, shipmentId)
@@ -510,13 +536,36 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة إدارة المخلفات</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.wmra_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تصريح WMRA</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.wmra_permit_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>موافقة هيئة النقل البري</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.land_transport_authority_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تأمين النقل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.transport_insurance_policy_number || '-'}</td>
+                </tr>
+                <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تسجيل المنشأة</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.establishment_registration || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الحماية المدنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.civil_defense_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السلامة المهنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.occupational_safety_approval_number || '-'}</td>
+                </tr>
+                {/* Sector-specific approvals — only show row if any field is filled */}
+                {(shipment.transporter?.health_ministry_approval_number || shipment.transporter?.petroleum_authority_approval_number || shipment.transporter?.drug_authority_approval_number || shipment.transporter?.nuclear_regulatory_approval_number || shipment.transporter?.food_safety_approval_number || shipment.transporter?.ports_authority_approval_number || shipment.transporter?.adr_certificate_number || shipment.transporter?.customs_authority_approval_number) && (
+                <tr>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.health_ministry_approval_number ? 'وزارة الصحة' : shipment.transporter?.petroleum_authority_approval_number ? 'هيئة البترول' : shipment.transporter?.adr_certificate_number ? 'شهادة ADR' : 'موافقات قطاعية'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.health_ministry_approval_number || shipment.transporter?.petroleum_authority_approval_number || shipment.transporter?.adr_certificate_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.drug_authority_approval_number ? 'هيئة الدواء' : shipment.transporter?.nuclear_regulatory_approval_number ? 'الرقابة النووية' : shipment.transporter?.food_safety_approval_number ? 'سلامة الغذاء' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.drug_authority_approval_number || shipment.transporter?.nuclear_regulatory_approval_number || shipment.transporter?.food_safety_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.ports_authority_approval_number ? 'هيئة الموانئ' : shipment.transporter?.customs_authority_approval_number ? 'الجمارك' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.ports_authority_approval_number || shipment.transporter?.customs_authority_approval_number || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.representative_name || '-'}</td>
                 </tr>
+                )}
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.address || '-'}</td>
@@ -524,7 +573,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.phone || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.email || '-'}</td>
-                  <td colSpan={2} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}></td>
+                  <td colSpan={2} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{!(shipment.transporter?.health_ministry_approval_number || shipment.transporter?.petroleum_authority_approval_number) ? shipment.transporter?.representative_name || '' : ''}</td>
                 </tr>
                 <tr>
                   <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السائق</td>
@@ -568,16 +617,32 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الحماية المدنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.civil_defense_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السلامة المهنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.occupational_safety_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ترخيص المحافظة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.governorate_activity_license_number || '-'}</td>
+                </tr>
+                {(shipment.recycler?.health_ministry_approval_number || shipment.recycler?.veterinary_quarantine_approval_number || shipment.recycler?.food_safety_approval_number) && (
+                <tr>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.health_ministry_approval_number ? 'وزارة الصحة' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.health_ministry_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.veterinary_quarantine_approval_number ? 'المحاجر البيطرية' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.veterinary_quarantine_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.food_safety_approval_number ? 'سلامة الغذاء' : ''}</td>
+                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.food_safety_approval_number || '-'}</td>
+                </tr>
+                )}
+                <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.address || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.phone || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.email || '-'}</td>
-                </tr>
-                <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
-                  <td colSpan={7} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.representative_name || '-'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
