@@ -801,11 +801,6 @@ const OrganizationProfile = () => {
               </Suspense>
             </ErrorBoundary>
           </TabsContent>
-                </div>
-                <SaveButton />
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* الموقع والصور */}
           <TabsContent value="location">
