@@ -215,7 +215,7 @@ const ShipmentCompactView = ({ shipment, onStatusChange }: CompactViewProps) => 
       </motion.div>
 
       <StatusChangeDialog isOpen={isStatusDialogOpen} onClose={() => setIsStatusDialogOpen(false)} shipment={{ ...shipment, status: mappedStatus }} onStatusChanged={() => { setIsStatusDialogOpen(false); onStatusChange?.(); }} />
-      {(isRecycler || isTransporter) && <RecyclingCertificateDialog isOpen={isReportDialogOpen} onClose={() => setIsReportDialogOpen(false)} shipment={shipment as Record<string, unknown>} />}
+      {(isRecycler || isTransporter) && <RecyclingCertificateDialog isOpen={isReportDialogOpen} onClose={() => setIsReportDialogOpen(false)} shipment={shipment as any} />}
       <ShipmentQuickPrint isOpen={isPrintDialogOpen} onClose={() => { setIsPrintDialogOpen(false); setPrintAutoAction(null); }} shipmentId={shipment.id} autoAction={printAutoAction} />
       <ShipmentRouteMap isOpen={isMapDialogOpen} onClose={() => setIsMapDialogOpen(false)} pickupAddress={shipment.pickup_address || 'غير محدد'} deliveryAddress={shipment.delivery_address || 'غير محدد'} shipmentNumber={shipment.shipment_number} driverId={shipment.driver_id} shipmentStatus={shipment.status} />
       {isLiveTrackingOpen && shipment.driver_id && (
