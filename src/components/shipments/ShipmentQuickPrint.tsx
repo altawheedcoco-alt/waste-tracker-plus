@@ -617,16 +617,32 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الحماية المدنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.civil_defense_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السلامة المهنية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.occupational_safety_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ترخيص المحافظة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.governorate_activity_license_number || '-'}</td>
+                </tr>
+                {(shipment.recycler?.health_ministry_approval_number || shipment.recycler?.veterinary_quarantine_approval_number || shipment.recycler?.food_safety_approval_number) && (
+                <tr>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.health_ministry_approval_number ? 'وزارة الصحة' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.health_ministry_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.veterinary_quarantine_approval_number ? 'المحاجر البيطرية' : ''}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.veterinary_quarantine_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.food_safety_approval_number ? 'سلامة الغذاء' : ''}</td>
+                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.food_safety_approval_number || '-'}</td>
+                </tr>
+                )}
+                <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.address || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.phone || '-'}</td>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
                   <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.email || '-'}</td>
-                </tr>
-                <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
-                  <td colSpan={7} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.representative_name || '-'}</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
