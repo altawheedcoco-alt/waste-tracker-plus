@@ -36,6 +36,11 @@ import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DriverDailySummary from '@/components/driver/DriverDailySummary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import { useRealWeather } from '@/hooks/useRealWeather';
+import DashboardV2Header from './shared/DashboardV2Header';
+import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 
 // Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
