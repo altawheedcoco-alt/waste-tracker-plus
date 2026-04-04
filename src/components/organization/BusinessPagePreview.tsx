@@ -343,6 +343,28 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
             </div>
           </TabsContent>
 
+          {/* ═══ Achievements Tab ═══ */}
+          <TabsContent value="achievements" className="p-4 mt-0">
+            <div className="max-w-xl mx-auto space-y-4">
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-primary" /> الأوسمة المكتسبة
+                  </h4>
+                  <OrgAchievementBadges orgId={organizationId} orgData={orgData} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5">
+                    🌍 الأثر البيئي التراكمي
+                  </h4>
+                  <OrgImpactCounter orgId={organizationId} />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* ═══ Photos Tab ═══ */}
           <TabsContent value="photos" className="p-4 mt-0">
             {photos.length > 0 ? (
