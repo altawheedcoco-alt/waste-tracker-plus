@@ -22,11 +22,11 @@ describe('strict type utilities', () => {
   });
 
   it('extractRows returns empty array on error', () => {
-    expect(extractRows({ data: null, error: 'fail' })).toEqual([]);
+    expect(extractRows({ data: null, error: 'fail' } as any)).toEqual([]);
   });
 
   it('extractRows returns data on success', () => {
-    const rows = [{ id: '1' }];
-    expect(extractRows({ data: rows, error: null })).toEqual(rows);
+    const rows = [{ id: '1' }] as any;
+    expect(extractRows({ data: rows, error: null } as any)).toEqual(rows);
   });
 });
