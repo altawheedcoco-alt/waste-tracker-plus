@@ -64,7 +64,7 @@ const AutomationAuditTab = ({ organizationId }: AutomationAuditTabProps) => {
       case 'ai': return 'bg-purple-500/10 text-purple-600';
       case 'auto': return 'bg-emerald-500/10 text-emerald-600';
       case 'hybrid': return 'bg-blue-500/10 text-blue-600';
-      case 'manual': return 'bg-gray-500/10 text-gray-600';
+      case 'manual': return 'bg-muted text-muted-foreground';
       default: return '';
     }
   };
