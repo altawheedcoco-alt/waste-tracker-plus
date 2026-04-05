@@ -538,7 +538,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           <Suspense fallback={null}><EncryptedChatWidget /></Suspense>
 
           {/* Voice Assistant */}
-          <Suspense fallback={null}><VoiceAssistantFAB userRole={profile?.account_type} /></Suspense>
+          <Suspense fallback={null}><VoiceAssistantFAB userRole={organization?.organization_type} /></Suspense>
         </div>
       </div>
     </TooltipProvider>
