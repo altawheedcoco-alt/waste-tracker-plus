@@ -44,11 +44,14 @@ const RecurringShipmentScheduler = () => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from('scheduled_collections').insert([{
+        organization_id: organization.id,
+        title: `${form.wasteType} - ${form.frequency}`,
         waste_type: form.wasteType,
         frequency: form.frequency,
         estimated_quantity: parseFloat(form.quantity),
-        quantity_unit: form.unit,
+        unit: form.unit,
         is_active: true,
+        start_date: new Date().toISOString().split('T')[0],
         next_collection_date: new Date(Date.now() + (form.frequency === 'daily' ? 86400000 : form.frequency === 'weekly' ? 604800000 : 2592000000)).toISOString().split('T')[0],
       }]);
       if (error) throw error;

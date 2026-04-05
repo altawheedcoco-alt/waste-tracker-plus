@@ -38,15 +38,17 @@ const ReverseAuctionPortal = () => {
     setIsSubmitting(true);
     try {
       // Create a work order as a reverse auction request
+      const orderNum = `RA-${Date.now().toString(36).toUpperCase()}`;
       const { error } = await supabase.from('work_orders').insert([{
-        created_by: organization.id,
-        title: `مزايدة عكسية: ${form.wasteType} - ${form.quantity} ${form.unit}`,
-        description: `طلب مزايدة عكسية\nنوع المخلف: ${form.wasteType}\nالكمية: ${form.quantity} ${form.unit}\nعنوان الاستلام: ${form.pickupAddress}\nالميزانية القصوى: ${form.maxBudget} ج.م\nآخر موعد: ${form.deadline}`,
-        order_type: 'reverse_auction',
-        status: 'open',
+        organization_id: organization.id,
+        order_number: orderNum,
         waste_type: form.wasteType,
+        waste_description: `مزايدة عكسية | عنوان: ${form.pickupAddress} | ميزانية: ${form.maxBudget} ج.م | موعد: ${form.deadline}`,
         estimated_quantity: parseFloat(form.quantity) || 0,
-        quantity_unit: form.unit,
+        unit: form.unit,
+        status: 'open',
+        urgency: 'normal',
+        pickup_location: form.pickupAddress,
       }]);
       if (error) throw error;
       toast.success('✅ تم نشر طلب المزايدة العكسية بنجاح');
