@@ -17,12 +17,12 @@ const CertifiedPartnersDirectory = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('id, name, city, phone, type, address')
-        .in('type', ['transporter', 'recycler'])
+        .select('id, name, city, phone, org_type, address')
+        .in('org_type', ['transporter', 'recycler'])
         .eq('status', 'active')
         .order('name')
         .limit(50);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
