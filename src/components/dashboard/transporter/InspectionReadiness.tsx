@@ -25,15 +25,15 @@ export default function InspectionReadiness() {
     queryKey: ['inspection-readiness', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const [permits, vehicles, drivers] = await Promise.all([
-        supabase.from('permits' as any).select('status, valid_until, permit_type').eq('organization_id', orgId!),
-        supabase.from('vehicles' as any).select('status, insurance_expiry, technical_inspection_date').eq('organization_id', orgId!),
-        supabase.from('drivers' as any).select('license_expiry, is_active, training_status').eq('organization_id', orgId!),
+      const [entityDocs, fleetVehicles, driversData] = await Promise.all([
+        supabase.from('entity_documents').select('status, expiry_date, document_type').eq('organization_id', orgId!),
+        supabase.from('fleet_vehicles').select('status').eq('organization_id', orgId!),
+        supabase.from('drivers').select('license_expiry, is_available').eq('organization_id', orgId!),
       ]);
       return {
-        permits: permits.data || [],
-        vehicles: vehicles.data || [],
-        drivers: drivers.data || [],
+        permits: (entityDocs.data || []) as any[],
+        vehicles: (fleetVehicles.data || []) as any[],
+        drivers: (driversData.data || []) as any[],
       };
     },
   });
@@ -43,51 +43,36 @@ export default function InspectionReadiness() {
     const now = new Date();
     const items: CheckItem[] = [];
 
-    // License checks
-    const hasActiveEEAA = data.permits.some(p => p.permit_type === 'environmental_approval' && p.status === 'active');
+    const hasActiveEEAA = data.permits.some((p: any) => p.document_type === 'environmental_approval' && (p.status === 'active' || p.status === 'approved'));
     items.push({ label: 'موافقة بيئية سارية (EEAA)', passed: hasActiveEEAA, critical: true });
 
-    const hasActiveWMRA = data.permits.some(p => p.permit_type === 'wmra_license' && p.status === 'active');
+    const hasActiveWMRA = data.permits.some((p: any) => p.document_type === 'wmra_license' && (p.status === 'active' || p.status === 'approved'));
     items.push({ label: 'ترخيص WMRA ساري', passed: hasActiveWMRA, critical: true });
 
-    const noExpired = !data.permits.some(p => {
-      if (!p.valid_until) return false;
-      return new Date(p.valid_until) < now;
+    const noExpired = !data.permits.some((p: any) => {
+      if (!p.expiry_date) return false;
+      return new Date(p.expiry_date) < now;
     });
-    items.push({ label: 'لا توجد تراخيص منتهية', passed: noExpired, critical: true });
+    items.push({ label: 'لا توجد وثائق منتهية', passed: noExpired, critical: true });
 
-    // Vehicle checks
-    const allVehiclesInsured = data.vehicles.length > 0 && data.vehicles.every(v => {
-      if (!v.insurance_expiry) return false;
-      return new Date(v.insurance_expiry) > now;
-    });
-    items.push({ label: 'تأمين جميع المركبات ساري', passed: allVehiclesInsured, critical: true });
+    const hasActiveVehicles = data.vehicles.some((v: any) => v.status === 'active');
+    items.push({ label: 'مركبات نشطة متاحة', passed: hasActiveVehicles, critical: true });
 
-    const allVehiclesInspected = data.vehicles.length > 0 && data.vehicles.every(v => {
-      if (!v.technical_inspection_date) return false;
-      const inspDate = new Date(v.technical_inspection_date);
-      const sixMonths = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-      return inspDate > sixMonths;
-    });
-    items.push({ label: 'فحص فني حديث لكل مركبة', passed: allVehiclesInspected, critical: false });
-
-    // Driver checks
-    const allDriversLicensed = data.drivers.length > 0 && data.drivers.every(d => {
+    const allDriversLicensed = data.drivers.length > 0 && data.drivers.every((d: any) => {
       if (!d.license_expiry) return false;
       return new Date(d.license_expiry) > now;
     });
     items.push({ label: 'رخص السائقين سارية', passed: allDriversLicensed, critical: true });
 
-    const hasActiveDrivers = data.drivers.some(d => d.is_active);
-    items.push({ label: 'سائقون نشطون متاحون', passed: hasActiveDrivers, critical: false });
+    const hasAvailableDrivers = data.drivers.some((d: any) => d.is_available);
+    items.push({ label: 'سائقون متاحون', passed: hasAvailableDrivers, critical: false });
 
     return items;
   }, [data]);
 
   const score = useMemo(() => {
     if (!checks.length) return 0;
-    const passed = checks.filter(c => c.passed).length;
-    return Math.round((passed / checks.length) * 100);
+    return Math.round((checks.filter(c => c.passed).length / checks.length) * 100);
   }, [checks]);
 
   if (isLoading) return <Skeleton className="h-[300px] w-full rounded-xl" />;
@@ -112,11 +97,7 @@ export default function InspectionReadiness() {
             <div
               key={i}
               className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
-                item.passed
-                  ? 'bg-emerald-500/5'
-                  : item.critical
-                  ? 'bg-destructive/5'
-                  : 'bg-amber-500/5'
+                item.passed ? 'bg-emerald-500/5' : item.critical ? 'bg-destructive/5' : 'bg-amber-500/5'
               }`}
             >
               {item.passed ? (

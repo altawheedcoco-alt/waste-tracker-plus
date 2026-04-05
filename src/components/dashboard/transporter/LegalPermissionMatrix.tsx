@@ -1,11 +1,10 @@
 /**
  * مصفوفة الصلاحيات القانونية - فكرة #14
- * ماذا يحق لك وماذا لا
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Scale, Check, X, Info } from 'lucide-react';
+import { Scale, Check, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,24 +20,24 @@ export default function LegalPermissionMatrix() {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  const { data: permits, isLoading } = useQuery({
+  const { data: docs, isLoading } = useQuery({
     queryKey: ['legal-permissions', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('permits' as any)
-        .select('permit_type, conditions, status')
+      const { data } = await (supabase
+        .from('entity_documents') as any)
+        .select('document_type, metadata, status')
         .eq('organization_id', orgId!)
         .in('status', ['active', 'approved']);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const matrix = useMemo((): PermissionItem[] => {
-    const types = new Set((permits || []).map(p => p.permit_type));
-    const conditions = (permits || []).reduce((acc, p) => {
-      const cond = p.conditions as any;
-      if (cond) Object.assign(acc, cond);
+    const types = new Set((docs || []).map((p: any) => p.document_type));
+    const conditions = (docs || []).reduce((acc: any, p: any) => {
+      const meta = p.metadata as any;
+      if (meta) Object.assign(acc, meta);
       return acc;
     }, {} as any);
 
@@ -53,7 +52,7 @@ export default function LegalPermissionMatrix() {
       { action: 'نقل عبر المحافظات', allowed: (conditions.governorates?.length || 0) > 1 || conditions.nationwide, reason: 'حسب نطاق الترخيص الجغرافي' },
       { action: 'إصدار مانيفست', allowed: types.has('wmra_license'), reason: types.has('wmra_license') ? 'مصرح بموجب WMRA' : 'يتطلب ترخيص WMRA' },
     ];
-  }, [permits]);
+  }, [docs]);
 
   if (isLoading) return <Skeleton className="h-[280px] w-full rounded-xl" />;
 
@@ -73,9 +72,7 @@ export default function LegalPermissionMatrix() {
       <CardContent>
         <div className="space-y-1.5">
           {matrix.map((item, i) => (
-            <div key={i} className={`flex items-center gap-2 p-2 rounded-lg ${
-              item.allowed ? 'bg-emerald-500/5' : 'bg-muted/30'
-            }`}>
+            <div key={i} className={`flex items-center gap-2 p-2 rounded-lg ${item.allowed ? 'bg-emerald-500/5' : 'bg-muted/30'}`}>
               {item.allowed ? (
                 <Check className="h-4 w-4 text-emerald-500 shrink-0" />
               ) : (

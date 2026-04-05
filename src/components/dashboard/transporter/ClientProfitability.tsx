@@ -20,13 +20,13 @@ export default function ClientProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('accounting_ledger' as any)
+        .from('accounting_ledger')
         .select('amount, entry_type, partner_organization_id, entry_category')
         .eq('organization_id', orgId!)
         .not('partner_organization_id', 'is', null)
         .order('created_at', { ascending: false })
         .limit(500);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
@@ -35,18 +35,19 @@ export default function ClientProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('partnerships' as any)
-        .select('partner_organization_id, partner_org:organizations!partnerships_partner_organization_id_fkey(name)')
-        .eq('organization_id', orgId!);
-      return data || [];
+        .from('organizations')
+        .select('id, name')
+        .limit(200);
+      return (data || []) as any[];
     },
   });
 
   const profitByClient = useMemo(() => {
     const map = new Map<string, { revenue: number; cost: number; count: number }>();
 
-    (ledger || []).forEach(entry => {
+    (ledger || []).forEach((entry: any) => {
       const pid = entry.partner_organization_id!;
+      if (!pid) return;
       if (!map.has(pid)) map.set(pid, { revenue: 0, cost: 0, count: 0 });
       const rec = map.get(pid)!;
       rec.count++;
@@ -55,9 +56,8 @@ export default function ClientProfitability() {
     });
 
     const partnerNames = new Map<string, string>();
-    (partners || []).forEach(p => {
-      const name = (p.partner_org as any)?.name;
-      if (name) partnerNames.set(p.partner_organization_id, name);
+    (partners || []).forEach((p: any) => {
+      if (p.name) partnerNames.set(p.id, p.name);
     });
 
     return Array.from(map.entries())

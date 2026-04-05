@@ -1,6 +1,5 @@
 /**
  * متتبع النطاق الجغرافي - فكرة #4
- * عرض المحافظات المصرح العمل فيها مع كشف العمليات خارج النطاق
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,28 +10,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const EGYPT_GOVERNORATES = [
-  'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحيرة', 'الشرقية',
-  'القليوبية', 'المنوفية', 'الغربية', 'كفر الشيخ', 'دمياط', 'بورسعيد',
-  'الإسماعيلية', 'السويس', 'الفيوم', 'بني سويف', 'المنيا', 'أسيوط',
-  'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'البحر الأحمر', 'الوادي الجديد',
-  'مطروح', 'شمال سيناء', 'جنوب سيناء',
-];
-
 export default function GeographicScopeMap() {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  const { data: permits, isLoading } = useQuery({
+  const { data: docs, isLoading } = useQuery({
     queryKey: ['geo-scope-permits', orgId],
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('permits' as any)
-        .select('permit_type, conditions, status')
+        .from('entity_documents')
+        .select('document_type, status, metadata')
         .eq('organization_id', orgId!)
         .in('status', ['active', 'approved']);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
@@ -41,18 +32,18 @@ export default function GeographicScopeMap() {
     let nationwide = false;
     const types = new Set<string>();
 
-    (permits || []).forEach(p => {
-      const conditions = p.conditions as any;
-      if (conditions?.governorates) {
-        if (Array.isArray(conditions.governorates)) {
-          conditions.governorates.forEach((g: string) => govs.add(g));
+    (docs || []).forEach((p: any) => {
+      const meta = p.metadata as any;
+      if (meta?.governorates) {
+        if (Array.isArray(meta.governorates)) {
+          meta.governorates.forEach((g: string) => govs.add(g));
         }
-        if (conditions.governorates === 'nationwide' || conditions.nationwide) {
+        if (meta.governorates === 'nationwide' || meta.nationwide) {
           nationwide = true;
         }
       }
-      if (conditions?.waste_types && Array.isArray(conditions.waste_types)) {
-        conditions.waste_types.forEach((t: string) => types.add(t));
+      if (meta?.waste_types && Array.isArray(meta.waste_types)) {
+        meta.waste_types.forEach((t: string) => types.add(t));
       }
     });
 
@@ -61,7 +52,7 @@ export default function GeographicScopeMap() {
       isNationwide: nationwide,
       wasteTypes: Array.from(types),
     };
-  }, [permits]);
+  }, [docs]);
 
   if (isLoading) return <Skeleton className="h-[260px] w-full rounded-xl" />;
 
@@ -82,7 +73,6 @@ export default function GeographicScopeMap() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Scope Summary */}
         <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
           {isNationwide ? (
             <>
@@ -102,7 +92,6 @@ export default function GeographicScopeMap() {
           )}
         </div>
 
-        {/* Authorized Governorates */}
         {!isNationwide && authorizedGovs.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {authorizedGovs.map(gov => (
@@ -114,7 +103,6 @@ export default function GeographicScopeMap() {
           </div>
         )}
 
-        {/* Waste Types */}
         {wasteTypes.length > 0 && (
           <div>
             <p className="text-[10px] text-muted-foreground mb-1.5">أنواع المخلفات المصرح بنقلها:</p>
@@ -131,7 +119,6 @@ export default function GeographicScopeMap() {
           </div>
         )}
 
-        {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-2 pt-1">
           <div className="text-center p-2 rounded-lg bg-muted/50">
             <div className="text-lg font-bold text-primary">
@@ -144,8 +131,8 @@ export default function GeographicScopeMap() {
             <div className="text-[10px] text-muted-foreground">نوع مخلفات</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-muted/50">
-            <div className="text-lg font-bold text-primary">{(permits || []).length}</div>
-            <div className="text-[10px] text-muted-foreground">تصريح</div>
+            <div className="text-lg font-bold text-primary">{(docs || []).length}</div>
+            <div className="text-[10px] text-muted-foreground">وثيقة</div>
           </div>
         </div>
       </CardContent>

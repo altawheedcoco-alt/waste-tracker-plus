@@ -3,7 +3,7 @@
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Clock, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,21 +19,19 @@ export default function DriverShiftManager() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('drivers' as any)
-        .select('id, full_name, is_active, current_status, shift_start, shift_end, total_hours_today')
+        .from('drivers')
+        .select('id, is_available, license_number')
         .eq('organization_id', orgId!)
-        .eq('is_active', true)
-        .order('full_name');
-      return data || [];
+        .order('created_at', { ascending: false });
+      return (data || []) as any[];
     },
   });
 
   const summary = useMemo(() => {
     const d = drivers || [];
     return {
-      onDuty: d.filter(x => x.current_status === 'on_duty' || x.current_status === 'driving').length,
-      offDuty: d.filter(x => x.current_status === 'off_duty' || !x.current_status).length,
-      overHours: d.filter(x => (x.total_hours_today || 0) > 10).length,
+      available: d.filter((x: any) => x.is_available).length,
+      unavailable: d.filter((x: any) => !x.is_available).length,
       total: d.length,
     };
   }, [drivers]);
@@ -49,32 +47,19 @@ export default function DriverShiftManager() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="text-center p-2 rounded-lg bg-emerald-500/10">
-            <div className="text-lg font-bold text-emerald-600">{summary.onDuty}</div>
-            <div className="text-[9px] text-muted-foreground">في الخدمة</div>
+            <div className="text-lg font-bold text-emerald-600">{summary.available}</div>
+            <div className="text-[9px] text-muted-foreground">متاح</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-muted/50">
-            <div className="text-lg font-bold">{summary.offDuty}</div>
-            <div className="text-[9px] text-muted-foreground">خارج الخدمة</div>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-destructive/10">
-            <div className="text-lg font-bold text-destructive">{summary.overHours}</div>
-            <div className="text-[9px] text-muted-foreground">تجاوز الحد</div>
+            <div className="text-lg font-bold">{summary.unavailable}</div>
+            <div className="text-[9px] text-muted-foreground">غير متاح</div>
           </div>
         </div>
 
-        {summary.overHours > 0 && (
-          <div className="p-2 rounded-lg bg-destructive/5 border border-destructive/20 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
-            <span className="text-[11px] text-destructive">
-              {summary.overHours} سائق تجاوز 10 ساعات قيادة (الحد القانوني)
-            </span>
-          </div>
-        )}
-
         {summary.total === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">لا يوجد سائقون نشطون</p>
+          <p className="text-sm text-muted-foreground text-center py-4">لا يوجد سائقون مسجلون</p>
         )}
       </CardContent>
     </Card>

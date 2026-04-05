@@ -1,6 +1,5 @@
 /**
  * لوحة حالة التراخيص الشاملة - فكرة #1
- * عرض كل التراخيص (EEAA، WMRA، نقل بري، دفاع مدني) بحالتها
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,36 +16,33 @@ interface LicenseInfo {
   id: string;
   type: string;
   typeAr: string;
-  issuer: string;
   number: string;
   validUntil: string;
   status: 'active' | 'expiring' | 'critical' | 'expired';
   daysLeft: number;
-  wasteTypes?: string[];
-  governorates?: string[];
 }
 
 export default function LicenseStatusBoard() {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  const { data: permits, isLoading } = useQuery({
+  const { data: docs, isLoading } = useQuery({
     queryKey: ['transporter-licenses', orgId],
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('permits' as any)
-        .select('*')
+        .from('entity_documents')
+        .select('id, document_type, document_number, status, expiry_date, metadata')
         .eq('organization_id', orgId!)
-        .order('valid_until', { ascending: true });
-      return data || [];
+        .order('expiry_date', { ascending: true });
+      return (data || []) as any[];
     },
   });
 
   const licenses = useMemo((): LicenseInfo[] => {
     const now = new Date();
-    return (permits || []).map(p => {
-      const validUntil = p.valid_until ? new Date(p.valid_until) : null;
+    return (docs || []).map((p: any) => {
+      const validUntil = p.expiry_date ? new Date(p.expiry_date) : null;
       const daysLeft = validUntil
         ? Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         : 999;
@@ -61,21 +57,20 @@ export default function LicenseStatusBoard() {
         wmra_license: 'ترخيص WMRA',
         transport_license: 'ترخيص نقل بري',
         civil_defense: 'موافقة دفاع مدني',
-        industrial_control: 'رقابة صناعية',
+        commercial_register: 'سجل تجاري',
       };
 
       return {
         id: p.id,
-        type: p.permit_type || 'other',
-        typeAr: typeMap[p.permit_type || ''] || p.permit_type || 'ترخيص آخر',
-        issuer: p.issuing_authority || 'جهة غير محددة',
-        number: p.permit_number || '-',
-        validUntil: p.valid_until || '-',
+        type: p.document_type || 'other',
+        typeAr: typeMap[p.document_type || ''] || p.document_type || 'وثيقة أخرى',
+        number: p.document_number || '-',
+        validUntil: p.expiry_date || '-',
         status,
         daysLeft,
       };
     });
-  }, [permits]);
+  }, [docs]);
 
   const statusConfig = {
     active: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle, label: 'ساري' },
@@ -115,9 +110,9 @@ export default function LicenseStatusBoard() {
         {licenses.length === 0 ? (
           <div className="text-center py-8">
             <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">لم يتم تسجيل تراخيص بعد</p>
+            <p className="text-sm text-muted-foreground">لم يتم تسجيل وثائق بعد</p>
             <Button variant="outline" size="sm" className="mt-3">
-              <RefreshCw className="h-3.5 w-3.5 ml-1" /> إضافة ترخيص
+              <RefreshCw className="h-3.5 w-3.5 ml-1" /> إضافة وثيقة
             </Button>
           </div>
         ) : (

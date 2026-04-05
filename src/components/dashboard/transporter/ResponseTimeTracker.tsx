@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Timer, TrendingUp, TrendingDown } from 'lucide-react';
+import { Timer } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,36 +20,25 @@ export default function ResponseTimeTracker() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments' as any)
-        .select('created_at, approved_at, collected_at, delivered_at, status')
+        .from('shipments')
+        .select('created_at, status')
         .eq('transporter_id', orgId!)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
         .limit(200);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const metrics = useMemo(() => {
-    const valid = (shipments || []).filter(s => s.created_at && s.approved_at);
-    if (!valid.length) return null;
-
-    const responseTimes = valid.map(s => {
-      const created = new Date(s.created_at).getTime();
-      const approved = new Date(s.approved_at!).getTime();
-      return (approved - created) / (1000 * 60); // minutes
-    });
-
-    const avg = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
-    const under30 = responseTimes.filter(t => t <= 30).length;
-    const under60 = responseTimes.filter(t => t <= 60).length;
+    if (!shipments?.length) return null;
+    const total = shipments.length;
+    const delivered = shipments.filter((s: any) => s.status === 'delivered' || s.status === 'confirmed').length;
+    const deliveryRate = Math.round((delivered / total) * 100);
 
     return {
-      avgMinutes: Math.round(avg),
-      under30Pct: Math.round((under30 / responseTimes.length) * 100),
-      under60Pct: Math.round((under60 / responseTimes.length) * 100),
-      total: responseTimes.length,
-      fastest: Math.round(Math.min(...responseTimes)),
-      slowest: Math.round(Math.max(...responseTimes)),
+      total,
+      delivered,
+      deliveryRate,
     };
   }, [shipments]);
 
@@ -60,7 +49,7 @@ export default function ResponseTimeTracker() {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Timer className="h-5 w-5 text-primary" />
-          وقت الاستجابة
+          أداء الشحنات
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -69,40 +58,16 @@ export default function ResponseTimeTracker() {
         ) : (
           <div className="space-y-3">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">{metrics.avgMinutes}</div>
-              <div className="text-xs text-muted-foreground">دقيقة متوسط الاستجابة</div>
+              <div className="text-3xl font-bold text-primary">{metrics.deliveryRate}%</div>
+              <div className="text-xs text-muted-foreground">معدل الإنجاز (30 يوم)</div>
             </div>
 
-            <div className="space-y-2">
-              <div>
-                <div className="flex justify-between text-[10px] mb-1">
-                  <span>أقل من 30 دقيقة</span>
-                  <span className="font-medium">{metrics.under30Pct}%</span>
-                </div>
-                <Progress value={metrics.under30Pct} className="h-1.5" />
+            <div>
+              <div className="flex justify-between text-[10px] mb-1">
+                <span>مكتمل</span>
+                <span className="font-medium">{metrics.delivered}/{metrics.total}</span>
               </div>
-              <div>
-                <div className="flex justify-between text-[10px] mb-1">
-                  <span>أقل من ساعة</span>
-                  <span className="font-medium">{metrics.under60Pct}%</span>
-                </div>
-                <Progress value={metrics.under60Pct} className="h-1.5" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-1.5 rounded bg-emerald-500/5">
-                <div className="text-xs font-bold text-emerald-600">{metrics.fastest}د</div>
-                <div className="text-[9px] text-muted-foreground">أسرع</div>
-              </div>
-              <div className="p-1.5 rounded bg-primary/5">
-                <div className="text-xs font-bold text-primary">{metrics.total}</div>
-                <div className="text-[9px] text-muted-foreground">عملية</div>
-              </div>
-              <div className="p-1.5 rounded bg-amber-500/5">
-                <div className="text-xs font-bold text-amber-600">{metrics.slowest}د</div>
-                <div className="text-[9px] text-muted-foreground">أبطأ</div>
-              </div>
+              <Progress value={metrics.deliveryRate} className="h-1.5" />
             </div>
           </div>
         )}

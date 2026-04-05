@@ -1,6 +1,5 @@
 /**
  * مستخرج الامتثال الفوري - فكرة #8
- * تقرير PDF جاهز للجهات الرقابية
  */
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,18 +20,21 @@ export default function ComplianceExtract() {
     queryKey: ['compliance-extract-data', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const [permits, shipments, vehicles] = await Promise.all([
-        supabase.from('permits' as any).select('status, permit_type, valid_until').eq('organization_id', orgId!),
-        supabase.from('shipments' as any).select('id, status').eq('transporter_id', orgId!).gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString()),
-        supabase.from('vehicles' as any).select('id, status').eq('organization_id', orgId!),
+      const [entityDocs, shipments, fleetVehicles] = await Promise.all([
+        supabase.from('entity_documents').select('id, status, document_type').eq('organization_id', orgId!),
+        supabase.from('shipments').select('id, status').eq('transporter_id', orgId!).gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString()),
+        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', orgId!),
       ]);
+      const docs = (entityDocs.data || []) as any[];
+      const ships = (shipments.data || []) as any[];
+      const vehicles = (fleetVehicles.data || []) as any[];
       return {
-        activePermits: (permits.data || []).filter(p => p.status === 'active').length,
-        totalPermits: (permits.data || []).length,
-        recentShipments: (shipments.data || []).length,
-        completedShipments: (shipments.data || []).filter(s => s.status === 'confirmed' || s.status === 'delivered').length,
-        activeVehicles: (vehicles.data || []).filter(v => v.status === 'active').length,
-        totalVehicles: (vehicles.data || []).length,
+        activePermits: docs.filter(p => p.status === 'active' || p.status === 'approved').length,
+        totalPermits: docs.length,
+        recentShipments: ships.length,
+        completedShipments: ships.filter(s => s.status === 'confirmed' || s.status === 'delivered').length,
+        activeVehicles: vehicles.filter(v => v.status === 'active').length,
+        totalVehicles: vehicles.length,
       };
     },
   });
@@ -54,7 +56,7 @@ export default function ComplianceExtract() {
           <div className="text-center p-2 rounded-lg bg-primary/5">
             <Shield className="h-4 w-4 text-primary mx-auto mb-1" />
             <div className="text-sm font-bold">{stats.activePermits}/{stats.totalPermits}</div>
-            <div className="text-[9px] text-muted-foreground">تراخيص سارية</div>
+            <div className="text-[9px] text-muted-foreground">وثائق سارية</div>
           </div>
           <div className="text-center p-2 rounded-lg bg-emerald-500/5">
             <CheckCircle className="h-4 w-4 text-emerald-500 mx-auto mb-1" />
@@ -82,12 +84,7 @@ export default function ComplianceExtract() {
             <Download className="h-3.5 w-3.5 ml-1" />
             {generating ? 'جاري التوليد...' : 'تقرير EEAA'}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs"
-            disabled={generating}
-          >
+          <Button variant="outline" size="sm" className="flex-1 text-xs" disabled={generating}>
             <Printer className="h-3.5 w-3.5 ml-1" />
             تقرير WMRA
           </Button>

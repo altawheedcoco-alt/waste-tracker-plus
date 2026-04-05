@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Route, TrendingUp, TrendingDown, MapPin } from 'lucide-react';
+import { Route, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,37 +19,34 @@ export default function RouteProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments' as any)
-        .select('pickup_governorate, delivery_governorate, actual_weight, distance_km, price_per_ton, status')
+        .from('shipments')
+        .select('waste_type, quantity, status')
         .eq('transporter_id', orgId!)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString())
         .limit(500);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const routes = useMemo(() => {
-    const map = new Map<string, { revenue: number; trips: number; totalKm: number; totalWeight: number }>();
+    const map = new Map<string, { trips: number; totalWeight: number }>();
 
-    (shipments || []).forEach(s => {
-      const key = `${s.pickup_governorate || 'غير محدد'} → ${s.delivery_governorate || 'غير محدد'}`;
-      if (!map.has(key)) map.set(key, { revenue: 0, trips: 0, totalKm: 0, totalWeight: 0 });
+    (shipments || []).forEach((s: any) => {
+      const key = s.waste_type || 'غير محدد';
+      if (!map.has(key)) map.set(key, { trips: 0, totalWeight: 0 });
       const r = map.get(key)!;
       r.trips++;
-      r.totalKm += s.distance_km || 0;
-      r.totalWeight += s.actual_weight || 0;
-      r.revenue += (s.actual_weight || 0) * (s.price_per_ton || 0);
+      r.totalWeight += s.quantity || 0;
     });
 
     return Array.from(map.entries())
       .map(([route, data]) => ({
         route,
         ...data,
-        avgRevPerTrip: data.trips > 0 ? data.revenue / data.trips : 0,
-        avgKm: data.trips > 0 ? data.totalKm / data.trips : 0,
+        avgWeight: data.trips > 0 ? data.totalWeight / data.trips : 0,
       }))
-      .sort((a, b) => b.revenue - a.revenue)
+      .sort((a, b) => b.trips - a.trips)
       .slice(0, 6);
   }, [shipments]);
 
@@ -60,7 +57,7 @@ export default function RouteProfitability() {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Route className="h-5 w-5 text-primary" />
-          ربحية المسارات
+          تحليل أنواع الشحنات
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -77,12 +74,11 @@ export default function RouteProfitability() {
                   </div>
                   <div className="flex gap-2 text-[9px] text-muted-foreground mt-0.5">
                     <span>{r.trips} رحلة</span>
-                    <span>{Math.round(r.avgKm)} كم/رحلة</span>
                   </div>
                 </div>
                 <div className="text-left shrink-0">
-                  <div className="text-xs font-bold">{r.revenue.toLocaleString('ar-EG')}</div>
-                  <div className="text-[9px] text-muted-foreground">ج.م</div>
+                  <div className="text-xs font-bold">{Math.round(r.totalWeight).toLocaleString('ar-EG')}</div>
+                  <div className="text-[9px] text-muted-foreground">كجم</div>
                 </div>
               </div>
             ))}

@@ -19,34 +19,34 @@ export default function PendingDelayedShipments() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments' as any)
-        .select('id, tracking_number, status, created_at, scheduled_date, waste_type, generator_name')
+        .from('shipments')
+        .select('id, tracking_number, status, created_at, scheduled_date, waste_type')
         .eq('transporter_id', orgId!)
         .in('status', ['new', 'approved', 'collecting', 'in_transit'])
         .order('created_at', { ascending: true })
         .limit(20);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const categorized = useMemo(() => {
     const now = new Date();
-    const delayed: typeof shipments = [];
-    const pending: typeof shipments = [];
+    const delayed: any[] = [];
+    const pending: any[] = [];
 
-    (shipments || []).forEach(s => {
+    (shipments || []).forEach((s: any) => {
       const created = new Date(s.created_at);
       const hoursSince = (now.getTime() - created.getTime()) / (1000 * 60 * 60);
       const scheduled = s.scheduled_date ? new Date(s.scheduled_date) : null;
 
       if ((scheduled && scheduled < now) || hoursSince > 48) {
-        delayed!.push(s);
+        delayed.push(s);
       } else {
-        pending!.push(s);
+        pending.push(s);
       }
     });
 
-    return { delayed: delayed!, pending: pending! };
+    return { delayed, pending };
   }, [shipments]);
 
   if (isLoading) return <Skeleton className="h-[200px] w-full rounded-xl" />;
@@ -88,9 +88,9 @@ export default function PendingDelayedShipments() {
             {categorized.delayed.length > 0 && (
               <div className="space-y-1">
                 <p className="text-[10px] font-medium text-destructive">⚠️ شحنات متأخرة:</p>
-                {categorized.delayed.slice(0, 3).map(s => (
+                {categorized.delayed.slice(0, 3).map((s: any) => (
                   <div key={s.id} className="flex justify-between items-center p-1.5 rounded bg-destructive/5 text-[10px]">
-                    <span className="truncate">{s.tracking_number || s.generator_name || 'شحنة'}</span>
+                    <span className="truncate">{s.tracking_number || 'شحنة'}</span>
                     <Badge variant="destructive" className="text-[8px]">{s.status}</Badge>
                   </div>
                 ))}
