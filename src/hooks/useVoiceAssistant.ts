@@ -31,6 +31,11 @@ interface UseVoiceAssistantOptions {
   wakeWord?: string;
 }
 
+/** How long (ms) to wait after the system finishes speaking before auto-listening again */
+const AUTO_LISTEN_DELAY = 400;
+/** How long (ms) of total inactivity before the conversation session ends */
+const SESSION_TIMEOUT = 45_000; // 45 seconds
+
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
   const [state, setState] = useState<VoiceState>('idle');
@@ -38,6 +43,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [lastResponse, setLastResponse] = useState('');
   const [lastSentiment, setLastSentiment] = useState<VoiceSentiment | null>(null);
   const [isSupported, setIsSupported] = useState(false);
+  const [conversationActive, setConversationActive] = useState(false);
   const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,11 +51,38 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const wakeRecognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isProcessingRef = useRef(false);
+  const conversationActiveRef = useRef(false);
+  const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     setIsSupported(!!SpeechRecognition && !!window.speechSynthesis);
   }, []);
+
+  // Keep ref in sync
+  useEffect(() => {
+    conversationActiveRef.current = conversationActive;
+  }, [conversationActive]);
+
+  /** Reset the session inactivity timer */
+  const resetSessionTimer = useCallback(() => {
+    if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
+    sessionTimerRef.current = setTimeout(() => {
+      // Session expired — end conversation
+      if (conversationActiveRef.current) {
+        setConversationActive(false);
+        conversationActiveRef.current = false;
+        setState('idle');
+        if (recognitionRef.current) {
+          try { recognitionRef.current.stop(); } catch {}
+          recognitionRef.current = null;
+        }
+        window.speechSynthesis.cancel();
+        // Restart wake word if enabled
+        if (wakeWordEnabled) startWakeWordListenerFn();
+      }
+    }, SESSION_TIMEOUT);
+  }, [wakeWordEnabled]);
 
   const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
@@ -57,7 +90,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-EG';
     
-    // Adapt speech based on sentiment
     if (sentiment) {
       switch (sentiment.emotion) {
         case 'frustrated':
@@ -89,17 +121,26 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     utterance.onstart = () => setState('speaking');
     utterance.onend = () => {
-      setState('idle');
       synthRef.current = null;
+      // If conversation is active, auto-listen again after speaking
+      if (conversationActiveRef.current) {
+        resetSessionTimer();
+        setTimeout(() => {
+          if (conversationActiveRef.current) {
+            startListeningInternal(true);
+          }
+        }, AUTO_LISTEN_DELAY);
+      } else {
+        setState('idle');
+      }
     };
     synthRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [resetSessionTimer]);
 
   const executeCommand = useCallback((command: VoiceCommand) => {
     const { action } = command;
     
-    // Track command in history
     setCommandHistory(prev => [...prev.slice(-19), {
       text: command.response,
       intent: command.intent,
@@ -138,6 +179,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     if (!text.trim() || isProcessingRef.current) return;
     isProcessingRef.current = true;
     setState('thinking');
+    resetSessionTimer(); // Reset timer on each interaction
 
     try {
       const { data, error } = await supabase.functions.invoke('voice-command', {
@@ -157,7 +199,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         executeCommand(command);
       }
 
-      // Use adaptive tone if available, else normal response
       const responseText = command.sentiment?.adaptive_tone || command.response;
       speak(responseText, command.sentiment);
     } catch (err) {
@@ -168,14 +209,23 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     } finally {
       isProcessingRef.current = false;
     }
-  }, [location.pathname, userRole, executeCommand, speak]);
+  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer]);
 
-  const startListening = useCallback(() => {
+  /** Internal listening function — isConversation means we're in continuous mode */
+  const startListeningInternal = useCallback((isConversation: boolean) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
+    // Stop wake word listener
     if (wakeRecognitionRef.current) {
       try { wakeRecognitionRef.current.stop(); } catch {}
+      wakeRecognitionRef.current = null;
+    }
+
+    // Stop existing recognition
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
     }
 
     window.speechSynthesis.cancel();
@@ -196,28 +246,73 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         else interimTranscript += t;
       }
       setTranscript(finalTranscript || interimTranscript);
-      if (finalTranscript) processTranscript(finalTranscript);
+      if (finalTranscript) {
+        // Check for end-conversation phrases
+        const endPhrases = ['خلاص', 'كفاية', 'شكرا', 'شكراً', 'باي', 'مع السلامة', 'سلام', 'اقفل', 'وقف'];
+        const isEndPhrase = endPhrases.some(p => finalTranscript.trim().includes(p));
+        
+        if (isEndPhrase && conversationActiveRef.current) {
+          // End conversation gracefully
+          setConversationActive(false);
+          conversationActiveRef.current = false;
+          if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
+          speak('تمام يا باشا، لو احتجتني قول "يا نظام" وأنا هنا! 👋');
+          return;
+        }
+        
+        processTranscript(finalTranscript);
+      }
     };
 
     recognition.onerror = (event: any) => {
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
         toast.error('خطأ في التعرف على الصوت');
       }
+      // If conversation active and it was just no-speech, re-listen
+      if (conversationActiveRef.current && (event.error === 'no-speech' || event.error === 'aborted')) {
+        setTimeout(() => {
+          if (conversationActiveRef.current) {
+            startListeningInternal(true);
+          }
+        }, 500);
+        return;
+      }
       setState('idle');
-      if (wakeWordEnabled) startWakeWordListener();
+      if (wakeWordEnabled) startWakeWordListenerFn();
     };
 
     recognition.onend = () => {
-      if (state === 'listening') setState('idle');
       recognitionRef.current = null;
-      if (wakeWordEnabled) startWakeWordListener();
+      // If still in conversation and not processing/speaking, re-listen
+      if (conversationActiveRef.current && !isProcessingRef.current && state !== 'thinking' && state !== 'speaking') {
+        // Small delay to avoid rapid re-starts
+        setTimeout(() => {
+          if (conversationActiveRef.current && !isProcessingRef.current) {
+            startListeningInternal(true);
+          }
+        }, 300);
+        return;
+      }
+      if (!conversationActiveRef.current) {
+        if (state === 'listening') setState('idle');
+        if (wakeWordEnabled) startWakeWordListenerFn();
+      }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [processTranscript, wakeWordEnabled, state]);
+  }, [processTranscript, wakeWordEnabled, state, speak]);
 
-  const startWakeWordListener = useCallback(() => {
+  /** Public: start a conversation session */
+  const startListening = useCallback(() => {
+    setConversationActive(true);
+    conversationActiveRef.current = true;
+    resetSessionTimer();
+    startListeningInternal(true);
+  }, [startListeningInternal, resetSessionTimer]);
+
+  // We need a stable ref for startWakeWordListener to avoid circular deps
+  const startWakeWordListenerFn = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition || !wakeWordEnabled) return;
     if (wakeRecognitionRef.current) return;
@@ -248,7 +343,12 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           osc.start();
           osc.stop(audioCtx.currentTime + 0.15);
           toast.info('🎤 أنا سامعك، قول أمرك!');
-          setTimeout(() => startListening(), 300);
+          setTimeout(() => {
+            setConversationActive(true);
+            conversationActiveRef.current = true;
+            resetSessionTimer();
+            startListeningInternal(true);
+          }, 300);
           return;
         }
       }
@@ -257,8 +357,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.onerror = () => {
       wakeRecognitionRef.current = null;
       setTimeout(() => {
-        if (wakeWordEnabled && state !== 'listening' && state !== 'thinking' && state !== 'speaking') {
-          startWakeWordListener();
+        if (wakeWordEnabled && !conversationActiveRef.current) {
+          startWakeWordListenerFn();
         }
       }, 2000);
     };
@@ -266,17 +366,25 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.onend = () => {
       wakeRecognitionRef.current = null;
       setTimeout(() => {
-        if (wakeWordEnabled && state !== 'listening' && state !== 'thinking' && state !== 'speaking') {
-          startWakeWordListener();
+        if (wakeWordEnabled && !conversationActiveRef.current) {
+          startWakeWordListenerFn();
         }
       }, 500);
     };
 
     wakeRecognitionRef.current = recognition;
     try { recognition.start(); } catch { wakeRecognitionRef.current = null; }
-  }, [wakeWordEnabled, wakeWord, startListening, state]);
+  }, [wakeWordEnabled, wakeWord, startListeningInternal, resetSessionTimer]);
+
+  // Alias for external use
+  const startWakeWordListener = startWakeWordListenerFn;
 
   const stopListening = useCallback(() => {
+    // End conversation session
+    setConversationActive(false);
+    conversationActiveRef.current = false;
+    if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
+    
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
@@ -287,7 +395,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
   const toggleWakeWord = useCallback((enabled: boolean) => {
     if (enabled) {
-      startWakeWordListener();
+      startWakeWordListenerFn();
     } else {
       if (wakeRecognitionRef.current) {
         try { wakeRecognitionRef.current.stop(); } catch {}
@@ -295,12 +403,13 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       }
       setState('idle');
     }
-  }, [startWakeWordListener]);
+  }, [startWakeWordListenerFn]);
 
   useEffect(() => {
     return () => {
       if (recognitionRef.current) try { recognitionRef.current.stop(); } catch {}
       if (wakeRecognitionRef.current) try { wakeRecognitionRef.current.stop(); } catch {}
+      if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
       window.speechSynthesis.cancel();
     };
   }, []);
@@ -311,6 +420,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     lastResponse,
     lastSentiment,
     isSupported,
+    conversationActive,
     commandHistory,
     startListening,
     stopListening,
