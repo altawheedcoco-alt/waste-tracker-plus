@@ -30,7 +30,7 @@ const ContainerFleetManager = () => {
     const total = containers.length;
     const active = containers.filter(c => c.status === 'active' || c.status === 'in_use').length;
     const needsMaintenance = containers.filter(c => c.status === 'maintenance').length;
-    const rental = containers.filter(c => c.ownership_type === 'rental' || c.container_type?.includes('إيجار')).length;
+    const rental = containers.filter(c => c.container_type?.includes('إيجار') || c.container_type?.includes('rental')).length;
     return { total, active, needsMaintenance, rental };
   }, [containers]);
 

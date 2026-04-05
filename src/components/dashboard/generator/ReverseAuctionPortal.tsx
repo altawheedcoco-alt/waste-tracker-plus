@@ -38,8 +38,8 @@ const ReverseAuctionPortal = () => {
     setIsSubmitting(true);
     try {
       // Create a work order as a reverse auction request
-      const { error } = await supabase.from('work_orders').insert({
-        organization_id: organization.id,
+      const { error } = await supabase.from('work_orders').insert([{
+        created_by: organization.id,
         title: `مزايدة عكسية: ${form.wasteType} - ${form.quantity} ${form.unit}`,
         description: `طلب مزايدة عكسية\nنوع المخلف: ${form.wasteType}\nالكمية: ${form.quantity} ${form.unit}\nعنوان الاستلام: ${form.pickupAddress}\nالميزانية القصوى: ${form.maxBudget} ج.م\nآخر موعد: ${form.deadline}`,
         order_type: 'reverse_auction',
@@ -47,7 +47,7 @@ const ReverseAuctionPortal = () => {
         waste_type: form.wasteType,
         estimated_quantity: parseFloat(form.quantity) || 0,
         quantity_unit: form.unit,
-      });
+      }]);
       if (error) throw error;
       toast.success('✅ تم نشر طلب المزايدة العكسية بنجاح');
       setShowForm(false);

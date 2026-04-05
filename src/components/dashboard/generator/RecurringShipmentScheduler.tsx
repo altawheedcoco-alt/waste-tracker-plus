@@ -43,15 +43,14 @@ const RecurringShipmentScheduler = () => {
     }
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('scheduled_collections').insert({
-        organization_id: organization.id,
+      const { error } = await supabase.from('scheduled_collections').insert([{
         waste_type: form.wasteType,
         frequency: form.frequency,
         estimated_quantity: parseFloat(form.quantity),
         quantity_unit: form.unit,
-        status: 'active',
+        is_active: true,
         next_collection_date: new Date(Date.now() + (form.frequency === 'daily' ? 86400000 : form.frequency === 'weekly' ? 604800000 : 2592000000)).toISOString().split('T')[0],
-      });
+      }]);
       if (error) throw error;
       toast.success('✅ تم إنشاء جدولة شحنة متكررة');
       setShowForm(false);
