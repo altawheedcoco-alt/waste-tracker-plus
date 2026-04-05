@@ -89,6 +89,32 @@ const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
 const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
 const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
 
+// ★ 25 ويدجت جديدة للمولد
+const TransporterPriceComparison = lazy(() => import('./generator/TransporterPriceComparison'));
+const ReverseAuctionPortal = lazy(() => import('./generator/ReverseAuctionPortal'));
+const WasteBudgetTracker = lazy(() => import('./generator/WasteBudgetTracker'));
+const RecyclingROICalculator = lazy(() => import('./generator/RecyclingROICalculator'));
+const BranchComparisonWidget = lazy(() => import('./generator/BranchComparisonWidget'));
+const ContainerFleetManager = lazy(() => import('./generator/ContainerFleetManager'));
+const RecurringShipmentScheduler = lazy(() => import('./generator/RecurringShipmentScheduler'));
+const CleanlinessScoreWidget = lazy(() => import('./generator/CleanlinessScoreWidget'));
+const SeasonalWasteAlerts = lazy(() => import('./generator/SeasonalWasteAlerts'));
+const IndustryBenchmark = lazy(() => import('./generator/IndustryBenchmark'));
+const SmartGoalsTracker = lazy(() => import('./generator/SmartGoalsTracker'));
+const EnvironmentalImpactCalculator = lazy(() => import('./generator/EnvironmentalImpactCalculator'));
+const EcoBadgeWidget = lazy(() => import('./generator/EcoBadgeWidget'));
+const NpsScoreWidget = lazy(() => import('./generator/NpsScoreWidget'));
+const ReferralProgramWidget = lazy(() => import('./generator/ReferralProgramWidget'));
+const ComplaintTicketSystem = lazy(() => import('./generator/ComplaintTicketSystem'));
+const CertifiedPartnersDirectory = lazy(() => import('./generator/CertifiedPartnersDirectory'));
+const SmartContractsManager = lazy(() => import('./generator/SmartContractsManager'));
+const SustainabilityIndex = lazy(() => import('./generator/SustainabilityIndex'));
+const ComplianceWidgets = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.ComplianceChecklistWidget })));
+const AuditReadinessScore = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.AuditReadinessScore })));
+const WeeklySummaryWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.WeeklySummaryWidget })));
+const AutoApprovalWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.AutoApprovalWidget })));
+const ExpiringWasteWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.ExpiringWasteWidget })));
+
 
 interface RecentShipment {
   id: string;
