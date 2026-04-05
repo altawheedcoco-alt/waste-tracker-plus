@@ -26,7 +26,7 @@ interface VoiceCommand {
   follow_up_suggestion?: string;
 }
 
-interface ConversationMessage {
+export interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
@@ -39,7 +39,8 @@ interface UseVoiceAssistantOptions {
 }
 
 const AUTO_LISTEN_DELAY = 500;
-const SESSION_TIMEOUT = 60_000; // 60 seconds
+const SESSION_TIMEOUT = 60_000;
+const MAX_RETRIES = 2;
 
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
@@ -62,15 +63,15 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const conversationHistoryRef = useRef<ConversationMessage[]>([]);
   const bestArabicVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const retryCountRef = useRef(0);
 
-  // Find the best Arabic voice on load
+  // Find best Arabic voice
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     setIsSupported(!!SpeechRecognition && !!window.speechSynthesis);
 
     const findBestVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      // Priority: Egyptian Arabic > Arabic > any
       const priorities = [
         (v: SpeechSynthesisVoice) => v.lang === 'ar-EG',
         (v: SpeechSynthesisVoice) => v.lang === 'ar-SA' && v.name.toLowerCase().includes('female'),
@@ -80,24 +81,15 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       ];
       for (const predicate of priorities) {
         const found = voices.find(predicate);
-        if (found) {
-          bestArabicVoiceRef.current = found;
-          return;
-        }
+        if (found) { bestArabicVoiceRef.current = found; return; }
       }
     };
-
     findBestVoice();
     window.speechSynthesis.onvoiceschanged = findBestVoice;
   }, []);
 
-  useEffect(() => {
-    conversationActiveRef.current = conversationActive;
-  }, [conversationActive]);
-
-  useEffect(() => {
-    conversationHistoryRef.current = conversationHistory;
-  }, [conversationHistory]);
+  useEffect(() => { conversationActiveRef.current = conversationActive; }, [conversationActive]);
+  useEffect(() => { conversationHistoryRef.current = conversationHistory; }, [conversationHistory]);
 
   const resetSessionTimer = useCallback(() => {
     if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
@@ -106,52 +98,68 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         setConversationActive(false);
         conversationActiveRef.current = false;
         setState('idle');
-        if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch {}
-          recognitionRef.current = null;
-        }
+        if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
         window.speechSynthesis.cancel();
         if (wakeWordEnabled) startWakeWordListenerFn();
       }
     }, SESSION_TIMEOUT);
   }, [wakeWordEnabled]);
 
+  // Activation sound
+  const playActivationSound = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      // Warm chime chord
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.06);
+        osc.stop(now + 0.5);
+      });
+    } catch {}
+  }, []);
+
+  const playEndSound = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      [783.99, 523.25].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.06, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1);
+        osc.stop(now + i * 0.1 + 0.35);
+      });
+    } catch {}
+  }, []);
+
   const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-EG';
+    if (bestArabicVoiceRef.current) utterance.voice = bestArabicVoiceRef.current;
 
-    // Use the best Arabic voice found
-    if (bestArabicVoiceRef.current) {
-      utterance.voice = bestArabicVoiceRef.current;
-    }
-
-    // Warm, natural settings
     utterance.rate = 0.95;
     utterance.pitch = 1.05;
     utterance.volume = 1.0;
 
     if (sentiment) {
       switch (sentiment.emotion) {
-        case 'frustrated':
-        case 'angry':
-          utterance.rate = 0.85;
-          utterance.pitch = 0.95;
-          break;
-        case 'urgent':
-          utterance.rate = 1.1;
-          utterance.pitch = 1.05;
-          break;
-        case 'happy':
-        case 'satisfied':
-          utterance.rate = 0.95;
-          utterance.pitch = 1.1;
-          break;
-        case 'confused':
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-          break;
+        case 'frustrated': case 'angry': utterance.rate = 0.85; utterance.pitch = 0.95; break;
+        case 'urgent': utterance.rate = 1.1; utterance.pitch = 1.05; break;
+        case 'happy': case 'satisfied': utterance.rate = 0.95; utterance.pitch = 1.1; break;
+        case 'confused': utterance.rate = 0.9; utterance.pitch = 1.0; break;
       }
     }
 
@@ -161,9 +169,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (conversationActiveRef.current) {
         resetSessionTimer();
         setTimeout(() => {
-          if (conversationActiveRef.current) {
-            startListeningInternal(true);
-          }
+          if (conversationActiveRef.current) startListeningInternal(true);
         }, AUTO_LISTEN_DELAY);
       } else {
         setState('idle');
@@ -175,12 +181,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
   const executeCommand = useCallback((command: VoiceCommand) => {
     const { action } = command;
-
-    setCommandHistory(prev => [...prev.slice(-19), {
-      text: command.response,
-      intent: command.intent,
-      time: Date.now(),
-    }]);
+    setCommandHistory(prev => [...prev.slice(-19), { text: command.response, intent: command.intent, time: Date.now() }]);
 
     switch (action.type) {
       case 'navigate_to':
@@ -195,6 +196,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           navigate(`/dashboard/shipments?${params.toString()}`);
         } else if (action.target === 'accounts') {
           navigate('/dashboard/accounts');
+        } else if (action.target === 'invoices') {
+          navigate('/dashboard/invoices');
         }
         break;
       case 'search_query':
@@ -205,9 +208,13 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       case 'open_dialog':
         if (action.target === 'new_shipment') navigate('/dashboard/shipments?action=create');
         break;
-      case 'conversation':
-        // Pure conversation, no navigation needed
+      case 'go_back':
+        window.history.back();
         break;
+      case 'refresh':
+        window.location.reload();
+        break;
+      case 'conversation':
       case 'show_info':
         break;
     }
@@ -218,69 +225,65 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     isProcessingRef.current = true;
     setState('thinking');
     resetSessionTimer();
+    retryCountRef.current = 0;
 
-    // Add to conversation history
     const userMsg: ConversationMessage = { role: 'user', content: text, timestamp: Date.now() };
     setConversationHistory(prev => [...prev, userMsg]);
 
-    try {
-      const { data, error } = await supabase.functions.invoke('voice-command', {
-        body: {
-          transcript: text,
-          currentRoute: location.pathname,
-          userRole,
-          conversationHistory: conversationHistoryRef.current,
-        },
-      });
+    const attemptProcess = async (): Promise<void> => {
+      try {
+        const { data, error } = await supabase.functions.invoke('voice-command', {
+          body: {
+            transcript: text,
+            currentRoute: location.pathname,
+            userRole,
+            conversationHistory: conversationHistoryRef.current.slice(-10),
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const command = data as VoiceCommand;
-      setLastResponse(command.response);
-      setFollowUpSuggestion(command.follow_up_suggestion || null);
+        const command = data as VoiceCommand;
+        setLastResponse(command.response);
+        setFollowUpSuggestion(command.follow_up_suggestion || null);
+        if (command.sentiment) setLastSentiment(command.sentiment);
 
-      if (command.sentiment) {
-        setLastSentiment(command.sentiment);
+        const assistantMsg: ConversationMessage = {
+          role: 'assistant',
+          content: command.response,
+          timestamp: Date.now(),
+        };
+        setConversationHistory(prev => [...prev, assistantMsg]);
+
+        if (command.confidence > 0.5) executeCommand(command);
+
+        const responseText = command.sentiment?.adaptive_tone || command.response;
+        speak(responseText, command.sentiment);
+      } catch (err) {
+        if (retryCountRef.current < MAX_RETRIES) {
+          retryCountRef.current++;
+          await new Promise(r => setTimeout(r, 1000));
+          return attemptProcess();
+        }
+        const errorMsg = 'معلش يا باشا حصلت مشكلة، حاول تاني';
+        setLastResponse(errorMsg);
+        speak(errorMsg);
+        toast.error('خطأ في معالجة الأمر الصوتي');
       }
+    };
 
-      // Add assistant response to conversation history
-      const assistantMsg: ConversationMessage = {
-        role: 'assistant',
-        content: command.response,
-        timestamp: Date.now(),
-      };
-      setConversationHistory(prev => [...prev, assistantMsg]);
-
-      if (command.confidence > 0.5) {
-        executeCommand(command);
-      }
-
-      const responseText = command.sentiment?.adaptive_tone || command.response;
-      speak(responseText, command.sentiment);
-    } catch (err) {
-      const errorMsg = 'معلش يا باشا حصلت مشكلة، حاول تاني';
-      setLastResponse(errorMsg);
-      speak(errorMsg);
-      toast.error('خطأ في معالجة الأمر الصوتي');
-    } finally {
-      isProcessingRef.current = false;
-    }
+    await attemptProcess();
+    isProcessingRef.current = false;
   }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
-    if (wakeRecognitionRef.current) {
-      try { wakeRecognitionRef.current.stop(); } catch {}
-      wakeRecognitionRef.current = null;
-    }
-    if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch {}
-      recognitionRef.current = null;
-    }
-
+    if (wakeRecognitionRef.current) { try { wakeRecognitionRef.current.stop(); } catch {} wakeRecognitionRef.current = null; }
+    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
     window.speechSynthesis.cancel();
+
     const recognition = new SpeechRecognition();
     recognition.lang = 'ar-EG';
     recognition.continuous = false;
@@ -306,12 +309,11 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           setConversationActive(false);
           conversationActiveRef.current = false;
           if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
-          speak('تمام يا باشا، لو احتجتني قول "يا نظام" وأنا موجود! 👋');
-          // Clear history for next session
-          setTimeout(() => setConversationHistory([]), 2000);
+          playEndSound();
+          speak('تمام يا باشا، لو احتجتني قول "يا نظام"! 👋');
+          setTimeout(() => setConversationHistory([]), 3000);
           return;
         }
-
         processTranscript(finalTranscript);
       }
     };
@@ -321,9 +323,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         toast.error('خطأ في التعرف على الصوت');
       }
       if (conversationActiveRef.current && (event.error === 'no-speech' || event.error === 'aborted')) {
-        setTimeout(() => {
-          if (conversationActiveRef.current) startListeningInternal(true);
-        }, 500);
+        setTimeout(() => { if (conversationActiveRef.current) startListeningInternal(true); }, 500);
         return;
       }
       setState('idle');
@@ -334,9 +334,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       recognitionRef.current = null;
       if (conversationActiveRef.current && !isProcessingRef.current) {
         setTimeout(() => {
-          if (conversationActiveRef.current && !isProcessingRef.current) {
-            startListeningInternal(true);
-          }
+          if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
         }, 300);
         return;
       }
@@ -348,14 +346,23 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [processTranscript, wakeWordEnabled, speak]);
+  }, [processTranscript, wakeWordEnabled, speak, playEndSound]);
 
   const startListening = useCallback(() => {
+    playActivationSound();
     setConversationActive(true);
     conversationActiveRef.current = true;
     resetSessionTimer();
     startListeningInternal(true);
-  }, [startListeningInternal, resetSessionTimer]);
+  }, [startListeningInternal, resetSessionTimer, playActivationSound]);
+
+  // Send text command without voice
+  const sendTextCommand = useCallback((text: string) => {
+    setConversationActive(true);
+    conversationActiveRef.current = true;
+    resetSessionTimer();
+    processTranscript(text);
+  }, [processTranscript, resetSessionTimer]);
 
   const startWakeWordListenerFn = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -373,24 +380,11 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.onresult = (event: any) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript.trim();
-        const wakeVariations = [wakeWord, 'يا نظام', 'يانظام', 'نظام', 'هاي نظام'];
-        const detected = wakeVariations.some(w => t.includes(w));
-        if (detected) {
+        const wakeVariations = [wakeWord, 'يا نظام', 'يانظام', 'نظام', 'هاي نظام', 'يا سيستم'];
+        if (wakeVariations.some(w => t.includes(w))) {
           try { recognition.stop(); } catch {}
           wakeRecognitionRef.current = null;
-          // Play activation sound
-          try {
-            const audioCtx = new AudioContext();
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.connect(g).connect(audioCtx.destination);
-            o.frequency.value = 880;
-            g.gain.value = 0.12;
-            o.start();
-            o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
-            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-            o.stop(audioCtx.currentTime + 0.2);
-          } catch {}
+          playActivationSound();
           toast.info('🎤 أيوه يا باشا، قول أمرك!');
           setTimeout(() => {
             setConversationActive(true);
@@ -419,7 +413,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     wakeRecognitionRef.current = recognition;
     try { recognition.start(); } catch { wakeRecognitionRef.current = null; }
-  }, [wakeWordEnabled, wakeWord, startListeningInternal, resetSessionTimer]);
+  }, [wakeWordEnabled, wakeWord, startListeningInternal, resetSessionTimer, playActivationSound]);
 
   const startWakeWordListener = startWakeWordListenerFn;
 
@@ -427,22 +421,17 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     setConversationActive(false);
     conversationActiveRef.current = false;
     if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
-    if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch {}
-      recognitionRef.current = null;
-    }
+    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
     window.speechSynthesis.cancel();
     setState('idle');
-  }, []);
+    playEndSound();
+  }, [playEndSound]);
 
   const toggleWakeWord = useCallback((enabled: boolean) => {
     if (enabled) {
       startWakeWordListenerFn();
     } else {
-      if (wakeRecognitionRef.current) {
-        try { wakeRecognitionRef.current.stop(); } catch {}
-        wakeRecognitionRef.current = null;
-      }
+      if (wakeRecognitionRef.current) { try { wakeRecognitionRef.current.stop(); } catch {} wakeRecognitionRef.current = null; }
       setState('idle');
     }
   }, [startWakeWordListenerFn]);
@@ -480,5 +469,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     toggleWakeWord,
     clearHistory,
     speak,
+    sendTextCommand,
   };
 }
