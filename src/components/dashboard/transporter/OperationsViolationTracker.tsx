@@ -18,13 +18,12 @@ export default function OperationsViolationTracker() {
     queryKey: ['ops-violations', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const [entityDocs, shipments] = await Promise.all([
-        supabase.from('entity_documents').select('metadata, status, document_type').eq('organization_id', orgId!).in('status', ['active', 'approved']),
-        supabase.from('shipments').select('waste_type, status, created_at')
-          .eq('transporter_id', orgId!)
-          .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
-          .limit(200),
-      ]);
+      const entityDocsQuery = supabase.from('entity_documents').select('metadata, status, document_type').eq('organization_id', orgId!).in('status', ['active', 'approved']);
+      const shipmentsQuery = supabase.from('shipments').select('waste_type, status, created_at')
+        .eq('transporter_id', orgId!)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
+        .limit(200);
+      const [entityDocs, shipments] = await Promise.all([entityDocsQuery, shipmentsQuery]);
       return { permits: (entityDocs.data || []) as any[], shipments: (shipments.data || []) as any[] };
     },
   });
