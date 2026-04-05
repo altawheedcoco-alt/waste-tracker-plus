@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -41,6 +41,9 @@ serve(async (req) => {
 ## حالات الشحنات:
 new (جديدة)، approved (معتمدة)، collecting (جاري التجميع)، in_transit (في الطريق)، delivered (تم التسليم)، confirmed (مؤكدة)
 
+## تحليل المشاعر:
+حلل نبرة المستخدم وحدد مشاعره (مثلاً: إحباط، رضا، استعجال، حياد، غضب، سعادة) حتى نقدر نتعامل معاه بشكل مناسب.
+
 أجب دائماً بـ JSON فقط بالشكل التالي:
 {
   "intent": "navigate" | "filter" | "search" | "create" | "info" | "unknown",
@@ -50,8 +53,19 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
     "params": { معاملات إضافية حسب الحاجة }
   },
   "response": "رد صوتي قصير ومهذب بالعربية (جملة أو اتنين بالكتير)",
-  "confidence": 0.0-1.0
+  "confidence": 0.0-1.0,
+  "sentiment": {
+    "emotion": "neutral" | "happy" | "frustrated" | "angry" | "urgent" | "confused" | "satisfied",
+    "score": 0.0-1.0,
+    "adaptive_tone": "رد مكيّف حسب مشاعر المستخدم"
+  }
 }
+
+## قواعد تكيّف الرد حسب المشاعر:
+- لو المستخدم محبط أو زعلان → كن أكثر تعاطفاً ومساعدة، قدّم حلول سريعة
+- لو المستخدم مستعجل → كن مختصراً ونفّذ بسرعة بدون كلام كتير
+- لو المستخدم سعيد → تفاعل بإيجابية
+- لو المستخدم مرتبك → اشرح ببساطة وقدم اقتراحات
 
 ## أمثلة:
 - "افتح الشحنات" → navigate, navigate_to, /dashboard/shipments
@@ -81,7 +95,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
             type: "function",
             function: {
               name: "execute_voice_command",
-              description: "تنفيذ أمر صوتي محلل",
+              description: "تنفيذ أمر صوتي محلل مع تحليل المشاعر",
               parameters: {
                 type: "object",
                 properties: {
@@ -97,8 +111,18 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
                   },
                   response: { type: "string" },
                   confidence: { type: "number" },
+                  sentiment: {
+                    type: "object",
+                    properties: {
+                      emotion: { type: "string", enum: ["neutral", "happy", "frustrated", "angry", "urgent", "confused", "satisfied"] },
+                      score: { type: "number" },
+                      adaptive_tone: { type: "string" },
+                    },
+                    required: ["emotion", "score"],
+                  },
                 },
-                required: ["intent", "action", "response", "confidence"],
+                required: ["intent", "action", "response", "confidence", "sentiment"],
+                additionalProperties: false,
               },
             },
           },
@@ -133,12 +157,12 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
       });
     }
 
-    // Fallback
     return new Response(JSON.stringify({
       intent: "unknown",
       action: { type: "show_info", target: "none" },
       response: "مش فاهم الأمر، ممكن تقوله تاني؟",
       confidence: 0,
+      sentiment: { emotion: "neutral", score: 0.5 },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -146,7 +170,8 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
     console.error("voice-command error:", e);
     return new Response(JSON.stringify({ 
       error: e instanceof Error ? e.message : "Unknown error",
-      response: "حصل مشكلة، حاول تاني"
+      response: "حصل مشكلة، حاول تاني",
+      sentiment: { emotion: "neutral", score: 0.5 },
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

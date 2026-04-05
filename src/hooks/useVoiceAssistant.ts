@@ -5,6 +5,14 @@ import { toast } from 'sonner';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'wake_listening';
 
+export type SentimentEmotion = 'neutral' | 'happy' | 'frustrated' | 'angry' | 'urgent' | 'confused' | 'satisfied';
+
+interface VoiceSentiment {
+  emotion: SentimentEmotion;
+  score: number;
+  adaptive_tone?: string;
+}
+
 interface VoiceCommand {
   intent: string;
   action: {
@@ -14,6 +22,7 @@ interface VoiceCommand {
   };
   response: string;
   confidence: number;
+  sentiment?: VoiceSentiment;
 }
 
 interface UseVoiceAssistantOptions {
@@ -27,7 +36,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [state, setState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
   const [lastResponse, setLastResponse] = useState('');
+  const [lastSentiment, setLastSentiment] = useState<VoiceSentiment | null>(null);
   const [isSupported, setIsSupported] = useState(false);
+  const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const recognitionRef = useRef<any>(null);
@@ -35,22 +46,43 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isProcessingRef = useRef(false);
 
-  // Check browser support
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     setIsSupported(!!SpeechRecognition && !!window.speechSynthesis);
   }, []);
 
-  // Speak response
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-EG';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
     
-    // Try to find Arabic voice
+    // Adapt speech based on sentiment
+    if (sentiment) {
+      switch (sentiment.emotion) {
+        case 'frustrated':
+        case 'angry':
+          utterance.rate = 0.85;
+          utterance.pitch = 0.9;
+          break;
+        case 'urgent':
+          utterance.rate = 1.15;
+          utterance.pitch = 1.1;
+          break;
+        case 'happy':
+        case 'satisfied':
+          utterance.rate = 1.0;
+          utterance.pitch = 1.1;
+          break;
+        default:
+          utterance.rate = 1.0;
+          utterance.pitch = 1.0;
+      }
+    } else {
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+    }
+
     const voices = window.speechSynthesis.getVoices();
     const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
     if (arabicVoice) utterance.voice = arabicVoice;
@@ -64,18 +96,21 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  // Execute the parsed command
   const executeCommand = useCallback((command: VoiceCommand) => {
     const { action } = command;
     
+    // Track command in history
+    setCommandHistory(prev => [...prev.slice(-19), {
+      text: command.response,
+      intent: command.intent,
+      time: Date.now(),
+    }]);
+
     switch (action.type) {
       case 'navigate_to':
-        if (action.target && action.target.startsWith('/')) {
-          navigate(action.target);
-        }
+        if (action.target?.startsWith('/')) navigate(action.target);
         break;
       case 'filter_data':
-        // Navigate to target page with filter params
         if (action.target === 'shipments') {
           const params = new URLSearchParams();
           if (action.params?.waste_type) params.set('waste_type', action.params.waste_type);
@@ -92,17 +127,13 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         }
         break;
       case 'open_dialog':
-        if (action.target === 'new_shipment') {
-          navigate('/dashboard/shipments?action=create');
-        }
+        if (action.target === 'new_shipment') navigate('/dashboard/shipments?action=create');
         break;
       case 'show_info':
-        // Info is conveyed via the spoken response
         break;
     }
   }, [navigate]);
 
-  // Process transcript with AI
   const processTranscript = useCallback(async (text: string) => {
     if (!text.trim() || isProcessingRef.current) return;
     isProcessingRef.current = true;
@@ -117,12 +148,18 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
       const command = data as VoiceCommand;
       setLastResponse(command.response);
+      
+      if (command.sentiment) {
+        setLastSentiment(command.sentiment);
+      }
 
       if (command.confidence > 0.5) {
         executeCommand(command);
       }
 
-      speak(command.response);
+      // Use adaptive tone if available, else normal response
+      const responseText = command.sentiment?.adaptive_tone || command.response;
+      speak(responseText, command.sentiment);
     } catch (err) {
       const errorMsg = 'معذرة، حصل مشكلة. حاول تاني.';
       setLastResponse(errorMsg);
@@ -133,12 +170,10 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     }
   }, [location.pathname, userRole, executeCommand, speak]);
 
-  // Start main listening (after button press or wake word)
   const startListening = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
-    // Stop wake word listener temporarily
     if (wakeRecognitionRef.current) {
       try { wakeRecognitionRef.current.stop(); } catch {}
     }
@@ -157,16 +192,11 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       let interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += t;
-        } else {
-          interimTranscript += t;
-        }
+        if (event.results[i].isFinal) finalTranscript += t;
+        else interimTranscript += t;
       }
       setTranscript(finalTranscript || interimTranscript);
-      if (finalTranscript) {
-        processTranscript(finalTranscript);
-      }
+      if (finalTranscript) processTranscript(finalTranscript);
     };
 
     recognition.onerror = (event: any) => {
@@ -174,14 +204,12 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         toast.error('خطأ في التعرف على الصوت');
       }
       setState('idle');
-      // Restart wake word if enabled
       if (wakeWordEnabled) startWakeWordListener();
     };
 
     recognition.onend = () => {
       if (state === 'listening') setState('idle');
       recognitionRef.current = null;
-      // Restart wake word if enabled
       if (wakeWordEnabled) startWakeWordListener();
     };
 
@@ -189,12 +217,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.start();
   }, [processTranscript, wakeWordEnabled, state]);
 
-  // Wake word listener — runs continuously in background
   const startWakeWordListener = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition || !wakeWordEnabled) return;
-
-    // Don't start if already active
     if (wakeRecognitionRef.current) return;
 
     const recognition = new SpeechRecognition();
@@ -208,14 +233,11 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.onresult = (event: any) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript.trim();
-        // Check for wake word variations
         const wakeVariations = [wakeWord, 'يا نظام', 'يانظام', 'نظام', 'هاي نظام'];
         const detected = wakeVariations.some(w => t.includes(w));
         if (detected) {
-          // Stop wake listener and start main listening
           try { recognition.stop(); } catch {}
           wakeRecognitionRef.current = null;
-          // Play activation sound
           const audioCtx = new AudioContext();
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -225,7 +247,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           gain.gain.value = 0.15;
           osc.start();
           osc.stop(audioCtx.currentTime + 0.15);
-          
           toast.info('🎤 أنا سامعك، قول أمرك!');
           setTimeout(() => startListening(), 300);
           return;
@@ -235,7 +256,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognition.onerror = () => {
       wakeRecognitionRef.current = null;
-      // Auto-restart after error
       setTimeout(() => {
         if (wakeWordEnabled && state !== 'listening' && state !== 'thinking' && state !== 'speaking') {
           startWakeWordListener();
@@ -245,7 +265,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognition.onend = () => {
       wakeRecognitionRef.current = null;
-      // Auto-restart
       setTimeout(() => {
         if (wakeWordEnabled && state !== 'listening' && state !== 'thinking' && state !== 'speaking') {
           startWakeWordListener();
@@ -254,14 +273,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     };
 
     wakeRecognitionRef.current = recognition;
-    try {
-      recognition.start();
-    } catch {
-      wakeRecognitionRef.current = null;
-    }
+    try { recognition.start(); } catch { wakeRecognitionRef.current = null; }
   }, [wakeWordEnabled, wakeWord, startListening, state]);
 
-  // Stop everything
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
@@ -271,7 +285,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     setState('idle');
   }, []);
 
-  // Toggle wake word
   const toggleWakeWord = useCallback((enabled: boolean) => {
     if (enabled) {
       startWakeWordListener();
@@ -284,7 +297,6 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     }
   }, [startWakeWordListener]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (recognitionRef.current) try { recognitionRef.current.stop(); } catch {}
@@ -297,7 +309,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     state,
     transcript,
     lastResponse,
+    lastSentiment,
     isSupported,
+    commandHistory,
     startListening,
     stopListening,
     startWakeWordListener,
