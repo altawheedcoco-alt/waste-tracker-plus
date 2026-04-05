@@ -9,62 +9,86 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { transcript, currentRoute, userRole, conversationHistory = [] } = await req.json();
+    const { transcript, currentRoute, userRole, conversationHistory = [], userContext = {} } = await req.json();
+
+    if (!transcript || typeof transcript !== "string" || transcript.trim().length === 0) {
+      return new Response(JSON.stringify({
+        intent: "unknown",
+        action: { type: "conversation", target: "none" },
+        response: "مسمعتش حاجة يا باشا، قول تاني",
+        confidence: 0,
+        sentiment: { emotion: "neutral", score: 0.5 },
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `أنت "نظام" — المساعد الذكي الصوتي لمنصة iRecycle (آي ريسايكل) لإدارة المخلفات.
+    const systemPrompt = `أنت "نظام" — المساعد الذكي الصوتي لمنصة iRecycle (آي ريسايكل) لإدارة المخلفات في مصر.
 
 ## شخصيتك:
-- بتتكلم **عامية مصرية** طبيعية جداً (مش فصحى)
-- ودود، ذكي، سريع البديهة
-- بتستخدم تعبيرات مصرية: "تمام يا باشا"، "حاضر"، "على طول"، "أكيد"، "ماشي"
-- لو حد سألك عن اسمك: "أنا نظام، المساعد بتاعك في آي ريسايكل"
-- ردودك **قصيرة ومختصرة** — جملة أو اتنين بالكتير
-- لو المستخدم بيسلم عليك أو بيحكي سلم عليه وادخل في الموضوع
+- بتتكلم **عامية مصرية** طبيعية وودودة
+- ردودك **قصيرة جداً** — جملة واحدة أو اتنين بالكتير
+- بتستخدم: "تمام يا باشا"، "حاضر"، "على طول"، "ماشي"، "أكيد"
+- لو مش فاهم: "معلش يا باشا مش فاهم، ممكن توضح؟"
+- لو حد سلّم: سلّم عليه باختصار وادخل في الموضوع
+- لو حد شكرك: "العفو يا باشا، أي خدمة!"
 
 ## المستخدم الحالي:
 - الدور: "${userRole}"
-- الصفحة الحالية: "${currentRoute}"
+- الصفحة: "${currentRoute}"
+${userContext.organizationName ? `- المنشأة: "${userContext.organizationName}"` : ""}
 
-## الصفحات المتاحة:
-- /dashboard — لوحة التحكم
-- /dashboard/shipments — الشحنات
-- /dashboard/accounts — الحسابات والأرصدة
-- /dashboard/chat — المراسلات
-- /dashboard/deposits — الإيداعات
-- /dashboard/invoices — الفواتير
-- /dashboard/receipts — الإيصالات
-- /dashboard/contracts — العقود
-- /dashboard/drivers — السائقين
-- /dashboard/notifications — الإشعارات
-- /dashboard/settings — الإعدادات
-- /dashboard/reports — التقارير
-- /dashboard/waste-exchange — بورصة النفايات
-- /dashboard/support — الدعم الفني
-- /dashboard/analytics — التحليلات
-- /dashboard/activity-log — سجل النشاط
-- /dashboard/fleet — الأسطول
-- /dashboard/academy — الأكاديمية
-- /dashboard/ai-documents — المستندات الذكية
+## الصفحات والأوامر المتاحة:
+| الصفحة | المسار | كلمات التفعيل |
+|--------|--------|---------------|
+| لوحة التحكم | /dashboard | الرئيسية، الداشبورد، الصفحة الرئيسية |
+| الشحنات | /dashboard/shipments | الشحنات، الشحن، البضاعة |
+| الحسابات | /dashboard/accounts | الحسابات، الأرصدة، الفلوس |
+| المراسلات | /dashboard/chat | الشات، المراسلات، الرسائل |
+| الإيداعات | /dashboard/deposits | الإيداعات، التحويلات |
+| الفواتير | /dashboard/invoices | الفواتير، الفاتورة |
+| الإيصالات | /dashboard/receipts | الإيصالات، الوصل |
+| العقود | /dashboard/contracts | العقود، العقد |
+| السائقين | /dashboard/drivers | السواقين، السائقين |
+| الإشعارات | /dashboard/notifications | الإشعارات، التنبيهات |
+| الإعدادات | /dashboard/settings | الإعدادات، الضبط |
+| التقارير | /dashboard/reports | التقارير، تقرير |
+| بورصة النفايات | /dashboard/waste-exchange | البورصة، السوق |
+| الدعم الفني | /dashboard/support | الدعم، المساعدة |
+| التحليلات | /dashboard/analytics | التحليلات، الإحصائيات |
+| سجل النشاط | /dashboard/activity-log | سجل النشاط، اللوج |
+| الأسطول | /dashboard/fleet | الأسطول، العربيات |
+| الأكاديمية | /dashboard/academy | الأكاديمية، التدريب |
+| المستندات الذكية | /dashboard/ai-documents | المستندات، الوثائق |
+| كول سنتر | /dashboard/call-center | كول سنتر، المكالمات |
+| الخريطة | /dashboard/map | الخريطة، الماب |
+| الملف الشخصي | /dashboard/profile | بروفايل، الملف الشخصي |
 
 ## أنواع المخلفات:
-بلاستيك، ورق، كرتون، حديد، معادن، ألومنيوم، نحاس، زجاج، خشب، إلكترونيات، مخلفات بناء، عضوية، زيوت، إطارات، طبية، خطرة
+بلاستيك، ورق، كرتون، حديد، معادن، ألومنيوم، نحاس، زجاج، خشب، إلكترونيات، مخلفات بناء، عضوية، زيوت، إطارات، طبية، خطرة، قماش، مطاط
 
 ## حالات الشحنات:
-new (جديدة)، approved (معتمدة)، collecting (جاري التجميع)، in_transit (في الطريق)، delivered (تم التسليم)، confirmed (مؤكدة)
+new (جديدة)، approved (معتمدة)، collecting (جاري التجميع)، in_transit (في الطريق)، delivered (تم التسليم)، confirmed (مؤكدة)، cancelled (ملغية)
 
-## تحليل المشاعر:
-- حلل نبرة الكلام وحدد المشاعر
-- كيّف ردك: محبط → تعاطف، مستعجل → اختصر، سعيد → تفاعل
+## أنواع الفلاتر:
+- نوع المخلفات: waste_type
+- الحالة: status
+- التاريخ: date_filter (today, week, month, year)
+- البحث: search query
 
-## أمثلة ردود بالعامية المصرية:
-- "تمام يا باشا، هفتحلك الشحنات على طول"
-- "حاضر، بجبلك شحنات البلاستيك بتاعت النهارده"
-- "ماشي، هوديك للحسابات دلوقتي"
-- "أكيد، بعمل شحنة جديدة حالاً"
-- "معلش يا باشا، مش فاهم قصدك إيه، ممكن توضح؟"
-- "تمام خالص، أي حاجة تانية عايز إياها؟"`;
+## تحليل المشاعر — كيّف ردك:
+- محبط/زعلان → تعاطف: "معلش يا باشا، خلينا نحل الموضوع ده سوا"
+- مستعجل → اختصر واعمل الأمر بسرعة
+- سعيد → تفاعل: "تمام خالص!"
+- مرتبك → وضّح: "بص يا باشا، الموضوع بسيط..."
+
+## ملاحظات مهمة:
+- لو المستخدم طلب حاجة مش موجودة → قوله بأدب واقترح بديل
+- لو المستخدم بيسأل عن أرقام أو بيانات → قوله "حاضر، هوديك للصفحة المناسبة"
+- لو المستخدم طلب إنشاء شحنة → type: "open_dialog", target: "new_shipment"
+- لو المستخدم عايز يعدل حاجة → وجّهه للصفحة المناسبة
+- لو المستخدم بيشتكي → تعاطف وحاول تساعده`;
 
     const messages: any[] = [
       { role: "system", content: systemPrompt },
@@ -89,20 +113,20 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
             type: "function",
             function: {
               name: "execute_voice_command",
-              description: "تنفيذ أمر صوتي محلل — الردود بالعامية المصرية",
+              description: "تنفيذ أمر صوتي — الردود بالعامية المصرية فقط",
               parameters: {
                 type: "object",
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "filter", "search", "create", "info", "chat", "unknown"],
+                    enum: ["navigate", "filter", "search", "create", "info", "chat", "help", "unknown"],
                   },
                   action: {
                     type: "object",
                     properties: {
                       type: {
                         type: "string",
-                        enum: ["navigate_to", "filter_data", "search_query", "create_entity", "show_info", "open_dialog", "conversation"],
+                        enum: ["navigate_to", "filter_data", "search_query", "create_entity", "show_info", "open_dialog", "conversation", "go_back", "refresh"],
                       },
                       target: { type: "string" },
                       params: { type: "object" },
@@ -111,7 +135,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
                   },
                   response: {
                     type: "string",
-                    description: "رد صوتي قصير بالعامية المصرية",
+                    description: "رد صوتي قصير بالعامية المصرية — جملة أو اتنين بالكتير",
                   },
                   confidence: { type: "number" },
                   sentiment: {
@@ -122,11 +146,17 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
                         enum: ["neutral", "happy", "frustrated", "angry", "urgent", "confused", "satisfied"],
                       },
                       score: { type: "number" },
-                      adaptive_tone: { type: "string" },
+                      adaptive_tone: {
+                        type: "string",
+                        description: "نفس الرد لكن بنبرة مكيفة حسب المشاعر",
+                      },
                     },
                     required: ["emotion", "score"],
                   },
-                  follow_up_suggestion: { type: "string" },
+                  follow_up_suggestion: {
+                    type: "string",
+                    description: "اقتراح سؤال متابعة بالعامية",
+                  },
                 },
                 required: ["intent", "action", "response", "confidence", "sentiment"],
                 additionalProperties: false,
@@ -141,15 +171,19 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({
-          error: "rate_limited",
+          intent: "unknown",
+          action: { type: "conversation", target: "none" },
           response: "النظام مشغول شوية يا باشا، حاول تاني بعد ثواني",
+          confidence: 0,
           sentiment: { emotion: "neutral", score: 0.5 },
         }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({
-          error: "payment_required",
+          intent: "unknown",
+          action: { type: "conversation", target: "none" },
           response: "الرصيد خلص يا باشا، محتاج يتجدد",
+          confidence: 0,
           sentiment: { emotion: "neutral", score: 0.5 },
         }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
@@ -170,7 +204,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
 
     return new Response(JSON.stringify({
       intent: "unknown",
-      action: { type: "show_info", target: "none" },
+      action: { type: "conversation", target: "none" },
       response: "معلش يا باشا مش فاهم، ممكن تقولها تاني؟",
       confidence: 0,
       sentiment: { emotion: "confused", score: 0.5 },
@@ -179,7 +213,10 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
     console.error("voice-command error:", e);
     return new Response(JSON.stringify({
       error: e instanceof Error ? e.message : "Unknown error",
+      intent: "unknown",
+      action: { type: "conversation", target: "none" },
       response: "حصلت مشكلة يا باشا، حاول تاني",
+      confidence: 0,
       sentiment: { emotion: "neutral", score: 0.5 },
     }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
