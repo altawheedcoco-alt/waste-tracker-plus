@@ -89,6 +89,32 @@ const CostPerKgWidget = lazy(() => import('./generator/CostPerKgWidget'));
 const PeriodComparisonWidget = lazy(() => import('./shared/PeriodComparisonWidget'));
 const SmartReminderWidget = lazy(() => import('./shared/SmartReminderWidget'));
 
+// ★ 25 ويدجت جديدة للمولد
+const TransporterPriceComparison = lazy(() => import('./generator/TransporterPriceComparison'));
+const ReverseAuctionPortal = lazy(() => import('./generator/ReverseAuctionPortal'));
+const WasteBudgetTracker = lazy(() => import('./generator/WasteBudgetTracker'));
+const RecyclingROICalculator = lazy(() => import('./generator/RecyclingROICalculator'));
+const BranchComparisonWidget = lazy(() => import('./generator/BranchComparisonWidget'));
+const ContainerFleetManager = lazy(() => import('./generator/ContainerFleetManager'));
+const RecurringShipmentScheduler = lazy(() => import('./generator/RecurringShipmentScheduler'));
+const CleanlinessScoreWidget = lazy(() => import('./generator/CleanlinessScoreWidget'));
+const SeasonalWasteAlerts = lazy(() => import('./generator/SeasonalWasteAlerts'));
+const IndustryBenchmark = lazy(() => import('./generator/IndustryBenchmark'));
+const SmartGoalsTracker = lazy(() => import('./generator/SmartGoalsTracker'));
+const EnvironmentalImpactCalculator = lazy(() => import('./generator/EnvironmentalImpactCalculator'));
+const EcoBadgeWidget = lazy(() => import('./generator/EcoBadgeWidget'));
+const NpsScoreWidget = lazy(() => import('./generator/NpsScoreWidget'));
+const ReferralProgramWidget = lazy(() => import('./generator/ReferralProgramWidget'));
+const ComplaintTicketSystem = lazy(() => import('./generator/ComplaintTicketSystem'));
+const CertifiedPartnersDirectory = lazy(() => import('./generator/CertifiedPartnersDirectory'));
+const SmartContractsManager = lazy(() => import('./generator/SmartContractsManager'));
+const SustainabilityIndex = lazy(() => import('./generator/SustainabilityIndex'));
+const ComplianceWidgets = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.ComplianceChecklistWidget })));
+const AuditReadinessScore = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.AuditReadinessScore })));
+const WeeklySummaryWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.WeeklySummaryWidget })));
+const AutoApprovalWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.AutoApprovalWidget })));
+const ExpiringWasteWidget = lazy(() => import('./generator/ComplianceWidgets').then(m => ({ default: m.ExpiringWasteWidget })));
+
 
 interface RecentShipment {
   id: string;
@@ -432,6 +458,15 @@ const GeneratorDashboard = () => {
               <FinancialSummaryWidget />
             </Suspense>
           </ErrorBoundary>
+
+          <Suspense fallback={<TabFallback />}>
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <SustainabilityIndex />
+              <EnvironmentalImpactCalculator />
+              <SmartGoalsTracker />
+              <EcoBadgeWidget />
+            </div>
+          </Suspense>
         </TabsContent>
 
         {/* ── الشحنات ── */}
@@ -512,18 +547,30 @@ const GeneratorDashboard = () => {
         <TabsContent value="finance" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
             <GeneratorFinanceTab />
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <TransporterPriceComparison />
+              <WasteBudgetTracker />
+              <RecyclingROICalculator />
+              <IndustryBenchmark />
+            </div>
+            <ReverseAuctionPortal />
           </Suspense>
         </TabsContent>
 
         {/* ── العمليات ── */}
         <TabsContent value="operations" className="space-y-4 mt-4 sm:mt-6">
-          <Suspense fallback={<TabFallback />}>
+           <Suspense fallback={<TabFallback />}>
             {/* ── ودجات متخصصة للمولد ── */}
             <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
               <WasteSourceTracker />
               <CollectionCalendarMini />
               <CostPerKgWidget />
+              <CleanlinessScoreWidget />
+              <ContainerFleetManager />
+              <BranchComparisonWidget />
             </div>
+            <RecurringShipmentScheduler />
+            <SeasonalWasteAlerts />
             <ErrorBoundary fallbackTitle="خطأ في التتبع">
               <GeneratorTrackingWidget />
             </ErrorBoundary>
@@ -577,6 +624,15 @@ const GeneratorDashboard = () => {
               <PartnerRatingsWidget />
             </Suspense>
           </ErrorBoundary>
+          <Suspense fallback={<TabFallback />}>
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <NpsScoreWidget />
+              <CertifiedPartnersDirectory />
+              <SmartContractsManager />
+              <ReferralProgramWidget />
+            </div>
+            <ComplaintTicketSystem />
+          </Suspense>
         </TabsContent>
 
         {/* ── التقارير ── */}
@@ -590,6 +646,13 @@ const GeneratorDashboard = () => {
         <TabsContent value="compliance" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
             <ComplianceAlertsWidget />
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <ComplianceWidgets />
+              <AuditReadinessScore />
+              <AutoApprovalWidget />
+              <WeeklySummaryWidget />
+              <ExpiringWasteWidget />
+            </div>
             <ConsultantKPIsWidget />
             <ComplianceCertificateWidget />
             <RiskMatrixWidget />
