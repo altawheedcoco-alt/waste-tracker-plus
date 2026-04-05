@@ -29,14 +29,12 @@ const AutoDataPreloader = () => {
 
       if (navigator.onLine && !isPreloading) {
         hasInitialized.current = true;
-        console.log('[AutoPreloader] تحميل أولي...');
         await preloadAll();
       }
 
       // مؤقت التحديث السريع (بيانات حرجة)
       quickSyncTimer.current = setInterval(() => {
         if (navigator.onLine) {
-          console.log('[AutoPreloader] تحديث سريع...');
           quickSync();
         }
       }, QUICK_SYNC_INTERVAL);
@@ -44,7 +42,6 @@ const AutoDataPreloader = () => {
       // مؤقت التحديث الكامل
       fullSyncTimer.current = setInterval(() => {
         if (navigator.onLine) {
-          console.log('[AutoPreloader] تحديث كامل...');
           preloadAll();
         }
       }, FULL_SYNC_INTERVAL);
@@ -63,7 +60,6 @@ const AutoDataPreloader = () => {
     if (!user) return;
 
     const handleOnline = () => {
-      console.log('[AutoPreloader] عودة الاتصال - تحديث فوري...');
       preloadAll();
     };
 
@@ -77,7 +73,6 @@ const AutoDataPreloader = () => {
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) {
-        console.log('[AutoPreloader] عودة للتطبيق - تحديث سريع...');
         quickSync();
       }
     };

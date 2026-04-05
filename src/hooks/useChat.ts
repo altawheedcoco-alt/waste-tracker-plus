@@ -344,7 +344,6 @@ export const useChat = () => {
           m._tempId === optimistic.tempId ? { ...m, _status: 'pending' as any } : m
         ));
         
-        console.log('[Chat] رسالة محفوظة للإرسال عند عودة الاتصال');
       } else {
         // Mark as failed
         const shouldRetry = failMessage(optimistic.tempId);
@@ -517,7 +516,6 @@ export const useChat = () => {
           // Auto-reconnect after error
           if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('Reconnecting realtime channel...');
             channel.subscribe();
           }, 3000);
         }

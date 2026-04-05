@@ -77,14 +77,6 @@ const CodeProtection = memo(() => {
       if ((widthDiff || heightDiff) && !devtoolsOpen) {
         devtoolsOpen = true;
         console.clear();
-        console.log(
-          '%c⚠️ تحذير أمني',
-          'color:red;font-size:40px;font-weight:bold;'
-        );
-        console.log(
-          '%cهذا الموقع محمي بموجب قوانين حقوق الملكية الفكرية المصرية. أي محاولة لنسخ أو سرقة الكود تعرضك للمساءلة القانونية.',
-          'color:red;font-size:16px;'
-        );
       } else if (!widthDiff && !heightDiff) {
         devtoolsOpen = false;
       }

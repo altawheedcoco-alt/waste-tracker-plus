@@ -249,7 +249,6 @@ const ShipmentDetailsPage = () => {
     setIsQuickStatusChanging(true);
     try {
       const dbStatus = mapToDbStatus(newStatus);
-      console.log('[StatusChange] UI status:', newStatus, '→ DB status:', dbStatus, '| Shipment ID:', shipment.id);
       const { error } = await supabase.from('shipments').update({ status: dbStatus as any }).eq('id', shipment.id);
       if (error) {
         console.error('[StatusChange] DB Error:', JSON.stringify(error));

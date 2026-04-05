@@ -47,7 +47,6 @@ const ShipmentImageAnalyzer = ({ onAnalysis, className }: ShipmentImageAnalyzerP
       // ضغط الصورة قبل الإرسال للتحليل
       const compressed = await compressImage(file, { maxWidth: 1280, quality: 0.75 });
       if (compressed.compressionRatio > 0) {
-        console.log(`📦 تم ضغط الصورة: ${formatFileSize(compressed.originalSize)} → ${formatFileSize(compressed.compressedSize)} (${compressed.compressionRatio}%)`);
       }
 
       const formData = new FormData();

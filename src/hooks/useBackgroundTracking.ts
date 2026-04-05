@@ -49,7 +49,6 @@ export function useBackgroundTracking(config: BackgroundTrackingConfig) {
       if ('wakeLock' in navigator) {
         wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
         wakeLockRef.current?.addEventListener('release', () => {
-          console.log('[BackgroundTracking] Wake lock released');
         });
       }
     } catch (err) {

@@ -107,7 +107,6 @@ export const useOfflineSync = () => {
       // معالجة في دفعات مع الحفاظ على الترتيب
       for (let batchStart = 0; batchStart < allActions.length; batchStart += BATCH_SIZE) {
         if (!navigator.onLine) {
-          console.log('[OfflineSync] فقدان الاتصال أثناء المزامنة');
           break;
         }
 
@@ -244,7 +243,6 @@ export const useOfflineSync = () => {
   // مزامنة فورية عند عودة الاتصال
   useEffect(() => {
     if (isOnline && status.pendingCount > 0 && !syncInProgress.current) {
-      console.log(`[OfflineSync] عودة الاتصال — مزامنة ${status.pendingCount} عملية...`);
       syncPendingActions();
     }
   }, [isOnline, status.pendingCount, syncPendingActions]);
