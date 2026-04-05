@@ -615,6 +615,15 @@ const GeneratorDashboard = () => {
               <PartnerRatingsWidget />
             </Suspense>
           </ErrorBoundary>
+          <Suspense fallback={<TabFallback />}>
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <NpsScoreWidget />
+              <CertifiedPartnersDirectory />
+              <SmartContractsManager />
+              <ReferralProgramWidget />
+            </div>
+            <ComplaintTicketSystem />
+          </Suspense>
         </TabsContent>
 
         {/* ── التقارير ── */}
