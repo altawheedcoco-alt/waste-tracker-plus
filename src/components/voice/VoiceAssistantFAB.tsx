@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap } from 'lucide-react';
+import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap, Trash2, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVoiceAssistant, VoiceState, SentimentEmotion } from '@/hooks/useVoiceAssistant';
 import { Switch } from '@/components/ui/switch';
@@ -15,10 +15,10 @@ interface VoiceAssistantFABProps {
 
 const stateConfig: Record<VoiceState, { color: string; icon: any; label: string; pulse: boolean }> = {
   idle: { color: 'bg-primary', icon: Mic, label: 'اضغط للتحدث', pulse: false },
-  wake_listening: { color: 'bg-emerald-500', icon: Ear, label: 'أقول "يا نظام"...', pulse: true },
-  listening: { color: 'bg-red-500', icon: Mic, label: 'بسمعك...', pulse: true },
-  thinking: { color: 'bg-amber-500', icon: Loader2, label: 'بفكر...', pulse: false },
-  speaking: { color: 'bg-blue-500', icon: Volume2, label: 'بتكلم...', pulse: true },
+  wake_listening: { color: 'bg-emerald-500', icon: Ear, label: 'قول "يا نظام"...', pulse: true },
+  listening: { color: 'bg-destructive', icon: Mic, label: 'بسمعك...', pulse: true },
+  thinking: { color: 'bg-accent', icon: Loader2, label: 'بفكر...', pulse: false },
+  speaking: { color: 'bg-primary', icon: Volume2, label: 'بتكلم...', pulse: true },
 };
 
 const sentimentIcons: Record<SentimentEmotion, { icon: any; color: string; label: string }> = {
@@ -26,7 +26,7 @@ const sentimentIcons: Record<SentimentEmotion, { icon: any; color: string; label
   happy: { icon: Heart, color: 'text-green-500', label: 'سعيد' },
   satisfied: { icon: Smile, color: 'text-emerald-500', label: 'راضي' },
   frustrated: { icon: Frown, color: 'text-orange-500', label: 'محبط' },
-  angry: { icon: Frown, color: 'text-red-500', label: 'غاضب' },
+  angry: { icon: Frown, color: 'text-destructive', label: 'غاضب' },
   urgent: { icon: Zap, color: 'text-amber-500', label: 'مستعجل' },
   confused: { icon: HelpCircle, color: 'text-purple-500', label: 'مرتبك' },
 };
@@ -45,11 +45,14 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     transcript,
     lastResponse,
     lastSentiment,
+    followUpSuggestion,
     isSupported,
     conversationActive,
+    conversationHistory,
     startListening,
     stopListening,
     toggleWakeWord,
+    clearHistory,
   } = useVoiceAssistant({ userRole, wakeWordEnabled: wakeEnabled });
 
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
   };
 
   const handleMainPress = () => {
-    if (state === 'listening') stopListening();
+    if (state === 'listening' || conversationActive) stopListening();
     else if (state === 'idle' || state === 'wake_listening') startListening();
     else if (state === 'speaking') stopListening();
   };
@@ -110,10 +113,24 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-foreground">🤖 المساعد الصوتي</h3>
-              <button onClick={() => setExpanded(false)} className="text-muted-foreground hover:text-foreground">
-                <ChevronDown className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground">🤖 المساعد الذكي</h3>
+                {conversationActive && (
+                  <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium animate-pulse">
+                    محادثة نشطة
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                {conversationHistory.length > 0 && (
+                  <button onClick={clearHistory} className="text-muted-foreground hover:text-destructive p-1 rounded" title="مسح المحادثة">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                <button onClick={() => setExpanded(false)} className="text-muted-foreground hover:text-foreground p-1">
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Tabs */}
@@ -141,11 +158,13 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
             {/* Main Tab */}
             {activeTab === 'main' && (
               <>
-                {/* Conversation Mode Indicator */}
+                {/* Conversation Mode Banner */}
                 {conversationActive && (
                   <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-[10px] text-primary font-medium">محادثة مستمرة — قول &quot;خلاص&quot; أو &quot;شكراً&quot; للإنهاء</span>
+                    <span className="text-[10px] text-primary font-medium">
+                      بسمعك باستمرار — قول &quot;خلاص&quot; للإنهاء
+                    </span>
                   </div>
                 )}
 
@@ -154,9 +173,9 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   <div className="flex items-center gap-2">
                     <div className={cn('w-2 h-2 rounded-full', config.pulse && 'animate-pulse',
                       state === 'idle' ? 'bg-muted-foreground' :
-                      state === 'listening' ? 'bg-red-500' :
-                      state === 'thinking' ? 'bg-amber-500' :
-                      state === 'speaking' ? 'bg-blue-500' :
+                      state === 'listening' ? 'bg-destructive' :
+                      state === 'thinking' ? 'bg-accent' :
+                      state === 'speaking' ? 'bg-primary' :
                       'bg-emerald-500'
                     )} />
                     <span className="text-xs text-muted-foreground">{config.label}</span>
@@ -169,19 +188,57 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   )}
                 </div>
 
-                {/* Transcript */}
-                {transcript && (
-                  <div className="bg-muted/50 rounded-lg p-2 mb-2">
-                    <p className="text-xs text-muted-foreground mb-0.5">أنت قلت:</p>
-                    <p className="text-sm text-foreground">{transcript}</p>
+                {/* Conversation History */}
+                {conversationHistory.length > 0 ? (
+                  <div className="space-y-1.5 mb-3 max-h-40 overflow-y-auto">
+                    {conversationHistory.slice(-6).map((msg, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          'rounded-lg p-2 text-xs',
+                          msg.role === 'user'
+                            ? 'bg-muted/50 text-foreground'
+                            : 'bg-primary/10 text-foreground'
+                        )}
+                      >
+                        <span className="text-[10px] text-muted-foreground mb-0.5 block">
+                          {msg.role === 'user' ? '🗣️ أنت' : '🤖 نظام'}
+                        </span>
+                        {msg.content}
+                      </div>
+                    ))}
+
+                    {/* Live transcript while listening */}
+                    {state === 'listening' && transcript && (
+                      <div className="rounded-lg p-2 text-xs bg-muted/30 border border-dashed border-muted-foreground/30">
+                        <span className="text-[10px] text-muted-foreground block">🎤 ...</span>
+                        <span className="text-foreground/70">{transcript}</span>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    {/* Transcript (no history yet) */}
+                    {transcript && (
+                      <div className="bg-muted/50 rounded-lg p-2 mb-2">
+                        <p className="text-xs text-muted-foreground mb-0.5">أنت قلت:</p>
+                        <p className="text-sm text-foreground">{transcript}</p>
+                      </div>
+                    )}
+                    {lastResponse && (
+                      <div className="bg-primary/10 rounded-lg p-2 mb-3">
+                        <p className="text-xs text-primary mb-0.5">النظام:</p>
+                        <p className="text-sm text-foreground">{lastResponse}</p>
+                      </div>
+                    )}
+                  </>
                 )}
 
-                {/* Response */}
-                {lastResponse && (
-                  <div className="bg-primary/10 rounded-lg p-2 mb-3">
-                    <p className="text-xs text-primary mb-0.5">النظام:</p>
-                    <p className="text-sm text-foreground">{lastResponse}</p>
+                {/* Follow-up suggestion */}
+                {followUpSuggestion && !conversationActive && (
+                  <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-lg bg-muted/30">
+                    <MessageCircle className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="text-[10px] text-muted-foreground">{followUpSuggestion}</span>
                   </div>
                 )}
 
@@ -201,7 +258,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                 <div className="mt-3 space-y-1">
                   <p className="text-[10px] text-muted-foreground font-medium">أوامر سريعة:</p>
                   <div className="flex flex-wrap gap-1">
-                    {['افتح الشحنات', 'شحنات النهارده', 'روح للحسابات'].map(cmd => (
+                    {['افتح الشحنات', 'شحنات النهارده', 'روح للحسابات', 'أنشئ شحنة'].map(cmd => (
                       <button
                         key={cmd}
                         className="text-[10px] bg-muted hover:bg-muted/80 text-foreground px-2 py-1 rounded-full transition-colors"
@@ -217,7 +274,6 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
             {/* Training Tab */}
             {activeTab === 'training' && (
               <div className="space-y-3">
-                {/* Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-foreground">تقدمك في التدريب</span>
@@ -229,7 +285,6 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   </p>
                 </div>
 
-                {/* Active Lesson */}
                 {activeLesson ? (
                   <div className="bg-primary/10 rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
@@ -251,10 +306,8 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                     </button>
                   </div>
                 ) : (
-                  /* Lessons List */
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {TRAINING_LESSONS.map(lesson => {
-                      const progress = getOverallProgress();
                       const lessonDone = localStorage.getItem('voice_training_progress') 
                         ? JSON.parse(localStorage.getItem('voice_training_progress') || '[]')
                             .find((p: any) => p.lessonId === lesson.id)?.completed
@@ -296,7 +349,6 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   </p>
                 </div>
 
-                {/* Enrolled Profiles */}
                 {profiles.length > 0 && (
                   <div className="space-y-1.5">
                     <p className="text-xs font-medium text-foreground">البصمات المسجلة:</p>
@@ -348,20 +400,24 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
           onDoubleClick={() => setExpanded(!expanded)}
           className={cn(
             'relative h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-colors',
-            config.color,
+            conversationActive ? 'bg-destructive' : config.color,
             'text-white',
           )}
         >
-          {config.pulse && (
+          {(config.pulse || conversationActive) && (
             <>
-              <span className={cn('absolute inset-0 rounded-full animate-ping opacity-20', config.color)} />
-              <span className={cn('absolute inset-[-4px] rounded-full animate-pulse opacity-10', config.color)} />
+              <span className={cn('absolute inset-0 rounded-full animate-ping opacity-20', conversationActive ? 'bg-destructive' : config.color)} />
+              <span className={cn('absolute inset-[-4px] rounded-full animate-pulse opacity-10', conversationActive ? 'bg-destructive' : config.color)} />
             </>
           )}
-          <IconComponent className={cn('h-6 w-6 relative z-10', state === 'thinking' && 'animate-spin')} />
+          {conversationActive && state !== 'listening' ? (
+            <MicOff className="h-6 w-6 relative z-10" />
+          ) : (
+            <IconComponent className={cn('h-6 w-6 relative z-10', state === 'thinking' && 'animate-spin')} />
+          )}
           
           {/* Sentiment badge */}
-          {lastSentiment && lastSentiment.emotion !== 'neutral' && state === 'idle' && (
+          {lastSentiment && lastSentiment.emotion !== 'neutral' && state === 'idle' && !conversationActive && (
             <span className={cn(
               'absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] bg-card border border-border shadow-sm',
               sentimentIcons[lastSentiment.emotion].color
@@ -374,14 +430,21 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                lastSentiment.emotion === 'satisfied' ? '😌' : ''}
             </span>
           )}
+
+          {/* Conversation count badge */}
+          {conversationActive && conversationHistory.length > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground rounded-full border-2 border-background">
+              {Math.ceil(conversationHistory.length / 2)}
+            </span>
+          )}
         </motion.button>
 
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setExpanded(!expanded)}
-          className="h-8 w-8 rounded-full bg-card border border-border shadow-md flex items-center justify-center"
+          className="h-8 w-8 rounded-full bg-card border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
-          {expanded ? <X className="h-3.5 w-3.5 text-muted-foreground" /> : <Ear className="h-3.5 w-3.5 text-muted-foreground" />}
+          {expanded ? <X className="h-4 w-4" /> : <ChevronDown className="h-4 w-4 rotate-180" />}
         </motion.button>
       </div>
     </div>
