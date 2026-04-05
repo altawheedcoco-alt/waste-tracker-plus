@@ -467,6 +467,7 @@ const GeneratorDashboard = () => {
               <EcoBadgeWidget />
             </div>
           </Suspense>
+        </TabsContent>
 
         {/* ── الشحنات ── */}
         <TabsContent value="shipments" className="space-y-4 mt-4 sm:mt-6">
