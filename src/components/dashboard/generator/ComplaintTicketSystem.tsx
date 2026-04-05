@@ -44,13 +44,16 @@ const ComplaintTicketSystem = () => {
     }
     setIsSubmitting(true);
     try {
+      const ticketNum = `TK-${Date.now().toString(36).toUpperCase()}`;
       const { error } = await supabase.from('support_tickets').insert([{
         organization_id: organization.id,
         created_by: user?.id,
-        subject,
-        description: details,
+        ticket_number: ticketNum,
+        title: subject,
+        description: details || subject,
         status: 'open',
         priority: 'medium',
+        category: 'complaint',
       }]);
       if (error) throw error;
       toast.success('✅ تم إرسال الشكوى بنجاح');

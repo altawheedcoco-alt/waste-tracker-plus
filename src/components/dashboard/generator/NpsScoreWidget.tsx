@@ -30,12 +30,12 @@ const NpsScoreWidget = () => {
   const nps = useMemo(() => {
     if (ratings.length === 0) return { score: 0, promoters: 0, passives: 0, detractors: 0, avg: 0 };
 
-    const promoters = ratings.filter(r => r.rating >= 4).length;
-    const passives = ratings.filter(r => r.rating === 3).length;
-    const detractors = ratings.filter(r => r.rating <= 2).length;
+    const promoters = ratings.filter(r => r.overall_rating >= 4).length;
+    const passives = ratings.filter(r => r.overall_rating === 3).length;
+    const detractors = ratings.filter(r => r.overall_rating <= 2).length;
     const total = ratings.length;
     const score = Math.round(((promoters - detractors) / total) * 100);
-    const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / total;
+    const avg = ratings.reduce((sum, r) => sum + r.overall_rating, 0) / total;
 
     return { score, promoters, passives, detractors, avg };
   }, [ratings]);

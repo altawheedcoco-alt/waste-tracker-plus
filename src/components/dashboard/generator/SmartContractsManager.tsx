@@ -17,11 +17,11 @@ const SmartContractsManager = () => {
     queryFn: async () => {
       if (!organization?.id) return [];
       const { data } = await supabase
-        .from('organization_contracts')
-        .select('*, partner:partner_organization_id(name, type)')
+        .from('contracts')
+        .select('*')
         .eq('organization_id', organization.id)
         .order('end_date', { ascending: true });
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!organization?.id,
   });

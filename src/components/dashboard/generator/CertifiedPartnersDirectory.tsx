@@ -56,7 +56,7 @@ const CertifiedPartnersDirectory = () => {
               <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
                 <div className="flex items-center gap-1">
                   <Badge variant="outline" className="text-[10px]">
-                    {typeLabel[p.type] || p.type}
+                    {typeLabel[p.org_type] || p.org_type}
                   </Badge>
                   {p.phone && (
                     <a href={`tel:${p.phone}`} className="text-primary hover:underline">
