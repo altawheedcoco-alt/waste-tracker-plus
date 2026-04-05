@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap, Trash2, MessageCircle, Send } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap, Trash2, MessageCircle, Send, Clock, Keyboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVoiceAssistant, VoiceState, SentimentEmotion } from '@/hooks/useVoiceAssistant';
 import { Switch } from '@/components/ui/switch';
@@ -9,6 +10,7 @@ import { TRAINING_LESSONS, getOverallProgress, type TrainingLesson } from '@/lib
 import { enrollVoice, getVoiceProfiles, extractVoiceFeatures } from '@/lib/voiceFingerprint';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { getContextualCommands } from '@/lib/voiceContextCommands';
 
 interface VoiceAssistantFABProps {
   userRole?: string;
@@ -32,17 +34,6 @@ const sentimentIcons: Record<SentimentEmotion, { icon: any; color: string; label
   confused: { icon: HelpCircle, color: 'text-purple-500', label: 'مرتبك' },
 };
 
-const QUICK_COMMANDS = [
-  { label: '📦 الشحنات', command: 'افتح الشحنات' },
-  { label: '📦 شحنات النهارده', command: 'عايز شحنات النهارده' },
-  { label: '💰 الحسابات', command: 'روح للحسابات' },
-  { label: '➕ شحنة جديدة', command: 'أنشئ شحنة جديدة' },
-  { label: '📊 التقارير', command: 'افتح التقارير' },
-  { label: '🚛 الأسطول', command: 'افتح الأسطول' },
-  { label: '💬 المراسلات', command: 'افتح الشات' },
-  { label: '🔔 الإشعارات', command: 'افتح الإشعارات' },
-];
-
 type TabType = 'main' | 'training' | 'fingerprint';
 
 export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) {
@@ -54,16 +45,19 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
   const [textInput, setTextInput] = useState('');
   const [showTextInput, setShowTextInput] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   const {
     state,
     transcript,
+    interimTranscript,
     lastResponse,
     lastSentiment,
     followUpSuggestion,
     isSupported,
     conversationActive,
     conversationHistory,
+    sessionDuration,
     startListening,
     stopListening,
     toggleWakeWord,
@@ -76,12 +70,17 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
-  }, [conversationHistory, transcript]);
+  }, [conversationHistory, transcript, interimTranscript]);
 
   useEffect(() => {
     const saved = localStorage.getItem('voice_wake_enabled');
     if (saved === 'true') { setWakeEnabled(true); toggleWakeWord(true); }
   }, []);
+
+  // Auto expand on conversation start
+  useEffect(() => {
+    if (conversationActive && !expanded) setExpanded(true);
+  }, [conversationActive]);
 
   const handleWakeToggle = (enabled: boolean) => {
     setWakeEnabled(enabled);
@@ -99,10 +98,6 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     if (!textInput.trim()) return;
     sendTextCommand(textInput.trim());
     setTextInput('');
-  };
-
-  const handleQuickCommand = (command: string) => {
-    sendTextCommand(command);
   };
 
   const handleEnrollVoice = useCallback(async () => {
@@ -126,6 +121,13 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
   const trainingProgress = getOverallProgress();
   const profiles = getVoiceProfiles();
   const SentimentIcon = lastSentiment ? sentimentIcons[lastSentiment.emotion] : null;
+  const contextualCommands = getContextualCommands(location.pathname, userRole);
+
+  const formatDuration = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}:${sec.toString().padStart(2, '0')}` : `${sec}ث`;
+  };
 
   return (
     <div className="fixed bottom-20 left-4 z-50 flex flex-col items-start gap-2" dir="rtl">
@@ -142,9 +144,15 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-foreground">🤖 المساعد الذكي</h3>
                 {conversationActive && (
-                  <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium animate-pulse">
-                    نشط
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium animate-pulse">
+                      نشط
+                    </span>
+                    <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                      <Clock className="h-2.5 w-2.5" />
+                      {formatDuration(sessionDuration)}
+                    </span>
+                  </div>
                 )}
               </div>
               <div className="flex items-center gap-1">
@@ -186,9 +194,16 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                 {conversationActive && (
                   <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-[10px] text-primary font-medium">
+                    <span className="text-[10px] text-primary font-medium flex-1">
                       بسمعك — قول &quot;خلاص&quot; للإنهاء
                     </span>
+                    {/* Session progress bar */}
+                    <div className="w-12 h-1 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-1000"
+                        style={{ width: `${Math.min((sessionDuration / 90) * 100, 100)}%` }}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -212,12 +227,14 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                 </div>
 
                 {/* Conversation History */}
-                <div ref={chatScrollRef} className="flex-1 overflow-y-auto space-y-1.5 mb-2 min-h-0 max-h-36">
+                <div ref={chatScrollRef} className="flex-1 overflow-y-auto space-y-1.5 mb-2 min-h-0 max-h-40">
                   {conversationHistory.length > 0 ? (
                     <>
-                      {conversationHistory.slice(-8).map((msg, i) => (
-                        <div
+                      {conversationHistory.slice(-10).map((msg, i) => (
+                        <motion.div
                           key={i}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
                           className={cn(
                             'rounded-lg p-2 text-xs',
                             msg.role === 'user' ? 'bg-muted/50 text-foreground' : 'bg-primary/10 text-foreground'
@@ -227,13 +244,29 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                             {msg.role === 'user' ? '🗣️ أنت' : '🤖 نظام'}
                           </span>
                           {msg.content}
-                        </div>
+                        </motion.div>
                       ))}
-                      {state === 'listening' && transcript && (
-                        <div className="rounded-lg p-2 text-xs bg-muted/30 border border-dashed border-muted-foreground/30">
+                      {/* Interim transcript while listening */}
+                      {state === 'listening' && (transcript || interimTranscript) && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="rounded-lg p-2 text-xs bg-muted/30 border border-dashed border-muted-foreground/30"
+                        >
                           <span className="text-[10px] text-muted-foreground block">🎤 ...</span>
-                          <span className="text-foreground/70">{transcript}</span>
-                        </div>
+                          <span className="text-foreground/70">{interimTranscript || transcript}</span>
+                        </motion.div>
+                      )}
+                      {/* Thinking indicator */}
+                      {state === 'thinking' && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="rounded-lg p-2 text-xs bg-primary/5 flex items-center gap-2"
+                        >
+                          <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                          <span className="text-muted-foreground">بفكر في ردك...</span>
+                        </motion.div>
                       )}
                     </>
                   ) : (
@@ -254,6 +287,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                         <div className="text-center py-4 text-muted-foreground">
                           <Mic className="h-8 w-8 mx-auto mb-2 opacity-30" />
                           <p className="text-xs">اضغط الزر أو قول "يا نظام" للبدء</p>
+                          <p className="text-[10px] mt-1 opacity-60">أو استخدم الأوامر السريعة بالأسفل</p>
                         </div>
                       )}
                     </>
@@ -262,13 +296,15 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
 
                 {/* Follow-up suggestion */}
                 {followUpSuggestion && (
-                  <button
+                  <motion.button
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
                     onClick={() => sendTextCommand(followUpSuggestion)}
                     className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-right w-full shrink-0"
                   >
                     <MessageCircle className="h-3 w-3 text-muted-foreground shrink-0" />
                     <span className="text-[10px] text-muted-foreground">{followUpSuggestion}</span>
-                  </button>
+                  </motion.button>
                 )}
 
                 {/* Text Input */}
@@ -292,26 +328,27 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   </div>
                 )}
 
-                {/* Quick Commands */}
+                {/* Contextual Quick Commands */}
                 <div className="space-y-1.5 shrink-0">
                   <div className="flex items-center justify-between">
                     <p className="text-[10px] text-muted-foreground font-medium">أوامر سريعة:</p>
                     <button
                       onClick={() => setShowTextInput(!showTextInput)}
-                      className="text-[10px] text-primary hover:underline"
+                      className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
                     >
-                      {showTextInput ? 'إخفاء' : '⌨️ كتابة'}
+                      <Keyboard className="h-3 w-3" />
+                      {showTextInput ? 'إخفاء' : 'كتابة'}
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {QUICK_COMMANDS.map(cmd => (
+                    {contextualCommands.map(cmd => (
                       <button
                         key={cmd.command}
-                        onClick={() => handleQuickCommand(cmd.command)}
+                        onClick={() => sendTextCommand(cmd.command)}
                         disabled={state === 'thinking'}
                         className="text-[10px] bg-muted hover:bg-muted/80 text-foreground px-2 py-1 rounded-full transition-colors disabled:opacity-50"
                       >
-                        {cmd.label}
+                        {cmd.icon} {cmd.label}
                       </button>
                     ))}
                   </div>
