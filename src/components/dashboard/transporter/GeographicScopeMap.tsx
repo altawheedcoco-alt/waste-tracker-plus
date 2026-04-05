@@ -18,7 +18,7 @@ export default function GeographicScopeMap() {
     queryKey: ['geo-scope-permits', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('entity_documents')
         .select('document_type, status, metadata')
         .eq('organization_id', orgId!)

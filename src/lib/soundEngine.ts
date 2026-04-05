@@ -181,9 +181,9 @@ function osc(
   const g = ctx.createGain();
   o.type = type;
   o.frequency.value = freq;
-  g.gain.value = vol * 0.8; // raised for louder output
+  g.gain.value = vol * 0.6;
   if (ramp) {
-    o.frequency.linearRampToValueAtTime(ramp, ctx.currentTime + duration);
+    o.frequency.exponentialRampToValueAtTime(ramp, ctx.currentTime + duration);
   }
   g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   o.connect(g).connect(ctx.destination);
@@ -191,19 +191,26 @@ function osc(
   o.stop(ctx.currentTime + duration);
 }
 
-function noise(ctx: AudioContext, vol: number, duration: number) {
+/** Warm chord — plays multiple sine harmonics together */
+function chord(ctx: AudioContext, vol: number, freqs: number[], duration: number) {
+  freqs.forEach(f => osc(ctx, vol / freqs.length, f, 'sine', duration));
+}
+
+/** Soft shimmer noise with bandpass */
+function shimmer(ctx: AudioContext, vol: number, duration: number) {
   const bufSize = ctx.sampleRate * duration;
   const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
   const data = buf.getChannelData(0);
-  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.15;
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.05;
   const src = ctx.createBufferSource();
   src.buffer = buf;
   const g = ctx.createGain();
-  g.gain.value = vol * 0.3; // raised from 0.2
+  g.gain.value = vol * 0.15;
   g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   const filter = ctx.createBiquadFilter();
-  filter.type = 'highpass';
-  filter.frequency.value = 4000;
+  filter.type = 'bandpass';
+  filter.frequency.value = 3000;
+  filter.Q.value = 2;
   src.connect(filter).connect(g).connect(ctx.destination);
   src.start();
   src.stop(ctx.currentTime + duration);
@@ -213,170 +220,205 @@ function noise(ctx: AudioContext, vol: number, duration: number) {
 
 const TONE_GENERATORS: Record<ToneName, (ctx: AudioContext, vol: number) => void> = {
   bold: (ctx, vol) => {
-    osc(ctx, vol, 880, 'sine', 0.12);
-    setTimeout(() => osc(ctx, vol, 1100, 'sine', 0.15), 80);
-    setTimeout(() => osc(ctx, vol, 1320, 'sine', 0.12), 180);
+    // Warm major triad
+    chord(ctx, vol, [523, 659, 784], 0.25);
   },
   chime: (ctx, vol) => {
-    osc(ctx, vol, 1200, 'sine', 0.2);
-    setTimeout(() => osc(ctx, vol * 0.8, 1500, 'sine', 0.15), 100);
-    setTimeout(() => osc(ctx, vol * 0.6, 1800, 'sine', 0.1), 200);
+    osc(ctx, vol, 1047, 'sine', 0.3);
+    setTimeout(() => osc(ctx, vol * 0.7, 1319, 'sine', 0.25), 120);
+    setTimeout(() => osc(ctx, vol * 0.5, 1568, 'sine', 0.2), 240);
   },
   alert: (ctx, vol) => {
-    osc(ctx, vol, 800, 'square', 0.1);
-    setTimeout(() => osc(ctx, vol, 1000, 'square', 0.1), 120);
-    setTimeout(() => osc(ctx, vol, 800, 'square', 0.15), 240);
+    osc(ctx, vol * 0.7, 659, 'triangle', 0.15);
+    setTimeout(() => osc(ctx, vol * 0.6, 784, 'triangle', 0.15), 150);
+    setTimeout(() => osc(ctx, vol * 0.5, 659, 'triangle', 0.2), 300);
   },
   melody: (ctx, vol) => {
-    osc(ctx, vol, 523, 'sine', 0.1);  // C5
-    setTimeout(() => osc(ctx, vol, 659, 'sine', 0.1), 100); // E5
-    setTimeout(() => osc(ctx, vol, 784, 'sine', 0.1), 200); // G5
-    setTimeout(() => osc(ctx, vol, 1047, 'sine', 0.2), 300); // C6
+    // Romantic ascending — C E G B
+    osc(ctx, vol * 0.8, 523, 'sine', 0.15);
+    setTimeout(() => osc(ctx, vol * 0.8, 659, 'sine', 0.15), 130);
+    setTimeout(() => osc(ctx, vol * 0.8, 784, 'sine', 0.15), 260);
+    setTimeout(() => osc(ctx, vol * 0.7, 988, 'sine', 0.3), 390);
   },
   pulse: (ctx, vol) => {
     for (let i = 0; i < 3; i++) {
-      setTimeout(() => osc(ctx, vol, 900, 'sine', 0.06), i * 80);
+      setTimeout(() => osc(ctx, vol * 0.6, 784, 'sine', 0.1), i * 120);
     }
   },
   echo: (ctx, vol) => {
-    osc(ctx, vol, 600, 'sine', 0.25);
-    setTimeout(() => osc(ctx, vol * 0.6, 600, 'sine', 0.2), 150);
-    setTimeout(() => osc(ctx, vol * 0.3, 600, 'sine', 0.15), 300);
+    osc(ctx, vol, 523, 'sine', 0.35);
+    setTimeout(() => osc(ctx, vol * 0.5, 523, 'sine', 0.25), 200);
+    setTimeout(() => osc(ctx, vol * 0.25, 523, 'sine', 0.2), 400);
   },
 };
 
-// ──────────── Sound Generators ────────────
+// ──────────── Sound Generators — Romantic & Warm ────────────
 
 const SOUNDS: Record<SoundName, (ctx: AudioContext, vol: number) => void> = {
   click: (ctx, vol) => {
-    osc(ctx, vol, 800, 'sine', 0.06);
-    noise(ctx, vol * 0.3, 0.03);
+    // Gentle water drop
+    osc(ctx, vol * 0.5, 1200, 'sine', 0.08, 800);
+    shimmer(ctx, vol * 0.2, 0.06);
   },
   tap: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 600, 'sine', 0.04);
+    osc(ctx, vol * 0.4, 900, 'sine', 0.06, 600);
   },
   toggle: (ctx, vol) => {
-    osc(ctx, vol, 500, 'sine', 0.08, 700);
+    // Soft harp pluck
+    osc(ctx, vol * 0.5, 659, 'sine', 0.15, 988);
+    shimmer(ctx, vol * 0.15, 0.1);
   },
   navigate: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 400, 'sine', 0.1, 600);
+    // Gentle breeze whoosh
+    osc(ctx, vol * 0.35, 440, 'sine', 0.18, 660);
+    shimmer(ctx, vol * 0.2, 0.15);
   },
   success: (ctx, vol) => {
-    osc(ctx, vol, 523, 'sine', 0.12);
-    setTimeout(() => osc(ctx, vol, 659, 'sine', 0.12), 100);
-    setTimeout(() => osc(ctx, vol, 784, 'sine', 0.18), 200);
+    // Warm ascending major7 — dreamy
+    osc(ctx, vol * 0.6, 523, 'sine', 0.18);
+    setTimeout(() => osc(ctx, vol * 0.6, 659, 'sine', 0.18), 120);
+    setTimeout(() => osc(ctx, vol * 0.6, 784, 'sine', 0.18), 240);
+    setTimeout(() => chord(ctx, vol * 0.5, [988, 1175], 0.3), 360);
   },
   error: (ctx, vol) => {
-    osc(ctx, vol, 300, 'square', 0.15);
-    setTimeout(() => osc(ctx, vol, 250, 'square', 0.2), 120);
+    // Soft descending minor — gentle disappointment
+    osc(ctx, vol * 0.5, 440, 'triangle', 0.2);
+    setTimeout(() => osc(ctx, vol * 0.4, 392, 'triangle', 0.25), 150);
   },
   warning: (ctx, vol) => {
-    osc(ctx, vol, 440, 'triangle', 0.15);
-    setTimeout(() => osc(ctx, vol, 440, 'triangle', 0.15), 180);
+    // Gentle bell ding-ding
+    osc(ctx, vol * 0.45, 587, 'sine', 0.2);
+    setTimeout(() => osc(ctx, vol * 0.4, 587, 'sine', 0.2), 220);
   },
   notification: (ctx, vol) => {
-    osc(ctx, vol, 880, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol, 1100, 'sine', 0.15), 80);
-    setTimeout(() => osc(ctx, vol, 1320, 'sine', 0.12), 180);
+    // Crystal chime — magical
+    osc(ctx, vol * 0.5, 1047, 'sine', 0.15);
+    setTimeout(() => osc(ctx, vol * 0.5, 1319, 'sine', 0.15), 100);
+    setTimeout(() => chord(ctx, vol * 0.4, [1568, 2093], 0.25), 200);
   },
   message_sent: (ctx, vol) => {
-    osc(ctx, vol * 0.7, 600, 'sine', 0.08, 900);
+    // Soft whoosh up
+    osc(ctx, vol * 0.4, 523, 'sine', 0.12, 1047);
+    shimmer(ctx, vol * 0.15, 0.1);
   },
   message_received: (ctx, vol) => {
-    osc(ctx, vol, 700, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol, 900, 'sine', 0.12), 90);
+    // Sweet two-note chime
+    osc(ctx, vol * 0.5, 784, 'sine', 0.15);
+    setTimeout(() => osc(ctx, vol * 0.5, 1047, 'sine', 0.2), 110);
   },
   delete: (ctx, vol) => {
-    osc(ctx, vol, 500, 'sine', 0.12, 200);
-    noise(ctx, vol * 0.5, 0.1);
+    // Soft dissolve
+    osc(ctx, vol * 0.4, 659, 'sine', 0.15, 330);
+    shimmer(ctx, vol * 0.3, 0.15);
   },
   refresh: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 300, 'sine', 0.2, 800);
+    // Gentle spiral up
+    osc(ctx, vol * 0.35, 392, 'sine', 0.25, 784);
   },
   login: (ctx, vol) => {
-    osc(ctx, vol, 440, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol, 554, 'sine', 0.1), 80);
-    setTimeout(() => osc(ctx, vol, 660, 'sine', 0.15), 160);
+    // Welcome — warm ascending major
+    osc(ctx, vol * 0.5, 523, 'sine', 0.12);
+    setTimeout(() => osc(ctx, vol * 0.5, 659, 'sine', 0.12), 100);
+    setTimeout(() => chord(ctx, vol * 0.5, [784, 1047], 0.25), 200);
   },
   logout: (ctx, vol) => {
-    osc(ctx, vol, 660, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol, 554, 'sine', 0.1), 80);
-    setTimeout(() => osc(ctx, vol, 440, 'sine', 0.15), 160);
+    // Gentle farewell — descending
+    osc(ctx, vol * 0.4, 784, 'sine', 0.12);
+    setTimeout(() => osc(ctx, vol * 0.4, 659, 'sine', 0.12), 100);
+    setTimeout(() => osc(ctx, vol * 0.3, 523, 'sine', 0.2), 200);
   },
   upload: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 400, 'sine', 0.15, 800);
+    // Soft rising tone
+    osc(ctx, vol * 0.4, 440, 'sine', 0.2, 880);
+    shimmer(ctx, vol * 0.15, 0.15);
   },
   download: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 800, 'sine', 0.15, 400);
+    // Soft descending tone
+    osc(ctx, vol * 0.4, 880, 'sine', 0.2, 440);
+    shimmer(ctx, vol * 0.15, 0.15);
   },
   scan: (ctx, vol) => {
-    osc(ctx, vol, 1200, 'sine', 0.05);
-    setTimeout(() => osc(ctx, vol, 1500, 'sine', 0.08), 60);
+    // Quick crystal ping
+    osc(ctx, vol * 0.5, 1319, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.4, 1568, 'sine', 0.1), 70);
   },
   popup_open: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 500, 'sine', 0.1, 700);
+    // Gentle bloom
+    osc(ctx, vol * 0.35, 523, 'sine', 0.15, 784);
+    shimmer(ctx, vol * 0.1, 0.12);
   },
   popup_close: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 700, 'sine', 0.08, 400);
+    // Soft close
+    osc(ctx, vol * 0.35, 784, 'sine', 0.12, 523);
   },
   recording_start: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 600, 'sine', 0.08);
-    setTimeout(() => osc(ctx, vol * 0.6, 800, 'sine', 0.1), 80);
+    // Gentle activate
+    osc(ctx, vol * 0.4, 659, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.5, 880, 'sine', 0.15), 100);
   },
   recording_stop: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 800, 'sine', 0.08);
-    setTimeout(() => osc(ctx, vol * 0.6, 600, 'sine', 0.1), 80);
+    // Gentle deactivate
+    osc(ctx, vol * 0.4, 880, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.4, 659, 'sine', 0.15), 100);
   },
   recording_cancel: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 400, 'sawtooth', 0.1, 200);
+    osc(ctx, vol * 0.3, 523, 'triangle', 0.15, 330);
   },
   reaction: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 1000, 'sine', 0.06);
-    setTimeout(() => osc(ctx, vol * 0.4, 1200, 'sine', 0.05), 50);
+    // Sparkle
+    osc(ctx, vol * 0.4, 1319, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.3, 1568, 'sine', 0.06), 50);
+    shimmer(ctx, vol * 0.1, 0.08);
   },
   copy: (ctx, vol) => {
-    osc(ctx, vol * 0.4, 700, 'sine', 0.05);
-    osc(ctx, vol * 0.3, 900, 'sine', 0.05);
+    osc(ctx, vol * 0.3, 784, 'sine', 0.06);
+    osc(ctx, vol * 0.25, 988, 'sine', 0.06);
   },
   pin: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 800, 'sine', 0.08, 1200);
+    osc(ctx, vol * 0.4, 880, 'sine', 0.1, 1319);
   },
   forward: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 500, 'sine', 0.1, 900);
+    osc(ctx, vol * 0.35, 523, 'sine', 0.12, 988);
   },
   typing: (ctx, vol) => {
-    osc(ctx, vol * 0.15, 1200, 'sine', 0.02);
-    noise(ctx, vol * 0.1, 0.02);
+    // Ultra-soft keypress
+    osc(ctx, vol * 0.1, 1047, 'sine', 0.025);
+    shimmer(ctx, vol * 0.05, 0.02);
   },
   call_ring: (ctx, vol) => {
-    osc(ctx, vol, 880, 'sine', 0.15);
-    setTimeout(() => osc(ctx, vol, 880, 'sine', 0.15), 200);
-    setTimeout(() => osc(ctx, vol, 1100, 'sine', 0.2), 400);
+    // Musical ring — romantic melody
+    osc(ctx, vol * 0.5, 784, 'sine', 0.2);
+    setTimeout(() => osc(ctx, vol * 0.5, 988, 'sine', 0.2), 220);
+    setTimeout(() => chord(ctx, vol * 0.4, [1175, 1568], 0.3), 440);
   },
   call_end: (ctx, vol) => {
-    osc(ctx, vol * 0.7, 600, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol * 0.7, 400, 'sine', 0.15), 100);
-    setTimeout(() => osc(ctx, vol * 0.5, 300, 'sine', 0.2), 200);
+    // Gentle goodbye
+    osc(ctx, vol * 0.4, 784, 'sine', 0.15);
+    setTimeout(() => osc(ctx, vol * 0.35, 587, 'sine', 0.15), 130);
+    setTimeout(() => osc(ctx, vol * 0.3, 440, 'sine', 0.25), 260);
   },
   join_room: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 500, 'sine', 0.08);
-    setTimeout(() => osc(ctx, vol * 0.6, 700, 'sine', 0.1), 80);
+    // Welcome chime
+    osc(ctx, vol * 0.4, 523, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.5, 784, 'sine', 0.15), 100);
   },
   leave_room: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 700, 'sine', 0.08);
-    setTimeout(() => osc(ctx, vol * 0.4, 400, 'sine', 0.12), 80);
+    osc(ctx, vol * 0.35, 784, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.3, 523, 'sine', 0.15), 100);
   },
   mention: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 900, 'sine', 0.06);
-    setTimeout(() => osc(ctx, vol * 0.5, 1100, 'sine', 0.08), 60);
+    // Gentle sparkle attention
+    osc(ctx, vol * 0.45, 988, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.4, 1319, 'sine', 0.1), 70);
   },
   broadcast: (ctx, vol) => {
-    osc(ctx, vol * 0.6, 440, 'sine', 0.1);
-    setTimeout(() => osc(ctx, vol * 0.6, 554, 'sine', 0.1), 100);
-    setTimeout(() => osc(ctx, vol * 0.7, 660, 'sine', 0.15), 200);
+    // Majestic fanfare — soft
+    osc(ctx, vol * 0.4, 523, 'sine', 0.12);
+    setTimeout(() => osc(ctx, vol * 0.4, 659, 'sine', 0.12), 120);
+    setTimeout(() => chord(ctx, vol * 0.4, [784, 1047], 0.25), 240);
   },
   poll_vote: (ctx, vol) => {
-    osc(ctx, vol * 0.5, 700, 'sine', 0.06, 1000);
+    osc(ctx, vol * 0.4, 784, 'sine', 0.1, 1175);
   },
 };
 
