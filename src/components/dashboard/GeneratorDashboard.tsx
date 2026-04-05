@@ -538,6 +538,13 @@ const GeneratorDashboard = () => {
         <TabsContent value="finance" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
             <GeneratorFinanceTab />
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <TransporterPriceComparison />
+              <WasteBudgetTracker />
+              <RecyclingROICalculator />
+              <IndustryBenchmark />
+            </div>
+            <ReverseAuctionPortal />
           </Suspense>
         </TabsContent>
 
