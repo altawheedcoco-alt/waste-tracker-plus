@@ -12,16 +12,16 @@ import { Input } from '@/components/ui/input';
 const CertifiedPartnersDirectory = () => {
   const [search, setSearch] = useState('');
 
-  const { data: partners = [] } = useQuery({
+  const { data: partners = [] } = useQuery<any[]>({
     queryKey: ['certified-partners-directory'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('organizations')
+        .from('organizations' as any)
         .select('id, name, city, phone, org_type, address')
         .eq('status', 'active')
         .order('name')
         .limit(50);
-      return (data || []).filter((o: any) => ['transporter', 'recycler'].includes(o.org_type)) as any[];
+      return (data || []).filter((o: any) => ['transporter', 'recycler'].includes(o.org_type));
     },
   });
 
