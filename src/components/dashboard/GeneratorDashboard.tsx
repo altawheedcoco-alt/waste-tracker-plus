@@ -458,7 +458,15 @@ const GeneratorDashboard = () => {
               <FinancialSummaryWidget />
             </Suspense>
           </ErrorBoundary>
-        </TabsContent>
+
+          <Suspense fallback={<TabFallback />}>
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <SustainabilityIndex />
+              <EnvironmentalImpactCalculator />
+              <SmartGoalsTracker />
+              <EcoBadgeWidget />
+            </div>
+          </Suspense>
 
         {/* ── الشحنات ── */}
         <TabsContent value="shipments" className="space-y-4 mt-4 sm:mt-6">
