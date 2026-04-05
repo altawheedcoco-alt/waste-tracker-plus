@@ -18,11 +18,10 @@ const CertifiedPartnersDirectory = () => {
       const { data } = await supabase
         .from('organizations')
         .select('id, name, city, phone, org_type, address')
-        .in('org_type', ['transporter', 'recycler'])
         .eq('status', 'active')
         .order('name')
         .limit(50);
-      return (data || []) as any[];
+      return (data || []).filter((o: any) => ['transporter', 'recycler'].includes(o.org_type)) as any[];
     },
   });
 
