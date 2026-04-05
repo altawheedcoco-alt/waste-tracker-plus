@@ -85,7 +85,6 @@ const PartnerNotesDialog = ({ open, onOpenChange, partnerId, partnerName }: Part
     
     setLoading(true);
     try {
-      console.log('[PartnerNotes] Fetching notes:', { orgId: organization.id, partnerId });
       
       const { data, error } = await supabase
         .from('partner_notes')
@@ -97,7 +96,6 @@ const PartnerNotesDialog = ({ open, onOpenChange, partnerId, partnerName }: Part
         .or(`and(sender_organization_id.eq.${organization.id},receiver_organization_id.eq.${partnerId}),and(sender_organization_id.eq.${partnerId},receiver_organization_id.eq.${organization.id})`)
         .order('created_at', { ascending: false });
 
-      console.log('[PartnerNotes] Result:', { data, error });
 
       if (error) throw error;
       setNotes((data || []) as unknown as Note[]);
@@ -162,7 +160,6 @@ const PartnerNotesDialog = ({ open, onOpenChange, partnerId, partnerName }: Part
         throw error;
       }
 
-      console.log('Note created successfully:', data);
       toast.success('تم إرسال الملاحظة بنجاح');
       setTitle('');
       setContent('');

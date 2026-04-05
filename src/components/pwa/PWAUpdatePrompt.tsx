@@ -44,7 +44,6 @@ export const PWAUpdatePrompt = () => {
     if (!pwaEnabled) return;
 
     if (needRefresh) {
-      console.log('[PWA] Auto-updating to new version...');
       updateServiceWorker(true);
     }
   }, [needRefresh, pwaEnabled, updateServiceWorker]);

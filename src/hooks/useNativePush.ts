@@ -88,7 +88,6 @@ export function useNativePush() {
       // 2. تسجيل Service Worker
       const reg = await navigator.serviceWorker.register(SW_PATH, { scope: '/' });
       await navigator.serviceWorker.ready;
-      console.log('[NativePush] SW registered:', reg.scope);
 
       // 3. إنشاء اشتراك Web Push
       const appServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
@@ -97,7 +96,6 @@ export function useNativePush() {
         applicationServerKey: appServerKey.buffer as ArrayBuffer,
       });
 
-      console.log('[NativePush] Subscription created:', sub.endpoint);
 
       // 4. استخراج المفاتيح
       const p256dh = arrayBufferToBase64Url(sub.getKey('p256dh')!);
@@ -124,7 +122,6 @@ export function useNativePush() {
       toast.success('✅ تم تفعيل الإشعارات الأصلية!');
 
       // 6. إرسال إشعار تجريبي فوراً
-      console.log('[NativePush] Sending test push...');
       const { error: pushError } = await supabase.functions.invoke('send-push', {
         body: {
           user_ids: [user.id],

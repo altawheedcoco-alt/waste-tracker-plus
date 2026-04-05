@@ -53,7 +53,6 @@ async function getTokenWithRetry(
 
   for (let attempt = 0; attempt < TOKEN_TIMEOUTS.length; attempt++) {
     const timeoutMs = TOKEN_TIMEOUTS[attempt];
-    console.log(`[FCM] getToken attempt ${attempt + 1}/${TOKEN_TIMEOUTS.length} (timeout: ${timeoutMs / 1000}s)`);
 
     try {
       const token = await Promise.race([
@@ -102,7 +101,6 @@ export function useFirebaseMessaging() {
       if (!messaging) return;
 
       unsubscribe = await onMessage(messaging, (payload) => {
-        console.log('[FCM] Foreground message:', payload);
         const title = payload.notification?.title || 'iRecycle';
         const body = payload.notification?.body || '';
         toast.info(`${title}: ${body}`, { duration: 5000 });
@@ -136,7 +134,6 @@ export function useFirebaseMessaging() {
     setLoading(true);
 
     try {
-      console.log('[FCM] Starting initialization...');
 
       const messaging = await getFirebaseMessaging();
       if (!messaging) {
@@ -150,15 +147,12 @@ export function useFirebaseMessaging() {
         const existingReg = await navigator.serviceWorker.getRegistration(FCM_SERVICE_WORKER_SCOPE);
         if (existingReg) {
           swReg = existingReg;
-          console.log('[FCM] Using existing SW registration:', swReg.scope);
         } else {
           swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
             scope: FCM_SERVICE_WORKER_SCOPE,
           });
-          console.log('[FCM] New SW registered:', swReg.scope);
         }
         await waitForServiceWorkerActivation(swReg);
-        console.log('[FCM] SW active:', swReg.active?.state);
       } catch (swErr: any) {
         const message = 'تعذر تسجيل خدمة الإشعارات — تأكد من اتصال الإنترنت';
         console.error('[FCM] SW registration failed:', swErr?.message);
@@ -167,7 +161,6 @@ export function useFirebaseMessaging() {
       }
 
       // Get FCM token with auto-retry
-      console.log('[FCM] Requesting token with VAPID key...');
       let token: string;
       try {
         token = await getTokenWithRetry(messaging, FCM_VAPID_KEY, swReg);
@@ -182,7 +175,6 @@ export function useFirebaseMessaging() {
         throw new Error(message);
       }
 
-      console.log('[FCM] Token received:', token.slice(0, 20) + '...');
       setFcmToken(token);
 
       // Ensure auth session is active
@@ -215,7 +207,6 @@ export function useFirebaseMessaging() {
         );
         if (!error) {
           saved = true;
-          console.log('[FCM] Token saved successfully to DB');
           break;
         }
         console.error(`[FCM] Token save attempt ${i + 1} failed:`, error.message);

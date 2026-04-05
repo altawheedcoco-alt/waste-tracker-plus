@@ -74,7 +74,6 @@ export function useDocumentSync() {
             .in('id', entityDocs.map(d => d.id));
 
           if (!updateErr) {
-            console.log(`✅ [DocSync] تم تحديث ${entityDocs.length} سجل(ات) في الأرشيف`);
             
             // إضافة وسم "موقّع" للسجلات
             for (const doc of entityDocs) {
@@ -101,7 +100,6 @@ export function useDocumentSync() {
       queryClient.invalidateQueries({ queryKey: ['entity-timeline'] });
       queryClient.invalidateQueries({ queryKey: ['signing-requests'] });
 
-      console.log('✅ [DocSync] تمت مزامنة المستند بنجاح بعد التوقيع');
     } catch (err) {
       console.error('❌ [DocSync] خطأ في مزامنة المستند:', err);
     }
@@ -143,7 +141,6 @@ export function useDocumentSync() {
       queryClient.invalidateQueries({ queryKey: ['entity-documents'] });
       queryClient.invalidateQueries({ queryKey: ['entity-timeline'] });
 
-      console.log(`✅ [DocSync] تم تحديث الملف: ${entityDocumentId}`);
     } catch (err) {
       console.error('❌ [DocSync] خطأ في التحديث:', err);
       toast.error('فشل في مزامنة المستند');

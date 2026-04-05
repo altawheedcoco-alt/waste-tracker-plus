@@ -12,7 +12,6 @@ export function useServiceWorkerNavigation() {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'NOTIFICATION_CLICK' && event.data?.url) {
         const url = event.data.url;
-        console.log('[SW-Nav] Navigating to:', url, event.data?.data || {});
 
         window.dispatchEvent(new CustomEvent('irecycle-notification-click', {
           detail: {

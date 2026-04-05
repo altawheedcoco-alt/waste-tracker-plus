@@ -99,7 +99,6 @@ export const useSystemHealth = () => {
           table: 'system_health_summary',
         },
         (payload) => {
-          console.log('Health summary updated:', payload);
           if (payload.new) {
             setRealtimeSummary(payload.new as unknown as SystemHealthSummary);
           }

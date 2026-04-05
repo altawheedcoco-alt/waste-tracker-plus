@@ -837,7 +837,6 @@ export const useCreateShipment = () => {
         try {
           const { autoCreateGeneratorDeclaration } = await import('@/utils/autoDeclarationCreator');
           await autoCreateGeneratorDeclaration(shipmentData.id, generatorId, profile.id);
-          console.log('Auto generator declaration created on shipment creation');
         } catch (e) {
           console.error('Auto declaration error (non-blocking):', e);
         }

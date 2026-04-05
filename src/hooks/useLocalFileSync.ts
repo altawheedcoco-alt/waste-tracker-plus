@@ -59,7 +59,6 @@ export function useLocalFileSync() {
           sessionStorage.setItem(STORAGE_KEY, 'granted');
         }
       } catch (e) {
-        console.log('Cannot persist directory handle');
       }
       
       toast.success(`تم ربط المجلد: ${handle.name}`);

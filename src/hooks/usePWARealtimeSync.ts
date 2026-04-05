@@ -17,7 +17,6 @@ export const usePWARealtimeSync = () => {
 
         // إذا مر أكثر من 30 ثانية → أعد الاتصال وحدث البيانات
         if (elapsed > 30_000) {
-          console.log('[PWA Sync] App resumed after', Math.round(elapsed / 1000), 's — reconnecting...');
           
           // إعادة اتصال Realtime
           supabase.realtime.setAuth(null as any); // force reconnect
@@ -39,7 +38,6 @@ export const usePWARealtimeSync = () => {
 
     // عند استعادة الاتصال بالشبكة
     const handleOnline = () => {
-      console.log('[PWA Sync] Network restored — invalidating cache');
       queryClient.invalidateQueries();
       
       supabase.auth.getSession().then(({ data }) => {
