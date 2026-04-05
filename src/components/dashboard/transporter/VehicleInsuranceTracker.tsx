@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Shield, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,29 +19,20 @@ export default function VehicleInsuranceTracker() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('vehicles' as any)
-        .select('id, plate_number, insurance_expiry, insurance_company, insurance_policy_number, status')
+        .from('fleet_vehicles')
+        .select('id, plate_number, status')
         .eq('organization_id', orgId!)
-        .order('insurance_expiry', { ascending: true });
-      return data || [];
+        .order('created_at', { ascending: false });
+      return (data || []) as any[];
     },
   });
 
   const categorized = useMemo(() => {
-    const now = new Date();
-    const expired: typeof vehicles = [];
-    const expiring: typeof vehicles = [];
-    const active: typeof vehicles = [];
+    const active = (vehicles || []).filter((v: any) => v.status === 'active');
+    const maintenance = (vehicles || []).filter((v: any) => v.status === 'maintenance');
+    const inactive = (vehicles || []).filter((v: any) => v.status !== 'active' && v.status !== 'maintenance');
 
-    (vehicles || []).forEach(v => {
-      if (!v.insurance_expiry) { expired!.push(v); return; }
-      const days = Math.ceil((new Date(v.insurance_expiry).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (days < 0) expired!.push(v);
-      else if (days <= 30) expiring!.push(v);
-      else active!.push(v);
-    });
-
-    return { expired: expired!, expiring: expiring!, active: active! };
+    return { active, maintenance, inactive };
   }, [vehicles]);
 
   if (isLoading) return <Skeleton className="h-[200px] w-full rounded-xl" />;
@@ -51,34 +42,34 @@ export default function VehicleInsuranceTracker() {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Shield className="h-5 w-5 text-primary" />
-          تأمين الأسطول
+          حالة الأسطول
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="text-center p-2 rounded-lg bg-destructive/10">
-            <div className="text-lg font-bold text-destructive">{categorized.expired.length}</div>
-            <div className="text-[9px] text-muted-foreground">منتهي</div>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-amber-500/10">
-            <div className="text-lg font-bold text-amber-600">{categorized.expiring.length}</div>
-            <div className="text-[9px] text-muted-foreground">يقترب</div>
-          </div>
           <div className="text-center p-2 rounded-lg bg-emerald-500/10">
             <div className="text-lg font-bold text-emerald-600">{categorized.active.length}</div>
-            <div className="text-[9px] text-muted-foreground">ساري</div>
+            <div className="text-[9px] text-muted-foreground">نشطة</div>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-amber-500/10">
+            <div className="text-lg font-bold text-amber-600">{categorized.maintenance.length}</div>
+            <div className="text-[9px] text-muted-foreground">صيانة</div>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-muted/50">
+            <div className="text-lg font-bold">{categorized.inactive.length}</div>
+            <div className="text-[9px] text-muted-foreground">أخرى</div>
           </div>
         </div>
 
-        {categorized.expired.length > 0 && (
+        {categorized.maintenance.length > 0 && (
           <div className="space-y-1">
-            {categorized.expired.slice(0, 3).map(v => (
-              <div key={v.id} className="flex items-center justify-between p-1.5 rounded bg-destructive/5 text-xs">
+            {categorized.maintenance.slice(0, 3).map((v: any) => (
+              <div key={v.id} className="flex items-center justify-between p-1.5 rounded bg-amber-500/5 text-xs">
                 <span className="flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3 text-destructive" />
+                  <AlertTriangle className="h-3 w-3 text-amber-500" />
                   {v.plate_number}
                 </span>
-                <Badge variant="destructive" className="text-[9px]">منتهي</Badge>
+                <Badge variant="secondary" className="text-[9px]">صيانة</Badge>
               </div>
             ))}
           </div>

@@ -18,63 +18,39 @@ export default function OperationsViolationTracker() {
     queryKey: ['ops-violations', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const [permits, shipments] = await Promise.all([
-        supabase.from('permits' as any).select('conditions, status, permit_type').eq('organization_id', orgId!).in('status', ['active', 'approved']),
-        supabase.from('shipments' as any).select('waste_type, pickup_governorate, delivery_governorate, status, created_at')
+      const [entityDocs, shipments] = await Promise.all([
+        supabase.from('entity_documents').select('metadata, status, document_type').eq('organization_id', orgId!).in('status', ['active', 'approved']),
+        supabase.from('shipments').select('waste_type, status, created_at')
           .eq('transporter_id', orgId!)
           .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
           .limit(200),
       ]);
-      return { permits: permits.data || [], shipments: shipments.data || [] };
+      return { permits: (entityDocs.data || []) as any[], shipments: (shipments.data || []) as any[] };
     },
   });
 
   const analysis = useMemo(() => {
-    if (!data) return { violations: [], compliant: 0, total: 0 };
+    if (!data) return { violations: [] as any[], compliant: 0, total: 0 };
 
-    // Extract authorized waste types & governorates from permits
     const authTypes = new Set<string>();
-    const authGovs = new Set<string>();
-    let nationwide = false;
-
-    data.permits.forEach(p => {
-      const cond = p.conditions as any;
-      if (cond?.waste_types) (Array.isArray(cond.waste_types) ? cond.waste_types : []).forEach((t: string) => authTypes.add(t));
-      if (cond?.governorates) {
-        if (cond.governorates === 'nationwide' || cond.nationwide) nationwide = true;
-        else if (Array.isArray(cond.governorates)) cond.governorates.forEach((g: string) => authGovs.add(g));
-      }
+    data.permits.forEach((p: any) => {
+      const meta = p.metadata as any;
+      if (meta?.waste_types) (Array.isArray(meta.waste_types) ? meta.waste_types : []).forEach((t: string) => authTypes.add(t));
     });
 
     const violations: Array<{ type: string; detail: string; severity: 'high' | 'medium' }> = [];
     let compliant = 0;
 
-    data.shipments.forEach(s => {
-      let hasIssue = false;
-
-      // Check waste type
+    data.shipments.forEach((s: any) => {
       if (s.waste_type && authTypes.size > 0 && !authTypes.has(s.waste_type)) {
         violations.push({
           type: 'نوع مخلفات غير مصرح',
           detail: `${s.waste_type} - غير مدرج في التصاريح`,
           severity: 'high',
         });
-        hasIssue = true;
+      } else {
+        compliant++;
       }
-
-      // Check governorate
-      if (!nationwide && authGovs.size > 0) {
-        if (s.pickup_governorate && !authGovs.has(s.pickup_governorate)) {
-          violations.push({
-            type: 'منطقة خارج النطاق',
-            detail: `الجمع من ${s.pickup_governorate} - خارج التصريح`,
-            severity: 'medium',
-          });
-          hasIssue = true;
-        }
-      }
-
-      if (!hasIssue) compliant++;
     });
 
     return { violations: violations.slice(0, 5), compliant, total: data.shipments.length };
@@ -82,9 +58,7 @@ export default function OperationsViolationTracker() {
 
   if (isLoading) return <Skeleton className="h-[240px] w-full rounded-xl" />;
 
-  const complianceRate = analysis.total > 0
-    ? Math.round((analysis.compliant / analysis.total) * 100)
-    : 100;
+  const complianceRate = analysis.total > 0 ? Math.round((analysis.compliant / analysis.total) * 100) : 100;
 
   return (
     <Card className="border-border">

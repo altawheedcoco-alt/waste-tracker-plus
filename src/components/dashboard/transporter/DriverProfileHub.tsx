@@ -20,18 +20,18 @@ export default function DriverProfileHub() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('drivers' as any)
-        .select('id, full_name, phone, license_expiry, license_type, is_active, rating, total_trips, training_status')
+        .from('drivers')
+        .select('id, profile_id, license_number, license_expiry, vehicle_type, vehicle_plate, is_available')
         .eq('organization_id', orgId!)
-        .order('is_active', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(15);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   if (isLoading) return <Skeleton className="h-[300px] w-full rounded-xl" />;
 
-  const activeCount = drivers?.filter(d => d.is_active).length || 0;
+  const activeCount = drivers?.filter((d: any) => d.is_available).length || 0;
   const total = drivers?.length || 0;
   const now = new Date();
 
@@ -44,7 +44,7 @@ export default function DriverProfileHub() {
             فريق السائقين
           </CardTitle>
           <div className="flex items-center gap-1.5">
-            <Badge variant="default" className="text-[10px]">{activeCount} نشط</Badge>
+            <Badge variant="default" className="text-[10px]">{activeCount} متاح</Badge>
             <Badge variant="outline" className="text-[10px]">{total} إجمالي</Badge>
           </div>
         </div>
@@ -55,9 +55,9 @@ export default function DriverProfileHub() {
         ) : (
           <ScrollArea className="h-[220px]">
             <div className="space-y-2 pr-2">
-              {drivers.map(d => {
+              {drivers.map((d: any) => {
                 const licenseExpired = d.license_expiry ? new Date(d.license_expiry) < now : false;
-                const initials = (d.full_name || '').split(' ').map(w => w[0]).join('').slice(0, 2);
+                const initials = (d.license_number || '').slice(0, 2);
                 return (
                   <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg border border-border hover:bg-accent/50 transition-colors">
                     <Avatar className="h-8 w-8">
@@ -67,18 +67,12 @@ export default function DriverProfileHub() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-medium truncate">{d.full_name || 'بدون اسم'}</p>
-                        {!d.is_active && <Badge variant="secondary" className="text-[8px]">غير نشط</Badge>}
+                        <p className="text-xs font-medium truncate">رخصة: {d.license_number || 'بدون'}</p>
+                        {!d.is_available && <Badge variant="secondary" className="text-[8px]">غير متاح</Badge>}
                       </div>
                       <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                        {d.phone && <span className="flex items-center gap-0.5"><Phone className="h-2.5 w-2.5" />{d.phone}</span>}
-                        {d.total_trips != null && <span>{d.total_trips} رحلة</span>}
-                        {d.rating != null && (
-                          <span className="flex items-center gap-0.5">
-                            <Star className="h-2.5 w-2.5 text-amber-500" />
-                            {Number(d.rating).toFixed(1)}
-                          </span>
-                        )}
+                        {d.vehicle_plate && <span>{d.vehicle_plate}</span>}
+                        {d.vehicle_type && <span>{d.vehicle_type}</span>}
                       </div>
                     </div>
                     <div className="shrink-0">

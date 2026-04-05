@@ -1,6 +1,5 @@
 /**
  * مراقب أنواع المخلفات المصرح بها - فكرة #5
- * خطر، غير خطر، طبي، بترولي مع مقارنة بالعمليات الفعلية
  */
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,29 +25,29 @@ export default function WasteTypeAuthorization() {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  const { data: permits, isLoading } = useQuery({
+  const { data: docs, isLoading } = useQuery({
     queryKey: ['waste-auth', orgId],
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('permits' as any)
-        .select('conditions, status')
+        .from('entity_documents')
+        .select('metadata, status')
         .eq('organization_id', orgId!)
         .in('status', ['active', 'approved']);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const authorizedTypes = useMemo(() => {
     const types = new Set<string>();
-    (permits || []).forEach(p => {
-      const cond = p.conditions as any;
-      if (cond?.waste_types && Array.isArray(cond.waste_types)) {
-        cond.waste_types.forEach((t: string) => types.add(t));
+    (docs || []).forEach((p: any) => {
+      const meta = p.metadata as any;
+      if (meta?.waste_types && Array.isArray(meta.waste_types)) {
+        meta.waste_types.forEach((t: string) => types.add(t));
       }
     });
     return types;
-  }, [permits]);
+  }, [docs]);
 
   if (isLoading) return <Skeleton className="h-[260px] w-full rounded-xl" />;
 
@@ -68,9 +67,7 @@ export default function WasteTypeAuthorization() {
               <div
                 key={cat.key}
                 className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${
-                  isAuthorized
-                    ? 'bg-emerald-500/5 border-emerald-500/20'
-                    : 'bg-muted/30 border-transparent opacity-60'
+                  isAuthorized ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/30 border-transparent opacity-60'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -92,7 +89,7 @@ export default function WasteTypeAuthorization() {
           <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <span className="text-xs text-amber-600">لم يتم ربط أنواع المخلفات بالتصاريح</span>
+              <span className="text-xs text-amber-600">لم يتم ربط أنواع المخلفات بالوثائق</span>
             </div>
           </div>
         )}

@@ -1,11 +1,8 @@
 /**
  * نظام توزيع الشحنات الذكي - فكرة #47
- * AI يختار أفضل سائق ومركبة
  */
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Brain, User, Truck, MapPin, CheckCircle } from 'lucide-react';
+import { Brain, User, Truck, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,17 +18,17 @@ export default function SmartDispatchWidget() {
     enabled: !!orgId,
     queryFn: async () => {
       const [pending, drivers, vehicles] = await Promise.all([
-        supabase.from('shipments' as any).select('id, tracking_number, waste_type, pickup_governorate, actual_weight')
+        supabase.from('shipments').select('id, tracking_number, waste_type, quantity')
           .eq('transporter_id', orgId!).in('status', ['approved']).limit(5),
-        supabase.from('drivers' as any).select('id, full_name, current_status, rating, total_trips')
-          .eq('organization_id', orgId!).eq('is_active', true),
-        supabase.from('vehicles' as any).select('id, plate_number, capacity_tons, status, vehicle_type')
+        supabase.from('drivers').select('id, is_available')
+          .eq('organization_id', orgId!).eq('is_available', true),
+        supabase.from('fleet_vehicles').select('id, status')
           .eq('organization_id', orgId!).eq('status', 'active'),
       ]);
       return {
-        pending: pending.data || [],
-        availableDrivers: (drivers.data || []).filter(d => d.current_status !== 'driving'),
-        availableVehicles: vehicles.data || [],
+        pending: (pending.data || []) as any[],
+        availableDrivers: (drivers.data || []) as any[],
+        availableVehicles: (vehicles.data || []) as any[],
       };
     },
   });
@@ -54,7 +51,7 @@ export default function SmartDispatchWidget() {
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-2 rounded-lg bg-amber-500/10">
             <div className="text-lg font-bold text-amber-600">{pendingCount}</div>
-            <div className="text-[9px] text-muted-foreground">شحنة بانتظار التوزيع</div>
+            <div className="text-[9px] text-muted-foreground">بانتظار التوزيع</div>
           </div>
           <div className="p-2 rounded-lg bg-emerald-500/10">
             <User className="h-3.5 w-3.5 text-emerald-500 mx-auto mb-0.5" />

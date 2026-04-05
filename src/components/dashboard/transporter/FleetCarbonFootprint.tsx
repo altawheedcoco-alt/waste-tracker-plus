@@ -4,14 +4,13 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Leaf, TreePine, Droplets, Wind } from 'lucide-react';
+import { Leaf, TreePine, Wind } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const CO2_PER_LITER_DIESEL = 2.68; // kg CO2
-const CO2_PER_KM = 0.8; // average kg CO2 for heavy vehicles
+const CO2_PER_KM = 0.8;
 
 export default function FleetCarbonFootprint() {
   const { organization } = useAuth();
@@ -22,30 +21,30 @@ export default function FleetCarbonFootprint() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments' as any)
-        .select('actual_weight, distance_km, status')
+        .from('shipments')
+        .select('quantity, status')
         .eq('transporter_id', orgId!)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString())
         .limit(500);
-      return data || [];
+      return (data || []) as any[];
     },
   });
 
   const metrics = useMemo(() => {
-    const totalDistance = (shipments || []).reduce((sum, s) => sum + (s.distance_km || 30), 0);
-    const totalWeight = (shipments || []).reduce((sum, s) => sum + (s.actual_weight || 0), 0);
-    const co2Emitted = totalDistance * CO2_PER_KM;
-    const co2Saved = totalWeight * 0.5; // simplified: recycling saves ~0.5 kg CO2 per kg
+    const totalWeight = (shipments || []).reduce((sum: number, s: any) => sum + (s.quantity || 0), 0);
+    const estimatedDistance = (shipments || []).length * 30; // avg 30km per trip estimate
+    const co2Emitted = estimatedDistance * CO2_PER_KM;
+    const co2Saved = totalWeight * 0.5;
     const netImpact = co2Saved - co2Emitted;
-    const treesEquiv = Math.round(Math.abs(netImpact) / 21); // 1 tree absorbs ~21 kg CO2/year
+    const treesEquiv = Math.round(Math.abs(netImpact) / 21);
 
     return {
       co2Emitted: Math.round(co2Emitted),
       co2Saved: Math.round(co2Saved),
       netImpact: Math.round(netImpact),
       treesEquiv,
-      totalDistance: Math.round(totalDistance),
+      totalDistance: Math.round(estimatedDistance),
       shipmentCount: (shipments || []).length,
     };
   }, [shipments]);
@@ -62,9 +61,7 @@ export default function FleetCarbonFootprint() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className={`text-center p-3 rounded-lg ${
-          metrics.netImpact >= 0 ? 'bg-emerald-500/10' : 'bg-amber-500/10'
-        }`}>
+        <div className={`text-center p-3 rounded-lg ${metrics.netImpact >= 0 ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
           <div className={`text-2xl font-bold ${metrics.netImpact >= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
             {metrics.netImpact >= 0 ? '+' : ''}{(metrics.netImpact / 1000).toFixed(1)} طن
           </div>
@@ -92,7 +89,7 @@ export default function FleetCarbonFootprint() {
         </div>
 
         <p className="text-[10px] text-muted-foreground text-center">
-          {metrics.shipmentCount} شحنة • {metrics.totalDistance.toLocaleString('ar-EG')} كم مقطوعة
+          {metrics.shipmentCount} شحنة • {metrics.totalDistance.toLocaleString('ar-EG')} كم تقديري
         </p>
       </CardContent>
     </Card>

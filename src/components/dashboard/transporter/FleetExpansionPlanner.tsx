@@ -20,39 +20,37 @@ export default function FleetExpansionPlanner() {
     enabled: !!orgId,
     queryFn: async () => {
       const [vehicles, shipments] = await Promise.all([
-        supabase.from('vehicles' as any).select('id, capacity_tons, status').eq('organization_id', orgId!),
-        supabase.from('shipments' as any).select('id, actual_weight, status, created_at')
+        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', orgId!),
+        supabase.from('shipments').select('id, quantity, status, created_at')
           .eq('transporter_id', orgId!)
           .in('status', ['delivered', 'confirmed'])
           .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString()),
       ]);
       return {
-        vehicles: vehicles.data || [],
-        shipments: shipments.data || [],
+        vehicles: (vehicles.data || []) as any[],
+        shipments: (shipments.data || []) as any[],
       };
     },
   });
 
   const analysis = useMemo(() => {
     if (!data) return null;
-    const activeVehicles = data.vehicles.filter(v => v.status === 'active');
-    const totalCapacity = activeVehicles.reduce((s, v) => s + (v.capacity_tons || 5), 0);
-    const monthlyWeight = data.shipments.reduce((s, sh) => s + (sh.actual_weight || 0), 0);
+    const activeVehicles = data.vehicles.filter((v: any) => v.status === 'active');
+    const monthlyWeight = data.shipments.reduce((s: number, sh: any) => s + (sh.quantity || 0), 0);
     const monthlyTrips = data.shipments.length;
     const tripsPerVehicle = activeVehicles.length > 0 ? monthlyTrips / activeVehicles.length : 0;
-    const utilizationRate = totalCapacity > 0 ? Math.min(100, Math.round((monthlyWeight / (totalCapacity * 30)) * 100)) : 0;
+    const utilizationRate = activeVehicles.length > 0 ? Math.min(100, Math.round((monthlyTrips / (activeVehicles.length * 25)) * 100)) : 0;
     const needExpansion = utilizationRate > 75 || tripsPerVehicle > 20;
 
     return {
       totalVehicles: data.vehicles.length,
       activeVehicles: activeVehicles.length,
-      totalCapacity,
       monthlyWeight: Math.round(monthlyWeight),
       monthlyTrips,
       tripsPerVehicle: tripsPerVehicle.toFixed(1),
       utilizationRate,
       needExpansion,
-      suggestedAdditional: needExpansion ? Math.ceil((monthlyWeight / (totalCapacity || 1)) * 0.3) : 0,
+      suggestedAdditional: needExpansion ? Math.max(1, Math.ceil(tripsPerVehicle / 20)) : 0,
     };
   }, [data]);
 
@@ -96,8 +94,8 @@ export default function FleetExpansionPlanner() {
               <span className="text-xs font-medium text-amber-600">توصية بالتوسع</span>
             </div>
             <p className="text-[10px] text-muted-foreground">
-              الأسطول الحالي يعمل بـ {analysis.utilizationRate}% من طاقته.
-              يُنصح بإضافة {analysis.suggestedAdditional} مركبة لتلبية الطلب المتزايد.
+              الأسطول يعمل بـ {analysis.utilizationRate}% من طاقته.
+              يُنصح بإضافة {analysis.suggestedAdditional} مركبة.
             </p>
           </div>
         )}
