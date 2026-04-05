@@ -46,6 +46,7 @@ import DashboardHeader from './DashboardHeader';
 import SidebarNavContent from './SidebarNavContent';
 
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
+const VoiceAssistantFAB = lazy(() => import('@/components/voice/VoiceAssistantFAB'));
 
 const NetworkStatusBanner = lazy(() => import('@/components/mobile/NetworkStatusBanner'));
 const ProactiveAlertsBanner = lazy(() => import('@/components/alerts/ProactiveAlertsBanner'));
