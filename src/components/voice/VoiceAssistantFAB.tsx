@@ -46,6 +46,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     lastResponse,
     lastSentiment,
     isSupported,
+    conversationActive,
     startListening,
     stopListening,
     toggleWakeWord,
