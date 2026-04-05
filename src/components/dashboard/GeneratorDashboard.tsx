@@ -637,6 +637,13 @@ const GeneratorDashboard = () => {
         <TabsContent value="compliance" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
             <ComplianceAlertsWidget />
+            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <ComplianceWidgets />
+              <AuditReadinessScore />
+              <AutoApprovalWidget />
+              <WeeklySummaryWidget />
+              <ExpiringWasteWidget />
+            </div>
             <ConsultantKPIsWidget />
             <ComplianceCertificateWidget />
             <RiskMatrixWidget />
