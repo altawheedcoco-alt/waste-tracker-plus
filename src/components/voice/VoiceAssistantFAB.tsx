@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap, Trash2, MessageCircle, Send, Clock, Keyboard } from 'lucide-react';
+import { Mic, MicOff, Loader2, Volume2, Ear, X, ChevronDown, GraduationCap, Fingerprint, Heart, Smile, Frown, AlertTriangle, HelpCircle, Zap, Trash2, MessageCircle, Send, Clock, Keyboard, Star, History, StarOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVoiceAssistant, VoiceState, SentimentEmotion } from '@/hooks/useVoiceAssistant';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { enrollVoice, getVoiceProfiles, extractVoiceFeatures } from '@/lib/voice
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { getContextualCommands } from '@/lib/voiceContextCommands';
+import { getFavorites, addFavorite, removeFavorite, getCommandHistory, clearCommandHistory, getMostUsedCommands, type VoiceFavorite } from '@/lib/voiceFavorites';
 
 interface VoiceAssistantFABProps {
   userRole?: string;
@@ -34,7 +35,7 @@ const sentimentIcons: Record<SentimentEmotion, { icon: any; color: string; label
   confused: { icon: HelpCircle, color: 'text-purple-500', label: 'مرتبك' },
 };
 
-type TabType = 'main' | 'training' | 'fingerprint';
+type TabType = 'main' | 'training' | 'fingerprint' | 'favorites' | 'history';
 
 export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) {
   const [expanded, setExpanded] = useState(false);
@@ -44,6 +45,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
   const [enrolling, setEnrolling] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [showTextInput, setShowTextInput] = useState(false);
+  const [favorites, setFavorites] = useState<VoiceFavorite[]>([]);
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -77,6 +79,11 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     if (saved === 'true') { setWakeEnabled(true); toggleWakeWord(true); }
   }, []);
 
+  // Refresh favorites
+  useEffect(() => {
+    setFavorites(getFavorites());
+  }, [activeTab]);
+
   // Auto expand on conversation start
   useEffect(() => {
     if (conversationActive && !expanded) setExpanded(true);
@@ -98,6 +105,17 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     if (!textInput.trim()) return;
     sendTextCommand(textInput.trim());
     setTextInput('');
+  };
+
+  const handleAddFavorite = (command: string, label: string) => {
+    addFavorite(command, label, '⭐');
+    setFavorites(getFavorites());
+    toast.success('تم إضافته للمفضلة! ⭐');
+  };
+
+  const handleRemoveFavorite = (id: string) => {
+    removeFavorite(id);
+    setFavorites(getFavorites());
   };
 
   const handleEnrollVoice = useCallback(async () => {
@@ -122,12 +140,30 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
   const profiles = getVoiceProfiles();
   const SentimentIcon = lastSentiment ? sentimentIcons[lastSentiment.emotion] : null;
   const contextualCommands = getContextualCommands(location.pathname, userRole);
+  const commandHistoryList = getCommandHistory();
+  const mostUsed = getMostUsedCommands(5);
 
   const formatDuration = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = s % 60;
     return m > 0 ? `${m}:${sec.toString().padStart(2, '0')}` : `${sec}ث`;
   };
+
+  const formatTimeAgo = (ts: number) => {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'دلوقتي';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} دقيقة`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)} ساعة`;
+    return `${Math.floor(diff / 86400000)} يوم`;
+  };
+
+  const tabs: { id: TabType; label: string }[] = [
+    { id: 'main', label: '🎤' },
+    { id: 'favorites', label: '⭐' },
+    { id: 'history', label: '📜' },
+    { id: 'training', label: '🎓' },
+    { id: 'fingerprint', label: '🔐' },
+  ];
 
   return (
     <div className="fixed bottom-20 left-4 z-50 flex flex-col items-start gap-2" dir="rtl">
@@ -142,7 +178,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-foreground">🤖 المساعد الذكي</h3>
+                <h3 className="text-sm font-bold text-foreground">🤖 نظام</h3>
                 {conversationActive && (
                   <div className="flex items-center gap-1">
                     <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium animate-pulse">
@@ -168,17 +204,13 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-3 bg-muted/30 rounded-lg p-1">
-              {([
-                { id: 'main' as TabType, label: '🎤 رئيسي' },
-                { id: 'training' as TabType, label: '🎓 تدريب' },
-                { id: 'fingerprint' as TabType, label: '🔐 بصمة' },
-              ]).map(tab => (
+            <div className="flex gap-0.5 mb-3 bg-muted/30 rounded-lg p-0.5">
+              {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    'flex-1 text-[10px] py-1.5 rounded-md transition-colors font-medium',
+                    'flex-1 text-[11px] py-1.5 rounded-md transition-colors font-medium',
                     activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -197,11 +229,10 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                     <span className="text-[10px] text-primary font-medium flex-1">
                       بسمعك — قول &quot;خلاص&quot; للإنهاء
                     </span>
-                    {/* Session progress bar */}
                     <div className="w-12 h-1 bg-muted rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary rounded-full transition-all duration-1000"
-                        style={{ width: `${Math.min((sessionDuration / 90) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((sessionDuration / 120) * 100, 100)}%` }}
                       />
                     </div>
                   </div>
@@ -236,7 +267,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           className={cn(
-                            'rounded-lg p-2 text-xs',
+                            'rounded-lg p-2 text-xs group relative',
                             msg.role === 'user' ? 'bg-muted/50 text-foreground' : 'bg-primary/10 text-foreground'
                           )}
                         >
@@ -244,9 +275,18 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                             {msg.role === 'user' ? '🗣️ أنت' : '🤖 نظام'}
                           </span>
                           {msg.content}
+                          {/* Add to favorites button on assistant messages */}
+                          {msg.role === 'user' && (
+                            <button
+                              onClick={() => handleAddFavorite(msg.content, msg.content.slice(0, 20))}
+                              className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-amber-500"
+                              title="أضف للمفضلة"
+                            >
+                              <Star className="h-3 w-3" />
+                            </button>
+                          )}
                         </motion.div>
                       ))}
-                      {/* Interim transcript while listening */}
                       {state === 'listening' && (transcript || interimTranscript) && (
                         <motion.div
                           initial={{ opacity: 0 }}
@@ -257,7 +297,6 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                           <span className="text-foreground/70">{interimTranscript || transcript}</span>
                         </motion.div>
                       )}
-                      {/* Thinking indicator */}
                       {state === 'thinking' && (
                         <motion.div
                           initial={{ opacity: 0 }}
@@ -279,7 +318,7 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                       )}
                       {lastResponse && (
                         <div className="bg-primary/10 rounded-lg p-2">
-                          <p className="text-xs text-primary mb-0.5">النظام:</p>
+                          <p className="text-xs text-primary mb-0.5">نظام:</p>
                           <p className="text-sm text-foreground">{lastResponse}</p>
                         </div>
                       )}
@@ -328,6 +367,25 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   </div>
                 )}
 
+                {/* Favorites Quick Access */}
+                {favorites.length > 0 && (
+                  <div className="mb-1.5 shrink-0">
+                    <p className="text-[10px] text-muted-foreground font-medium mb-1">⭐ المفضلة:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {favorites.slice(0, 4).map(fav => (
+                        <button
+                          key={fav.id}
+                          onClick={() => sendTextCommand(fav.command)}
+                          disabled={state === 'thinking'}
+                          className="text-[10px] bg-amber-500/10 hover:bg-amber-500/20 text-foreground px-2 py-1 rounded-full transition-colors disabled:opacity-50 border border-amber-500/20"
+                        >
+                          {fav.icon} {fav.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Contextual Quick Commands */}
                 <div className="space-y-1.5 shrink-0">
                   <div className="flex items-center justify-between">
@@ -365,6 +423,116 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   </div>
                   <Switch checked={wakeEnabled} onCheckedChange={handleWakeToggle} />
                 </div>
+              </div>
+            )}
+
+            {/* Favorites Tab */}
+            {activeTab === 'favorites' && (
+              <div className="space-y-3 overflow-y-auto flex-1">
+                <div className="text-center mb-2">
+                  <Star className="h-6 w-6 text-amber-500 mx-auto mb-1" />
+                  <p className="text-xs font-bold text-foreground">أوامرك المفضلة</p>
+                  <p className="text-[10px] text-muted-foreground">أضف أوامر للوصول السريع</p>
+                </div>
+
+                {favorites.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {favorites.map(fav => (
+                      <div key={fav.id} className="flex items-center gap-2 bg-muted/30 rounded-lg p-2 group">
+                        <button
+                          onClick={() => sendTextCommand(fav.command)}
+                          className="flex-1 text-right"
+                        >
+                          <p className="text-xs font-medium text-foreground">{fav.icon} {fav.label}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            استخدم {fav.usageCount} مرة
+                          </p>
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFavorite(fav.id)}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                        >
+                          <StarOff className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <p className="text-[10px]">مافيش مفضلة لسه</p>
+                    <p className="text-[10px] opacity-60">مرّر على أمر في المحادثة واضغط ⭐</p>
+                  </div>
+                )}
+
+                {/* Most Used */}
+                {mostUsed.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-[10px] font-medium text-muted-foreground mb-1.5">🔥 الأكثر استخداماً:</p>
+                    <div className="space-y-1">
+                      {mostUsed.map((cmd, i) => (
+                        <button
+                          key={i}
+                          onClick={() => sendTextCommand(cmd.command)}
+                          className="w-full flex items-center justify-between bg-muted/20 hover:bg-muted/40 rounded-lg p-2 transition-colors text-right"
+                        >
+                          <span className="text-xs text-foreground truncate flex-1">{cmd.command}</span>
+                          <span className="text-[10px] text-muted-foreground shrink-0 mr-2">{cmd.count}×</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* History Tab */}
+            {activeTab === 'history' && (
+              <div className="space-y-3 overflow-y-auto flex-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-foreground">📜 سجل الأوامر</p>
+                    <p className="text-[10px] text-muted-foreground">{commandHistoryList.length} أمر</p>
+                  </div>
+                  {commandHistoryList.length > 0 && (
+                    <button
+                      onClick={() => { clearCommandHistory(); setFavorites(getFavorites()); }}
+                      className="text-[10px] text-destructive hover:underline"
+                    >
+                      مسح الكل
+                    </button>
+                  )}
+                </div>
+
+                {commandHistoryList.length > 0 ? (
+                  <div className="space-y-1 max-h-60 overflow-y-auto">
+                    {commandHistoryList.slice(0, 30).map((entry, i) => (
+                      <button
+                        key={i}
+                        onClick={() => sendTextCommand(entry.command)}
+                        className="w-full flex items-start gap-2 bg-muted/20 hover:bg-muted/40 rounded-lg p-2 transition-colors text-right group"
+                      >
+                        <span className="text-[10px] mt-0.5">{entry.success ? '✅' : '❌'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-foreground truncate">{entry.command}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{entry.response}</p>
+                          <p className="text-[9px] text-muted-foreground/60">{formatTimeAgo(entry.timestamp)}</p>
+                        </div>
+                        <Star
+                          className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-amber-500 transition-all shrink-0 mt-0.5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddFavorite(entry.command, entry.command.slice(0, 20));
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <History className="h-6 w-6 mx-auto mb-1 opacity-30" />
+                    <p className="text-[10px]">مافيش أوامر سابقة</p>
+                  </div>
+                )}
               </div>
             )}
 

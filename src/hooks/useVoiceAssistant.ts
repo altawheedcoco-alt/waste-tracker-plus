@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { addToHistory, incrementFavoriteUsage } from '@/lib/voiceFavorites';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'wake_listening';
 
@@ -39,9 +40,19 @@ interface UseVoiceAssistantOptions {
 }
 
 const AUTO_LISTEN_DELAY = 500;
-const SESSION_TIMEOUT = 90_000; // 90 ثانية بدل 60
+const SESSION_TIMEOUT = 120_000; // 120 ثانية — دقيقتين
 const MAX_RETRIES = 2;
 const SILENCE_RESTART_DELAY = 300;
+
+// Haptic feedback
+function haptic(type: 'light' | 'medium' | 'heavy' = 'light') {
+  try {
+    if ('vibrate' in navigator) {
+      const patterns = { light: [10], medium: [20, 10, 20], heavy: [50, 20, 50] };
+      navigator.vibrate(patterns[type]);
+    }
+  } catch {}
+}
 
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
@@ -56,6 +67,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
   const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
+  const [lastCommandTime, setLastCommandTime] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const recognitionRef = useRef<any>(null);
@@ -120,27 +132,32 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
         window.speechSynthesis.cancel();
         playEndSound();
+        const timeoutMsg = 'مش سامع حاجة يا باشا، هقفل الجلسة. لو عايزني قول "يا نظام"! 👋';
+        speak(timeoutMsg);
         if (wakeWordEnabled) startWakeWordListenerFn();
       }
     }, SESSION_TIMEOUT);
   }, [wakeWordEnabled]);
 
-  // Sound effects
+  // Sound effects — improved tones
   const playActivationSound = useCallback(() => {
     try {
       const ctx = new AudioContext();
       const now = ctx.currentTime;
-      [523.25, 659.25, 783.99].forEach((freq, i) => {
+      // Ascending chime — warm and inviting
+      [440, 554.37, 659.25, 880].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        gain.gain.setValueAtTime(0, now + i * 0.06);
+        gain.gain.linearRampToValueAtTime(0.07, now + i * 0.06 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.25);
         osc.connect(gain).connect(ctx.destination);
         osc.start(now + i * 0.06);
         osc.stop(now + 0.5);
       });
+      haptic('medium');
     } catch {}
   }, []);
 
@@ -148,17 +165,19 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     try {
       const ctx = new AudioContext();
       const now = ctx.currentTime;
-      [783.99, 523.25].forEach((freq, i) => {
+      // Descending gentle close
+      [659.25, 554.37, 440].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.06, now + i * 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        gain.gain.setValueAtTime(0.05, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
         osc.connect(gain).connect(ctx.destination);
-        osc.start(now + i * 0.1);
-        osc.stop(now + i * 0.1 + 0.35);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.25);
       });
+      haptic('light');
     } catch {}
   }, []);
 
@@ -166,15 +185,35 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     try {
       const ctx = new AudioContext();
       const now = ctx.currentTime;
+      // Two-note ding
+      [880, 1108.73].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.04, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.12);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.05);
+        osc.stop(now + 0.2);
+      });
+    } catch {}
+  }, []);
+
+  const playErrorSound = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.type = 'triangle';
+      osc.frequency.value = 300;
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
       osc.connect(gain).connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.2);
+      osc.stop(now + 0.35);
+      haptic('heavy');
     } catch {}
   }, []);
 
@@ -217,12 +256,28 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const executeCommand = useCallback((command: VoiceCommand) => {
     const { action } = command;
     setCommandHistory(prev => [...prev.slice(-19), { text: command.response, intent: command.intent, time: Date.now() }]);
+    setLastCommandTime(Date.now());
+
+    // Track in persistent history
+    addToHistory({
+      command: command.response,
+      intent: command.intent,
+      response: command.response,
+      success: command.confidence > 0.5,
+    });
+
+    // Increment favorite usage if applicable
+    incrementFavoriteUsage(command.response);
 
     switch (action.type) {
       case 'navigate_to':
-        if (action.target?.startsWith('/')) navigate(action.target);
+        if (action.target?.startsWith('/')) {
+          haptic('medium');
+          navigate(action.target);
+        }
         break;
       case 'filter_data':
+        haptic('light');
         if (action.target === 'shipments') {
           const params = new URLSearchParams();
           if (action.params?.waste_type) params.set('waste_type', action.params.waste_type);
@@ -238,18 +293,22 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         }
         break;
       case 'search_query':
+        haptic('light');
         if (action.params?.query) {
           navigate(`/dashboard/shipments?search=${encodeURIComponent(action.params.query)}`);
         }
         break;
       case 'open_dialog':
+        haptic('medium');
         if (action.target === 'new_shipment') navigate('/dashboard/shipments?action=create');
         else if (action.target === 'new_invoice') navigate('/dashboard/invoices?action=create');
         break;
       case 'go_back':
+        haptic('light');
         window.history.back();
         break;
       case 'refresh':
+        haptic('medium');
         window.location.reload();
         break;
       case 'scroll_top':
@@ -257,6 +316,10 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         break;
       case 'scroll_bottom':
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        break;
+      case 'toggle_theme':
+        haptic('light');
+        document.documentElement.classList.toggle('dark');
         break;
       case 'conversation':
       case 'show_info':
@@ -271,6 +334,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     setInterimTranscript('');
     resetSessionTimer();
     retryCountRef.current = 0;
+    haptic('light');
 
     const userMsg: ConversationMessage = { role: 'user', content: text, timestamp: Date.now() };
     setConversationHistory(prev => [...prev, userMsg]);
@@ -311,6 +375,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           await new Promise(r => setTimeout(r, 1000));
           return attemptProcess();
         }
+        playErrorSound();
         const errorMsg = 'معلش يا باشا حصلت مشكلة، حاول تاني';
         setLastResponse(errorMsg);
         speak(errorMsg);
@@ -320,7 +385,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     await attemptProcess();
     isProcessingRef.current = false;
-  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound]);
+  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound, playErrorSound]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -362,6 +427,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
             'تمام يا باشا، لو احتجتني قول "يا نظام"! 👋',
             'ماشي يا كبير، أنا هنا لو عايزني! 👋',
             'حاضر يا باشا، في أمان الله! 👋',
+            'تمام يا معلم، أي وقت كلمني! 👋',
           ];
           speak(goodbyes[Math.floor(Math.random() * goodbyes.length)]);
           setTimeout(() => setConversationHistory([]), 3000);
@@ -411,6 +477,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       'أيوه يا باشا، قول أمرك!',
       'حاضر يا باشا، بسمعك!',
       'أنا معاك يا باشا، عايز إيه؟',
+      'تحت أمرك يا باشا!',
     ];
     toast.info(`🎤 ${greetings[Math.floor(Math.random() * greetings.length)]}`);
     startListeningInternal(true);
@@ -528,6 +595,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     conversationHistory,
     commandHistory,
     sessionDuration,
+    lastCommandTime,
     startListening,
     stopListening,
     startWakeWordListener,
