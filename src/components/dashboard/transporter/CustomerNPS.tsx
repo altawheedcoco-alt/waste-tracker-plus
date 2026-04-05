@@ -24,7 +24,7 @@ export default function CustomerNPS() {
         .from('shipments')
         .select('id, status, created_at')
         .eq('transporter_id', orgId!)
-        .in('status', ['delivered', 'confirmed', 'rejected'])
+        .in('status', ['delivered', 'confirmed', 'cancelled'])
         .order('created_at', { ascending: false })
         .limit(100);
       return (data || []) as any[];
