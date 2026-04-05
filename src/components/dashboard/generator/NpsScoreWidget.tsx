@@ -18,11 +18,11 @@ const NpsScoreWidget = () => {
       if (!organization?.id) return [];
       const { data } = await supabase
         .from('partner_ratings')
-        .select('rating, review, created_at')
+        .select('overall_rating, comment, created_at')
         .eq('rated_organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(50);
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!organization?.id,
   });
