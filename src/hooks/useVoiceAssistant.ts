@@ -39,13 +39,15 @@ interface UseVoiceAssistantOptions {
 }
 
 const AUTO_LISTEN_DELAY = 500;
-const SESSION_TIMEOUT = 60_000;
+const SESSION_TIMEOUT = 90_000; // 90 ثانية بدل 60
 const MAX_RETRIES = 2;
+const SILENCE_RESTART_DELAY = 300;
 
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
   const [state, setState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [lastResponse, setLastResponse] = useState('');
   const [lastSentiment, setLastSentiment] = useState<VoiceSentiment | null>(null);
   const [followUpSuggestion, setFollowUpSuggestion] = useState<string | null>(null);
@@ -53,6 +55,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [conversationActive, setConversationActive] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
   const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
+  const [sessionDuration, setSessionDuration] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const recognitionRef = useRef<any>(null);
@@ -61,9 +64,11 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const isProcessingRef = useRef(false);
   const conversationActiveRef = useRef(false);
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sessionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const conversationHistoryRef = useRef<ConversationMessage[]>([]);
   const bestArabicVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const retryCountRef = useRef(0);
+  const sessionStartRef = useRef(0);
 
   // Find best Arabic voice
   useEffect(() => {
@@ -91,6 +96,20 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   useEffect(() => { conversationActiveRef.current = conversationActive; }, [conversationActive]);
   useEffect(() => { conversationHistoryRef.current = conversationHistory; }, [conversationHistory]);
 
+  // Session duration tracker
+  useEffect(() => {
+    if (conversationActive) {
+      sessionStartRef.current = Date.now();
+      sessionIntervalRef.current = setInterval(() => {
+        setSessionDuration(Math.floor((Date.now() - sessionStartRef.current) / 1000));
+      }, 1000);
+    } else {
+      if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current);
+      setSessionDuration(0);
+    }
+    return () => { if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current); };
+  }, [conversationActive]);
+
   const resetSessionTimer = useCallback(() => {
     if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
     sessionTimerRef.current = setTimeout(() => {
@@ -100,17 +119,17 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         setState('idle');
         if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
         window.speechSynthesis.cancel();
+        playEndSound();
         if (wakeWordEnabled) startWakeWordListenerFn();
       }
     }, SESSION_TIMEOUT);
   }, [wakeWordEnabled]);
 
-  // Activation sound
+  // Sound effects
   const playActivationSound = useCallback(() => {
     try {
       const ctx = new AudioContext();
       const now = ctx.currentTime;
-      // Warm chime chord
       [523.25, 659.25, 783.99].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -140,6 +159,22 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         osc.start(now + i * 0.1);
         osc.stop(now + i * 0.1 + 0.35);
       });
+    } catch {}
+  }, []);
+
+  const playNotificationSound = useCallback(() => {
+    try {
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.2);
     } catch {}
   }, []);
 
@@ -197,7 +232,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         } else if (action.target === 'accounts') {
           navigate('/dashboard/accounts');
         } else if (action.target === 'invoices') {
-          navigate('/dashboard/invoices');
+          const params = new URLSearchParams();
+          if (action.params?.status) params.set('status', action.params.status);
+          navigate(`/dashboard/invoices?${params.toString()}`);
         }
         break;
       case 'search_query':
@@ -207,12 +244,19 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         break;
       case 'open_dialog':
         if (action.target === 'new_shipment') navigate('/dashboard/shipments?action=create');
+        else if (action.target === 'new_invoice') navigate('/dashboard/invoices?action=create');
         break;
       case 'go_back':
         window.history.back();
         break;
       case 'refresh':
         window.location.reload();
+        break;
+      case 'scroll_top':
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
+      case 'scroll_bottom':
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         break;
       case 'conversation':
       case 'show_info':
@@ -224,6 +268,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     if (!text.trim() || isProcessingRef.current) return;
     isProcessingRef.current = true;
     setState('thinking');
+    setInterimTranscript('');
     resetSessionTimer();
     retryCountRef.current = 0;
 
@@ -254,6 +299,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           timestamp: Date.now(),
         };
         setConversationHistory(prev => [...prev, assistantMsg]);
+        playNotificationSound();
 
         if (command.confidence > 0.5) executeCommand(command);
 
@@ -274,7 +320,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     await attemptProcess();
     isProcessingRef.current = false;
-  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer]);
+  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -294,15 +340,17 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
-      let interimTranscript = '';
+      let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
         if (event.results[i].isFinal) finalTranscript += t;
-        else interimTranscript += t;
+        else interim += t;
       }
-      setTranscript(finalTranscript || interimTranscript);
+      if (interim) setInterimTranscript(interim);
+      setTranscript(finalTranscript || interim);
       if (finalTranscript) {
-        const endPhrases = ['خلاص', 'كفاية', 'شكرا', 'شكراً', 'باي', 'مع السلامة', 'سلام', 'اقفل', 'وقف'];
+        setInterimTranscript('');
+        const endPhrases = ['خلاص', 'كفاية', 'شكرا', 'شكراً', 'باي', 'مع السلامة', 'سلام', 'اقفل', 'وقف', 'تصبح على خير', 'يلا باي'];
         const isEndPhrase = endPhrases.some(p => finalTranscript.trim().includes(p));
 
         if (isEndPhrase && conversationActiveRef.current) {
@@ -310,7 +358,12 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           conversationActiveRef.current = false;
           if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
           playEndSound();
-          speak('تمام يا باشا، لو احتجتني قول "يا نظام"! 👋');
+          const goodbyes = [
+            'تمام يا باشا، لو احتجتني قول "يا نظام"! 👋',
+            'ماشي يا كبير، أنا هنا لو عايزني! 👋',
+            'حاضر يا باشا، في أمان الله! 👋',
+          ];
+          speak(goodbyes[Math.floor(Math.random() * goodbyes.length)]);
           setTimeout(() => setConversationHistory([]), 3000);
           return;
         }
@@ -323,7 +376,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         toast.error('خطأ في التعرف على الصوت');
       }
       if (conversationActiveRef.current && (event.error === 'no-speech' || event.error === 'aborted')) {
-        setTimeout(() => { if (conversationActiveRef.current) startListeningInternal(true); }, 500);
+        setTimeout(() => { if (conversationActiveRef.current) startListeningInternal(true); }, SILENCE_RESTART_DELAY);
         return;
       }
       setState('idle');
@@ -335,7 +388,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (conversationActiveRef.current && !isProcessingRef.current) {
         setTimeout(() => {
           if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
-        }, 300);
+        }, SILENCE_RESTART_DELAY);
         return;
       }
       if (!conversationActiveRef.current) {
@@ -353,13 +406,21 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     setConversationActive(true);
     conversationActiveRef.current = true;
     resetSessionTimer();
+
+    const greetings = [
+      'أيوه يا باشا، قول أمرك!',
+      'حاضر يا باشا، بسمعك!',
+      'أنا معاك يا باشا، عايز إيه؟',
+    ];
+    toast.info(`🎤 ${greetings[Math.floor(Math.random() * greetings.length)]}`);
     startListeningInternal(true);
   }, [startListeningInternal, resetSessionTimer, playActivationSound]);
 
-  // Send text command without voice
   const sendTextCommand = useCallback((text: string) => {
-    setConversationActive(true);
-    conversationActiveRef.current = true;
+    if (!conversationActiveRef.current) {
+      setConversationActive(true);
+      conversationActiveRef.current = true;
+    }
     resetSessionTimer();
     processTranscript(text);
   }, [processTranscript, resetSessionTimer]);
@@ -440,6 +501,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     setConversationHistory([]);
     setLastResponse('');
     setTranscript('');
+    setInterimTranscript('');
     setLastSentiment(null);
     setFollowUpSuggestion(null);
   }, []);
@@ -449,6 +511,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (recognitionRef.current) try { recognitionRef.current.stop(); } catch {}
       if (wakeRecognitionRef.current) try { wakeRecognitionRef.current.stop(); } catch {}
       if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
+      if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current);
       window.speechSynthesis.cancel();
     };
   }, []);
@@ -456,6 +519,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   return {
     state,
     transcript,
+    interimTranscript,
     lastResponse,
     lastSentiment,
     followUpSuggestion,
@@ -463,6 +527,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     conversationActive,
     conversationHistory,
     commandHistory,
+    sessionDuration,
     startListening,
     stopListening,
     startWakeWordListener,

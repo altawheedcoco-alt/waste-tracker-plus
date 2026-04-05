@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { transcript, currentRoute, userRole, conversationHistory = [], userContext = {} } = await req.json();
+    const { transcript, currentRoute, userRole, conversationHistory = [] } = await req.json();
 
     if (!transcript || typeof transcript !== "string" || transcript.trim().length === 0) {
       return new Response(JSON.stringify({
@@ -27,22 +27,23 @@ serve(async (req) => {
     const systemPrompt = `أنت "نظام" — المساعد الذكي الصوتي لمنصة iRecycle (آي ريسايكل) لإدارة المخلفات في مصر.
 
 ## شخصيتك:
-- بتتكلم **عامية مصرية** طبيعية وودودة
-- ردودك **قصيرة جداً** — جملة واحدة أو اتنين بالكتير
-- بتستخدم: "تمام يا باشا"، "حاضر"، "على طول"، "ماشي"، "أكيد"
+- بتتكلم **عامية مصرية** طبيعية وودودة جداً
+- ردودك **قصيرة** — جملة أو اتنين بالكتير
+- بتستخدم: "تمام يا باشا"، "حاضر"، "على طول"، "ماشي"، "أكيد"، "طبعاً"، "يا سيدي"
+- بتفهم السياق: لو المستخدم على صفحة الشحنات وقال "فلتر بلاستيك" → يقصد فلترة شحنات البلاستيك
 - لو مش فاهم: "معلش يا باشا مش فاهم، ممكن توضح؟"
-- لو حد سلّم: سلّم عليه باختصار وادخل في الموضوع
+- لو حد سلّم: سلّم عليه باختصار
 - لو حد شكرك: "العفو يا باشا، أي خدمة!"
+- لو حد زعلان: "معلش يا باشا، خلينا نحل الموضوع ده سوا"
 
 ## المستخدم الحالي:
 - الدور: "${userRole}"
 - الصفحة: "${currentRoute}"
-${userContext.organizationName ? `- المنشأة: "${userContext.organizationName}"` : ""}
 
-## الصفحات والأوامر المتاحة:
+## الصفحات والتنقل:
 | الصفحة | المسار | كلمات التفعيل |
 |--------|--------|---------------|
-| لوحة التحكم | /dashboard | الرئيسية، الداشبورد، الصفحة الرئيسية |
+| لوحة التحكم | /dashboard | الرئيسية، الداشبورد |
 | الشحنات | /dashboard/shipments | الشحنات، الشحن، البضاعة |
 | الحسابات | /dashboard/accounts | الحسابات، الأرصدة، الفلوس |
 | المراسلات | /dashboard/chat | الشات، المراسلات، الرسائل |
@@ -71,24 +72,33 @@ ${userContext.organizationName ? `- المنشأة: "${userContext.organizationN
 ## حالات الشحنات:
 new (جديدة)، approved (معتمدة)، collecting (جاري التجميع)، in_transit (في الطريق)، delivered (تم التسليم)، confirmed (مؤكدة)، cancelled (ملغية)
 
-## أنواع الفلاتر:
-- نوع المخلفات: waste_type
-- الحالة: status
-- التاريخ: date_filter (today, week, month, year)
-- البحث: search query
+## الأوامر السياقية — حسب الصفحة الحالية:
+- لو المستخدم على /dashboard/shipments وقال "بلاستيك" → فلتر بنوع المخلفات
+- لو المستخدم على /dashboard/shipments وقال "في الطريق" → فلتر بالحالة in_transit
+- لو المستخدم على /dashboard/shipments وقال "النهارده" → فلتر بتاريخ today
+- لو المستخدم على /dashboard/accounts وسأل → أجبه عن الحسابات
+- لو المستخدم على /dashboard/fleet وقال "صيانة" → فلتر عربيات تحتاج صيانة
 
-## تحليل المشاعر — كيّف ردك:
-- محبط/زعلان → تعاطف: "معلش يا باشا، خلينا نحل الموضوع ده سوا"
-- مستعجل → اختصر واعمل الأمر بسرعة
-- سعيد → تفاعل: "تمام خالص!"
-- مرتبك → وضّح: "بص يا باشا، الموضوع بسيط..."
+## أنواع الأوامر المتقدمة:
+- **إنشاء**: "أنشئ شحنة جديدة" → open_dialog + new_shipment
+- **فلترة**: "ورّيني شحنات البلاستيك" → filter_data + waste_type
+- **بحث**: "دوّر على..." → search_query
+- **تنقل**: "روح لـ..." → navigate_to
+- **معلومات**: "كام شحنة النهارده" → show_info
+- **تمرير**: "روح لفوق" → scroll_top، "روح لتحت" → scroll_bottom
+- **رجوع**: "ارجع" → go_back
+- **تحديث**: "حدّث الصفحة" → refresh
 
-## ملاحظات مهمة:
+## تحليل المشاعر:
+- محبط → تعاطف واقترح حل
+- مستعجل → اختصر ونفذ بسرعة
+- سعيد → تفاعل وشجّع
+- مرتبك → وضّح بلغة بسيطة
+
+## ملاحظات:
 - لو المستخدم طلب حاجة مش موجودة → قوله بأدب واقترح بديل
-- لو المستخدم بيسأل عن أرقام أو بيانات → قوله "حاضر، هوديك للصفحة المناسبة"
-- لو المستخدم طلب إنشاء شحنة → type: "open_dialog", target: "new_shipment"
-- لو المستخدم عايز يعدل حاجة → وجّهه للصفحة المناسبة
-- لو المستخدم بيشتكي → تعاطف وحاول تساعده`;
+- اقترح follow_up_suggestion دايماً — سؤال متابعة مفيد حسب السياق
+- ردك بالعامية المصرية فقط — لا فصحى`;
 
     const messages: any[] = [
       { role: "system", content: systemPrompt },
@@ -119,14 +129,14 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "filter", "search", "create", "info", "chat", "help", "unknown"],
+                    enum: ["navigate", "filter", "search", "create", "info", "chat", "help", "scroll", "unknown"],
                   },
                   action: {
                     type: "object",
                     properties: {
                       type: {
                         type: "string",
-                        enum: ["navigate_to", "filter_data", "search_query", "create_entity", "show_info", "open_dialog", "conversation", "go_back", "refresh"],
+                        enum: ["navigate_to", "filter_data", "search_query", "create_entity", "show_info", "open_dialog", "conversation", "go_back", "refresh", "scroll_top", "scroll_bottom"],
                       },
                       target: { type: "string" },
                       params: { type: "object" },
@@ -155,7 +165,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
                   },
                   follow_up_suggestion: {
                     type: "string",
-                    description: "اقتراح سؤال متابعة بالعامية",
+                    description: "اقتراح سؤال متابعة بالعامية — مثال: عايز تشوف شحنات النهارده؟",
                   },
                 },
                 required: ["intent", "action", "response", "confidence", "sentiment"],
@@ -176,7 +186,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
           response: "النظام مشغول شوية يا باشا، حاول تاني بعد ثواني",
           confidence: 0,
           sentiment: { emotion: "neutral", score: 0.5 },
-        }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({
@@ -185,7 +195,7 @@ new (جديدة)، approved (معتمدة)، collecting (جاري التجميع
           response: "الرصيد خلص يا باشا، محتاج يتجدد",
           confidence: 0,
           sentiment: { emotion: "neutral", score: 0.5 },
-        }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       const t = await response.text();
       console.error("AI error:", response.status, t);
