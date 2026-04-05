@@ -29,8 +29,8 @@ export default function WasteTypeAuthorization() {
     queryKey: ['waste-auth', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('entity_documents')
+      const { data } = await (supabase
+        .from('entity_documents') as any)
         .select('metadata, status')
         .eq('organization_id', orgId!)
         .in('status', ['active', 'approved']);

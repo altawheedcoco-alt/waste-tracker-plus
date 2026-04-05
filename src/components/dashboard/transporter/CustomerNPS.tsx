@@ -35,7 +35,7 @@ export default function CustomerNPS() {
     if (!shipments?.length) return null;
     // Simulate NPS from delivery success rate
     const delivered = shipments.filter((s: any) => s.status === 'delivered' || s.status === 'confirmed').length;
-    const rejected = shipments.filter((s: any) => s.status === 'rejected').length;
+    const rejected = shipments.filter((s: any) => s.status === 'cancelled').length;
     const total = shipments.length;
     const promoters = delivered;
     const detractors = rejected;
