@@ -141,6 +141,14 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
             {/* Main Tab */}
             {activeTab === 'main' && (
               <>
+                {/* Conversation Mode Indicator */}
+                {conversationActive && (
+                  <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[10px] text-primary font-medium">محادثة مستمرة — قول &quot;خلاص&quot; أو &quot;شكراً&quot; للإنهاء</span>
+                  </div>
+                )}
+
                 {/* State + Sentiment */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
