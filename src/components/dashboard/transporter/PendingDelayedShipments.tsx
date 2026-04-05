@@ -19,7 +19,7 @@ export default function PendingDelayedShipments() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments')
+        .from('shipments' as any)
         .select('id, tracking_number, status, created_at, scheduled_date, waste_type, generator_name')
         .eq('transporter_id', orgId!)
         .in('status', ['new', 'approved', 'collecting', 'in_transit'])

@@ -20,7 +20,7 @@ export default function ResponseTimeTracker() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments')
+        .from('shipments' as any)
         .select('created_at, approved_at, collected_at, delivered_at, status')
         .eq('transporter_id', orgId!)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())

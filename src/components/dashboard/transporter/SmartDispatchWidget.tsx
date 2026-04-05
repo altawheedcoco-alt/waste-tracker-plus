@@ -21,11 +21,11 @@ export default function SmartDispatchWidget() {
     enabled: !!orgId,
     queryFn: async () => {
       const [pending, drivers, vehicles] = await Promise.all([
-        supabase.from('shipments').select('id, tracking_number, waste_type, pickup_governorate, actual_weight')
+        supabase.from('shipments' as any).select('id, tracking_number, waste_type, pickup_governorate, actual_weight')
           .eq('transporter_id', orgId!).in('status', ['approved']).limit(5),
-        supabase.from('drivers').select('id, full_name, current_status, rating, total_trips')
+        supabase.from('drivers' as any).select('id, full_name, current_status, rating, total_trips')
           .eq('organization_id', orgId!).eq('is_active', true),
-        supabase.from('vehicles').select('id, plate_number, capacity_tons, status, vehicle_type')
+        supabase.from('vehicles' as any).select('id, plate_number, capacity_tons, status, vehicle_type')
           .eq('organization_id', orgId!).eq('status', 'active'),
       ]);
       return {

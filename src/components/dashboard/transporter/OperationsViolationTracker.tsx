@@ -19,8 +19,8 @@ export default function OperationsViolationTracker() {
     enabled: !!orgId,
     queryFn: async () => {
       const [permits, shipments] = await Promise.all([
-        supabase.from('permits').select('conditions, status, permit_type').eq('organization_id', orgId!).in('status', ['active', 'approved']),
-        supabase.from('shipments').select('waste_type, pickup_governorate, delivery_governorate, status, created_at')
+        supabase.from('permits' as any).select('conditions, status, permit_type').eq('organization_id', orgId!).in('status', ['active', 'approved']),
+        supabase.from('shipments' as any).select('waste_type, pickup_governorate, delivery_governorate, status, created_at')
           .eq('transporter_id', orgId!)
           .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
           .limit(200),

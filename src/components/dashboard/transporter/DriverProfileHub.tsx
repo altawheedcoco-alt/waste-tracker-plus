@@ -20,7 +20,7 @@ export default function DriverProfileHub() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('drivers')
+        .from('drivers' as any)
         .select('id, full_name, phone, license_expiry, license_type, is_active, rating, total_trips, training_status')
         .eq('organization_id', orgId!)
         .order('is_active', { ascending: false })

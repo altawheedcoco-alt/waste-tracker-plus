@@ -19,7 +19,7 @@ export default function VehicleInsuranceTracker() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('vehicles')
+        .from('vehicles' as any)
         .select('id, plate_number, insurance_expiry, insurance_company, insurance_policy_number, status')
         .eq('organization_id', orgId!)
         .order('insurance_expiry', { ascending: true });

@@ -22,7 +22,7 @@ export default function FleetCarbonFootprint() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments')
+        .from('shipments' as any)
         .select('actual_weight, distance_km, status')
         .eq('transporter_id', orgId!)
         .in('status', ['delivered', 'confirmed'])

@@ -20,8 +20,8 @@ export default function FleetExpansionPlanner() {
     enabled: !!orgId,
     queryFn: async () => {
       const [vehicles, shipments] = await Promise.all([
-        supabase.from('vehicles').select('id, capacity_tons, status').eq('organization_id', orgId!),
-        supabase.from('shipments').select('id, actual_weight, status, created_at')
+        supabase.from('vehicles' as any).select('id, capacity_tons, status').eq('organization_id', orgId!),
+        supabase.from('shipments' as any).select('id, actual_weight, status, created_at')
           .eq('transporter_id', orgId!)
           .in('status', ['delivered', 'confirmed'])
           .gte('created_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString()),

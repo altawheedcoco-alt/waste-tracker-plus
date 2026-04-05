@@ -35,7 +35,7 @@ export default function LicenseStatusBoard() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('permits')
+        .from('permits' as any)
         .select('*')
         .eq('organization_id', orgId!)
         .order('valid_until', { ascending: true });

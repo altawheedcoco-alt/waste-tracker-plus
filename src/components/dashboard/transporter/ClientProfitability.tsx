@@ -20,7 +20,7 @@ export default function ClientProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('accounting_ledger')
+        .from('accounting_ledger' as any)
         .select('amount, entry_type, partner_organization_id, entry_category')
         .eq('organization_id', orgId!)
         .not('partner_organization_id', 'is', null)
@@ -35,7 +35,7 @@ export default function ClientProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('partnerships')
+        .from('partnerships' as any)
         .select('partner_organization_id, partner_org:organizations!partnerships_partner_organization_id_fkey(name)')
         .eq('organization_id', orgId!);
       return data || [];

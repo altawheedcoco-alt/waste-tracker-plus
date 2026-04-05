@@ -19,7 +19,7 @@ export default function VehicleIdentityCard() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('vehicles')
+        .from('vehicles' as any)
         .select('*')
         .eq('organization_id', orgId!)
         .order('created_at', { ascending: false })

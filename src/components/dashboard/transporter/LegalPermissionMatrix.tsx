@@ -26,7 +26,7 @@ export default function LegalPermissionMatrix() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('permits')
+        .from('permits' as any)
         .select('permit_type, conditions, status')
         .eq('organization_id', orgId!)
         .in('status', ['active', 'approved']);

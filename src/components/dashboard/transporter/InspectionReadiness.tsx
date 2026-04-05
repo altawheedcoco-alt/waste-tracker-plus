@@ -26,9 +26,9 @@ export default function InspectionReadiness() {
     enabled: !!orgId,
     queryFn: async () => {
       const [permits, vehicles, drivers] = await Promise.all([
-        supabase.from('permits').select('status, valid_until, permit_type').eq('organization_id', orgId!),
-        supabase.from('vehicles').select('status, insurance_expiry, technical_inspection_date').eq('organization_id', orgId!),
-        supabase.from('drivers').select('license_expiry, is_active, training_status').eq('organization_id', orgId!),
+        supabase.from('permits' as any).select('status, valid_until, permit_type').eq('organization_id', orgId!),
+        supabase.from('vehicles' as any).select('status, insurance_expiry, technical_inspection_date').eq('organization_id', orgId!),
+        supabase.from('drivers' as any).select('license_expiry, is_active, training_status').eq('organization_id', orgId!),
       ]);
       return {
         permits: permits.data || [],

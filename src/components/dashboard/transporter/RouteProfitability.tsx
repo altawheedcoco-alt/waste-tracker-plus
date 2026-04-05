@@ -19,7 +19,7 @@ export default function RouteProfitability() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('shipments')
+        .from('shipments' as any)
         .select('pickup_governorate, delivery_governorate, actual_weight, distance_km, price_per_ton, status')
         .eq('transporter_id', orgId!)
         .in('status', ['delivered', 'confirmed'])

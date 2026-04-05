@@ -20,7 +20,7 @@ export default function CustomerNPS() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('partnership_ratings')
+        .from('partnership_ratings' as any)
         .select('overall_rating, review_text, created_at')
         .eq('rated_organization_id', orgId!)
         .order('created_at', { ascending: false })

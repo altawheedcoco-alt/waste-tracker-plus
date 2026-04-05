@@ -22,9 +22,9 @@ export default function ComplianceExtract() {
     enabled: !!orgId,
     queryFn: async () => {
       const [permits, shipments, vehicles] = await Promise.all([
-        supabase.from('permits').select('status, permit_type, valid_until').eq('organization_id', orgId!),
-        supabase.from('shipments').select('id, status').eq('transporter_id', orgId!).gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString()),
-        supabase.from('vehicles').select('id, status').eq('organization_id', orgId!),
+        supabase.from('permits' as any).select('status, permit_type, valid_until').eq('organization_id', orgId!),
+        supabase.from('shipments' as any).select('id, status').eq('transporter_id', orgId!).gte('created_at', new Date(Date.now() - 90 * 24 * 3600000).toISOString()),
+        supabase.from('vehicles' as any).select('id, status').eq('organization_id', orgId!),
       ]);
       return {
         activePermits: (permits.data || []).filter(p => p.status === 'active').length,

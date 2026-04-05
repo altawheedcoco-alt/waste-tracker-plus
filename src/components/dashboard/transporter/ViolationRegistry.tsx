@@ -18,7 +18,7 @@ export default function ViolationRegistry() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('compliance_violations')
+        .from('compliance_violations' as any)
         .select('id, violation_type, severity, status, description, created_at, penalty_amount')
         .eq('organization_id', orgId!)
         .order('created_at', { ascending: false })

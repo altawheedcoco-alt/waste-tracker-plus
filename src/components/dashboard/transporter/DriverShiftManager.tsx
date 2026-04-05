@@ -19,7 +19,7 @@ export default function DriverShiftManager() {
     enabled: !!orgId,
     queryFn: async () => {
       const { data } = await supabase
-        .from('drivers')
+        .from('drivers' as any)
         .select('id, full_name, is_active, current_status, shift_start, shift_end, total_hours_today')
         .eq('organization_id', orgId!)
         .eq('is_active', true)
