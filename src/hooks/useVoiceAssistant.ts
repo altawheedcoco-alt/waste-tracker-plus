@@ -48,10 +48,11 @@ interface UseVoiceAssistantOptions {
   wakeWord?: string;
 }
 
-const AUTO_LISTEN_DELAY = 500;
+const AUTO_LISTEN_DELAY = 600;
 const SESSION_TIMEOUT = 120_000; // 120 ثانية — دقيقتين
 const MAX_RETRIES = 2;
-const SILENCE_RESTART_DELAY = 300;
+const SILENCE_RESTART_DELAY = 500;
+const SYNTH_WATCHDOG_MS = 15_000; // Chrome speechSynthesis hang guard
 
 // Haptic feedback
 function haptic(type: 'light' | 'medium' | 'heavy' = 'light') {
