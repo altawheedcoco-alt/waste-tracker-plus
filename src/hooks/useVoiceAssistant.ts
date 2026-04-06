@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addToHistory, incrementFavoriteUsage } from '@/lib/voiceFavorites';
 import { useAuth } from '@/contexts/AuthContext';
+import { getPageContextForAI, getProactiveWelcome } from '@/lib/voicePageContext';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'wake_listening';
 
@@ -444,6 +445,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const processViaActionEngine = useCallback(async (text: string): Promise<string> => {
     actionConversationRef.current.push({ role: 'user', content: text });
 
+    // Build rich page context for the AI
+    const pageContext = getPageContextForAI(location.pathname, userRole);
+
     try {
       const { data, error } = await supabase.functions.invoke('voice-action-engine', {
         body: {
@@ -452,6 +456,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           organizationId: organization?.id,
           userId: user?.id,
           currentRoute: location.pathname,
+          actionContext: pageContext,
         },
       });
 
@@ -707,15 +712,30 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     conversationActiveRef.current = true;
     resetSessionTimer();
 
-    const greetings = [
-      'أيوه يا باشا، قول أمرك!',
-      'حاضر يا باشا، بسمعك!',
-      'أنا معاك يا باشا، عايز إيه؟',
-      'تحت أمرك يا باشا!',
-    ];
-    toast.info(`🎤 ${greetings[Math.floor(Math.random() * greetings.length)]}`);
+    // Proactive welcome based on current page
+    const proactiveWelcome = getProactiveWelcome(location.pathname);
+    const greeting = proactiveWelcome || 'أيوه يا باشا، قول أمرك!';
+    
+    toast.info(`🎤 ${greeting.slice(0, 60)}...`);
+
+    // If on a specific page, auto-activate action engine for proactive behavior
+    if (proactiveWelcome) {
+      setActionEngineState('active');
+      actionActiveRef.current = true;
+      // Send the page context as an initial "system" trigger
+      const pageContext = getPageContextForAI(location.pathname, userRole);
+      actionConversationRef.current = [{ role: 'user', content: `فتحت الصفحة: ${location.pathname}` }];
+      // Process proactively in background
+      processViaActionEngine(`فتحت الصفحة دي وعايز أعرف أعمل إيه`).then(response => {
+        setLastResponse(response);
+        const assistantMsg: ConversationMessage = { role: 'assistant', content: response, timestamp: Date.now() };
+        setConversationHistory(prev => [...prev, assistantMsg]);
+        speak(response);
+      });
+    }
+
     startListeningInternal(true);
-  }, [startListeningInternal, resetSessionTimer, playActivationSound]);
+  }, [startListeningInternal, resetSessionTimer, playActivationSound, location.pathname, userRole, processViaActionEngine, speak]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!conversationActiveRef.current) {
