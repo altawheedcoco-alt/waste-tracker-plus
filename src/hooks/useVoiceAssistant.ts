@@ -381,20 +381,35 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     }
   }, [navigate]);
 
-  // Detect if text is an action command (create, update, assign, etc.)
+  // Detect if text is an action command with enhanced fuzzy matching
   const isActionCommand = useCallback((text: string): boolean => {
+    const normalized = text.replace(/[\s\.،,!؟?]+/g, ' ').trim().toLowerCase();
     const actionPatterns = [
-      /أنشئ|انشئ|اعمل|سجل|ضيف|أضف|حط/,
-      /عيّن|خصص|وزع|اطلب/,
-      /حدّث|غيّر|عدّل/,
-      /احذف|الغي|شيل/,
-      /شحنة جديدة|فاتورة جديدة|أمر عمل/,
-      /عايز أعمل|عايز أنشئ|عايز أضيف|عايزه/,
-      /سواق.*شحنة|شحنة.*سواق/,
-      /كم.*(شحنة|فاتورة|سائق|شحنات)/,
-      /إحصائيات|ملخص اليوم|ملخص الشهر/,
+      // Creation commands
+      /أنشئ|انشئ|اعمل|سجل|ضيف|أضف|حط|نشئ|اضف|ضف/,
+      // Assignment commands
+      /عيّن|عين|خصص|وزع|اطلب|طلب|رشح/,
+      // Update commands
+      /حدّث|حدث|غيّر|غير|عدّل|عدل|حول|بدل/,
+      // Delete commands
+      /احذف|الغي|شيل|امسح|فك|ارجع/,
+      // Creation with context
+      /شحنة جديدة|فاتورة جديدة|أمر عمل|طلب جديد|عقد جديد/,
+      // Intent expressions
+      /عايز أعمل|عايز أنشئ|عايز أضيف|عايزه|محتاج أعمل|نفسي أعمل/,
+      // Combined commands
+      /سواق.*شحنة|شحنة.*سواق|عربية.*شحنة/,
+      // Queries that need action engine
+      /كم.*(شحنة|فاتورة|سائق|شحنات|طلب|عميل)/,
+      /إحصائيات|ملخص اليوم|ملخص الشهر|ملخص الأسبوع|تقرير/,
+      // Approval/confirmation commands
+      /وافق|ارفض|قبول|رفض|اعتمد|صدق/,
+      // Data entry
+      /سعر|وزن|كمية|عدد|رقم.*تليفون|عنوان/,
+      // Compound commands
+      /و(بعدين|كمان|بعد كده|من بعدها)/,
     ];
-    return actionPatterns.some(p => p.test(text));
+    return actionPatterns.some(p => p.test(normalized));
   }, []);
 
   // Process via action engine
