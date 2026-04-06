@@ -235,41 +235,77 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     } catch {}
   }, []);
 
+  // Text preprocessing for better Arabic TTS pronunciation
+  const preprocessForTTS = useCallback((text: string): string => {
+    let processed = text;
+    // Remove emojis for cleaner speech
+    processed = processed.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|✅|❌|⭐|👋|🎤|🤖|⚡|📊|📋/gu, '');
+    // Expand common abbreviations
+    processed = processed.replace(/\bKG\b/gi, 'كيلو جرام');
+    processed = processed.replace(/\bKM\b/gi, 'كيلو متر');
+    processed = processed.replace(/\bESG\b/gi, 'معايير الاستدامة');
+    processed = processed.replace(/\bKPI\b/gi, 'مؤشر أداء');
+    // Add natural pauses at punctuation
+    processed = processed.replace(/\./g, '، ');
+    processed = processed.replace(/!/g, '، ');
+    // Normalize spaces
+    processed = processed.replace(/\s+/g, ' ').trim();
+    return processed;
+  }, []);
+
   const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-EG';
-    if (bestArabicVoiceRef.current) utterance.voice = bestArabicVoiceRef.current;
-
-    utterance.rate = 0.95;
-    utterance.pitch = 1.05;
-    utterance.volume = 1.0;
-
-    if (sentiment) {
-      switch (sentiment.emotion) {
-        case 'frustrated': case 'angry': utterance.rate = 0.85; utterance.pitch = 0.95; break;
-        case 'urgent': utterance.rate = 1.1; utterance.pitch = 1.05; break;
-        case 'happy': case 'satisfied': utterance.rate = 0.95; utterance.pitch = 1.1; break;
-        case 'confused': utterance.rate = 0.9; utterance.pitch = 1.0; break;
+    
+    const processedText = preprocessForTTS(text);
+    
+    // Split long text into chunks for better quality
+    const chunks = processedText.length > 200
+      ? processedText.match(/[^،.!؟]+[،.!؟]?/g) || [processedText]
+      : [processedText];
+    
+    const speakChunks = (index: number) => {
+      if (index >= chunks.length) {
+        synthRef.current = null;
+        if (conversationActiveRef.current) {
+          resetSessionTimer();
+          setTimeout(() => {
+            if (conversationActiveRef.current) startListeningInternal(true);
+          }, AUTO_LISTEN_DELAY);
+        } else {
+          setState('idle');
+        }
+        return;
       }
-    }
 
-    utterance.onstart = () => setState('speaking');
-    utterance.onend = () => {
-      synthRef.current = null;
-      if (conversationActiveRef.current) {
-        resetSessionTimer();
-        setTimeout(() => {
-          if (conversationActiveRef.current) startListeningInternal(true);
-        }, AUTO_LISTEN_DELAY);
-      } else {
-        setState('idle');
+      const utterance = new SpeechSynthesisUtterance(chunks[index].trim());
+      utterance.lang = 'ar-EG';
+      if (bestArabicVoiceRef.current) utterance.voice = bestArabicVoiceRef.current;
+
+      // Enhanced natural speech parameters
+      utterance.rate = 0.92;
+      utterance.pitch = 1.08;
+      utterance.volume = 1.0;
+
+      if (sentiment) {
+        switch (sentiment.emotion) {
+          case 'frustrated': case 'angry': utterance.rate = 0.82; utterance.pitch = 0.92; break;
+          case 'urgent': utterance.rate = 1.05; utterance.pitch = 1.08; break;
+          case 'happy': case 'satisfied': utterance.rate = 0.93; utterance.pitch = 1.15; break;
+          case 'confused': utterance.rate = 0.88; utterance.pitch = 1.0; break;
+        }
       }
+
+      if (index === 0) utterance.onstart = () => setState('speaking');
+      utterance.onend = () => speakChunks(index + 1);
+      utterance.onerror = () => speakChunks(index + 1);
+      
+      synthRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
     };
-    synthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [resetSessionTimer]);
+
+    speakChunks(0);
+  }, [resetSessionTimer, preprocessForTTS]);
 
   const executeCommand = useCallback((command: VoiceCommand) => {
     const { action } = command;
