@@ -65,6 +65,7 @@ function haptic(type: 'light' | 'medium' | 'heavy' = 'light') {
 
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
+  const { user, organization } = useAuth();
   const [state, setState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
@@ -77,6 +78,14 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [lastCommandTime, setLastCommandTime] = useState(0);
+  // Action engine state
+  const [actionEngineState, setActionEngineState] = useState<ActionEngineState>('idle');
+  const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
+  const [currentOptions, setCurrentOptions] = useState<ActionOption[]>([]);
+  const [nextSuggestion, setNextSuggestion] = useState<string | null>(null);
+  const actionConversationRef = useRef<any[]>([]);
+  const actionActiveRef = useRef(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const recognitionRef = useRef<any>(null);
