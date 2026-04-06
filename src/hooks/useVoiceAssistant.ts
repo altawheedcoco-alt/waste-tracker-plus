@@ -100,6 +100,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const bestArabicVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const retryCountRef = useRef(0);
   const sessionStartRef = useRef(0);
+  const isRestartingRef = useRef(false); // Guard against duplicate restarts
+  const synthWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Find best Arabic voice
   useEffect(() => {
