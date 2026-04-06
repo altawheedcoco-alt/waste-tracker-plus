@@ -608,9 +608,19 @@ const PAGE_COMMANDS: Record<string, ContextualCommand[]> = {
     { label: 'العمليات', command: 'ورّيني عمليات التخلص', icon: '⚙️' },
     { label: 'عملية جديدة', command: 'ابدأ عملية تخلص جديدة', icon: '➕' },
   ],
+  '/dashboard/disposal/operations/new': [
+    { label: 'عملية جديدة', command: 'أنشئ عملية تخلص جديدة', icon: '➕' },
+    { label: 'اختر النوع', command: 'حدد نوع المخلفات', icon: '🏷️' },
+    { label: 'بيانات العملية', command: 'أكمل بيانات العملية', icon: '📝' },
+  ],
   '/dashboard/disposal/certificates': [
     { label: 'شهادات التخلص', command: 'ورّيني شهادات التخلص', icon: '📜' },
     { label: 'شهادة جديدة', command: 'أصدر شهادة تخلص', icon: '➕' },
+  ],
+  '/dashboard/disposal/certificates/new': [
+    { label: 'شهادة جديدة', command: 'أنشئ شهادة تخلص جديدة', icon: '➕' },
+    { label: 'اختر الشحنة', command: 'اختار الشحنة', icon: '📦' },
+    { label: 'بيانات الشهادة', command: 'أكمل بيانات الشهادة', icon: '📝' },
   ],
   '/dashboard/disposal/reports': [
     { label: 'تقارير التخلص', command: 'ورّيني تقارير التخلص', icon: '📊' },
