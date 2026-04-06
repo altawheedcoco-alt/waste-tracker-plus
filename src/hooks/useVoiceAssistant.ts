@@ -445,6 +445,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const processViaActionEngine = useCallback(async (text: string): Promise<string> => {
     actionConversationRef.current.push({ role: 'user', content: text });
 
+    // Build rich page context for the AI
+    const pageContext = getPageContextForAI(location.pathname, userRole);
+
     try {
       const { data, error } = await supabase.functions.invoke('voice-action-engine', {
         body: {
@@ -453,6 +456,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
           organizationId: organization?.id,
           userId: user?.id,
           currentRoute: location.pathname,
+          actionContext: pageContext,
         },
       });
 
