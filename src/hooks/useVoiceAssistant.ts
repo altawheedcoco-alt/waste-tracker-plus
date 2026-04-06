@@ -813,6 +813,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (wakeRecognitionRef.current) try { wakeRecognitionRef.current.stop(); } catch {}
       if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
       if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current);
+      if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
       window.speechSynthesis.cancel();
     };
   }, []);
