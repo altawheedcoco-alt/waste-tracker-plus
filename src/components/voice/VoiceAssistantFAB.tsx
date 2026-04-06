@@ -339,8 +339,59 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
                   )}
                 </div>
 
+                {/* Action Engine Status */}
+                {(actionEngineState === 'active' || actionEngineState === 'waiting_input') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-2 px-2 py-1.5 rounded-lg bg-primary/10 border border-primary/20 shrink-0"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="h-3 w-3 text-primary animate-pulse" />
+                      <span className="text-[10px] text-primary font-medium">
+                        {actionEngineState === 'active' ? 'جاري التنفيذ...' : '⏳ في انتظار ردك...'}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Action Engine Options */}
+                {currentOptions.length > 0 && actionEngineState === 'waiting_input' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-2 shrink-0"
+                  >
+                    <p className="text-[10px] text-muted-foreground mb-1">اختر من الخيارات:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {currentOptions.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => sendTextCommand(opt.label)}
+                          className="text-[10px] bg-primary/10 hover:bg-primary/20 text-foreground px-2.5 py-1.5 rounded-full transition-colors border border-primary/20"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Completed Action - Next Suggestion */}
+                {actionEngineState === 'completed' && nextSuggestion && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    onClick={() => sendTextCommand(nextSuggestion)}
+                    className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-right w-full shrink-0 border border-primary/20"
+                  >
+                    <Zap className="h-3 w-3 text-primary shrink-0" />
+                    <span className="text-[10px] text-primary">الخطوة التالية: {nextSuggestion}</span>
+                  </motion.button>
+                )}
+
                 {/* Follow-up suggestion */}
-                {followUpSuggestion && (
+                {followUpSuggestion && !isActionActive && (
                   <motion.button
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
