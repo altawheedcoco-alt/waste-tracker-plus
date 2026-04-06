@@ -596,8 +596,13 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound, playErrorSound, isActionCommand, processViaActionEngine]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
+    // Guard against duplicate restarts
+    if (isRestartingRef.current) return;
+    isRestartingRef.current = true;
+    setTimeout(() => { isRestartingRef.current = false; }, 200);
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) { isRestartingRef.current = false; return; }
 
     if (wakeRecognitionRef.current) { try { wakeRecognitionRef.current.stop(); } catch {} wakeRecognitionRef.current = null; }
     if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
@@ -608,6 +613,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+
+    let handledEnd = false; // Prevent onerror + onend both restarting
 
     recognition.onstart = () => setState('listening');
 
@@ -622,6 +629,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (interim) setInterimTranscript(interim);
       setTranscript(finalTranscript || interim);
       if (finalTranscript) {
+        handledEnd = true; // Processing will handle restart
         setInterimTranscript('');
         const endPhrases = ['خلاص', 'كفاية', 'شكرا', 'شكراً', 'باي', 'مع السلامة', 'سلام', 'اقفل', 'وقف', 'تصبح على خير', 'يلا باي'];
         const isEndPhrase = endPhrases.some(p => finalTranscript.trim().includes(p));
@@ -646,11 +654,17 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     };
 
     recognition.onerror = (event: any) => {
+      if (handledEnd) return;
+      handledEnd = true;
+
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.warn('SpeechRecognition error:', event.error);
         toast.error('خطأ في التعرف على الصوت');
       }
+      recognitionRef.current = null;
+
       if (conversationActiveRef.current && (event.error === 'no-speech' || event.error === 'aborted')) {
-        setTimeout(() => { if (conversationActiveRef.current) startListeningInternal(true); }, SILENCE_RESTART_DELAY);
+        setTimeout(() => { if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true); }, SILENCE_RESTART_DELAY);
         return;
       }
       setState('idle');
@@ -659,6 +673,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognition.onend = () => {
       recognitionRef.current = null;
+      if (handledEnd) return; // Already handled by onerror or onresult
+      handledEnd = true;
+
       if (conversationActiveRef.current && !isProcessingRef.current) {
         setTimeout(() => {
           if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
@@ -672,7 +689,16 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (e) {
+      console.warn('Recognition start failed:', e);
+      recognitionRef.current = null;
+      // Retry once after a delay
+      setTimeout(() => {
+        if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
+      }, 1000);
+    }
   }, [processTranscript, wakeWordEnabled, speak, playEndSound]);
 
   const startListening = useCallback(() => {
