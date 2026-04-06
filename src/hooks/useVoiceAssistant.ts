@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addToHistory, incrementFavoriteUsage } from '@/lib/voiceFavorites';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'wake_listening';
 
@@ -25,6 +26,14 @@ interface VoiceCommand {
   confidence: number;
   sentiment?: VoiceSentiment;
   follow_up_suggestion?: string;
+}
+
+// Action engine types
+export type ActionEngineState = 'idle' | 'active' | 'waiting_input' | 'completed';
+
+export interface ActionOption {
+  id: string;
+  label: string;
 }
 
 export interface ConversationMessage {
@@ -56,6 +65,7 @@ function haptic(type: 'light' | 'medium' | 'heavy' = 'light') {
 
 export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const { userRole = 'user', wakeWordEnabled = true, wakeWord = 'يا نظام' } = options;
+  const { user, organization } = useAuth();
   const [state, setState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
@@ -68,6 +78,14 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const [commandHistory, setCommandHistory] = useState<Array<{ text: string; intent: string; time: number }>>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [lastCommandTime, setLastCommandTime] = useState(0);
+  // Action engine state
+  const [actionEngineState, setActionEngineState] = useState<ActionEngineState>('idle');
+  const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
+  const [currentOptions, setCurrentOptions] = useState<ActionOption[]>([]);
+  const [nextSuggestion, setNextSuggestion] = useState<string | null>(null);
+  const actionConversationRef = useRef<any[]>([]);
+  const actionActiveRef = useRef(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const recognitionRef = useRef<any>(null);
@@ -327,6 +345,99 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     }
   }, [navigate]);
 
+  // Detect if text is an action command (create, update, assign, etc.)
+  const isActionCommand = useCallback((text: string): boolean => {
+    const actionPatterns = [
+      /أنشئ|انشئ|اعمل|سجل|ضيف|أضف|حط/,
+      /عيّن|خصص|وزع|اطلب/,
+      /حدّث|غيّر|عدّل/,
+      /احذف|الغي|شيل/,
+      /شحنة جديدة|فاتورة جديدة|أمر عمل/,
+      /عايز أعمل|عايز أنشئ|عايز أضيف|عايزه/,
+      /سواق.*شحنة|شحنة.*سواق/,
+      /كم.*(شحنة|فاتورة|سائق|شحنات)/,
+      /إحصائيات|ملخص اليوم|ملخص الشهر/,
+    ];
+    return actionPatterns.some(p => p.test(text));
+  }, []);
+
+  // Process via action engine
+  const processViaActionEngine = useCallback(async (text: string): Promise<string> => {
+    actionConversationRef.current.push({ role: 'user', content: text });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('voice-action-engine', {
+        body: {
+          messages: actionConversationRef.current,
+          userRole,
+          organizationId: organization?.id,
+          userId: user?.id,
+          currentRoute: location.pathname,
+        },
+      });
+
+      if (error) throw error;
+
+      const response = data;
+
+      switch (response.type) {
+        case 'ask_user':
+          setActionEngineState('waiting_input');
+          setCurrentQuestion(response.question || null);
+          setCurrentOptions(response.options || []);
+          if (response.conversation_state) {
+            actionConversationRef.current = response.conversation_state;
+          }
+          actionActiveRef.current = true;
+          return response.question || 'محتاج بيانات يا باشا';
+
+        case 'navigate':
+          if (response.path) navigate(response.path);
+          if (response.conversation_state) {
+            actionConversationRef.current = response.conversation_state;
+            actionActiveRef.current = true;
+            setActionEngineState('waiting_input');
+          }
+          return response.message || 'تم فتح الصفحة يا باشا';
+
+        case 'complete':
+          setActionEngineState('completed');
+          setNextSuggestion(response.next_suggestion || null);
+          actionActiveRef.current = false;
+          if (response.success) {
+            toast.success(response.message || 'تم التنفيذ بنجاح! ✅');
+          } else {
+            toast.error(response.message || 'حصلت مشكلة');
+          }
+          // Reset after completion
+          setTimeout(() => {
+            setActionEngineState('idle');
+            actionConversationRef.current = [];
+          }, 2000);
+          return response.message || 'تم يا باشا';
+
+        case 'message':
+          if (!actionActiveRef.current) setActionEngineState('idle');
+          return response.message || '';
+
+        case 'error':
+          setActionEngineState('idle');
+          actionActiveRef.current = false;
+          actionConversationRef.current = [];
+          return response.message || 'حصلت مشكلة';
+
+        default:
+          return response.message || '';
+      }
+    } catch (err) {
+      console.error('Action engine error:', err);
+      setActionEngineState('idle');
+      actionActiveRef.current = false;
+      actionConversationRef.current = [];
+      return 'معلش يا باشا حصلت مشكلة، حاول تاني';
+    }
+  }, [userRole, organization, user, location.pathname, navigate]);
+
   const processTranscript = useCallback(async (text: string) => {
     if (!text.trim() || isProcessingRef.current) return;
     isProcessingRef.current = true;
@@ -339,6 +450,24 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     const userMsg: ConversationMessage = { role: 'user', content: text, timestamp: Date.now() };
     setConversationHistory(prev => [...prev, userMsg]);
 
+    // Route to action engine if it's an action command or action is already active
+    if (actionActiveRef.current || isActionCommand(text)) {
+      if (!actionActiveRef.current) {
+        setActionEngineState('active');
+        actionActiveRef.current = true;
+      }
+
+      const responseText = await processViaActionEngine(text);
+      setLastResponse(responseText);
+      const assistantMsg: ConversationMessage = { role: 'assistant', content: responseText, timestamp: Date.now() };
+      setConversationHistory(prev => [...prev, assistantMsg]);
+      playNotificationSound();
+      speak(responseText);
+      isProcessingRef.current = false;
+      return;
+    }
+
+    // Regular voice command processing
     const attemptProcess = async (): Promise<void> => {
       try {
         const { data, error } = await supabase.functions.invoke('voice-command', {
@@ -385,7 +514,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     await attemptProcess();
     isProcessingRef.current = false;
-  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound, playErrorSound]);
+  }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound, playErrorSound, isActionCommand, processViaActionEngine]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -596,6 +725,12 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     commandHistory,
     sessionDuration,
     lastCommandTime,
+    // Action engine
+    actionEngineState,
+    currentQuestion,
+    currentOptions,
+    nextSuggestion,
+    isActionActive: actionActiveRef.current,
     startListening,
     stopListening,
     startWakeWordListener,
