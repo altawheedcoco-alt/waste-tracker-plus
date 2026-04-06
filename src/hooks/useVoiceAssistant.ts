@@ -28,6 +28,14 @@ interface VoiceCommand {
   follow_up_suggestion?: string;
 }
 
+// Action engine types
+export type ActionEngineState = 'idle' | 'active' | 'waiting_input' | 'completed';
+
+export interface ActionOption {
+  id: string;
+  label: string;
+}
+
 export interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;
