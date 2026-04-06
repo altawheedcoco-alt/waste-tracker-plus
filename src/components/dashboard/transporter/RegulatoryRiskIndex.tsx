@@ -2,11 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldAlert, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-const riskFactors = [
-  { factor: 'تعديل لائحة نقل المخلفات الخطرة', impact: 'high' as const, trend: 'up' as const, description: 'قد يتطلب تصاريح إضافية' },
-  { factor: 'زيادة رسوم التراخيص السنوية', impact: 'medium' as const, trend: 'up' as const, description: 'زيادة متوقعة 15%' },
-  { factor: 'اشتراطات GPS جديدة', impact: 'low' as const, trend: 'stable' as const, description: 'متوافق حالياً' },
-  { factor: 'تحديث معايير الحاويات', impact: 'medium' as const, trend: 'up' as const, description: 'قد يتطلب استبدال حاويات' },
+type Trend = 'up' | 'down' | 'stable';
+type Impact = 'high' | 'medium' | 'low';
+const riskFactors: { factor: string; impact: Impact; trend: Trend; description: string }[] = [
+  { factor: 'تعديل لائحة نقل المخلفات الخطرة', impact: 'high', trend: 'up', description: 'قد يتطلب تصاريح إضافية' },
+  { factor: 'زيادة رسوم التراخيص السنوية', impact: 'medium', trend: 'up', description: 'زيادة متوقعة 15%' },
+  { factor: 'اشتراطات GPS جديدة', impact: 'low', trend: 'stable', description: 'متوافق حالياً' },
+  { factor: 'تحديث معايير الحاويات', impact: 'medium', trend: 'up', description: 'قد يتطلب استبدال حاويات' },
 ];
 
 const impactColors = { high: 'bg-red-100 text-red-800', medium: 'bg-yellow-100 text-yellow-800', low: 'bg-green-100 text-green-800' };
