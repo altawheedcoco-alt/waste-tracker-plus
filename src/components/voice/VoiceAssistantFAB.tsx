@@ -65,6 +65,12 @@ export default function VoiceAssistantFAB({ userRole }: VoiceAssistantFABProps) 
     toggleWakeWord,
     clearHistory,
     sendTextCommand,
+    // Action engine
+    actionEngineState,
+    currentQuestion,
+    currentOptions,
+    nextSuggestion,
+    isActionActive,
   } = useVoiceAssistant({ userRole, wakeWordEnabled: wakeEnabled });
 
   // Auto-scroll chat
