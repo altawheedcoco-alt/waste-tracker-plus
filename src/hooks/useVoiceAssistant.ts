@@ -725,6 +725,12 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     commandHistory,
     sessionDuration,
     lastCommandTime,
+    // Action engine
+    actionEngineState,
+    currentQuestion,
+    currentOptions,
+    nextSuggestion,
+    isActionActive: actionActiveRef.current,
     startListening,
     stopListening,
     startWakeWordListener,
