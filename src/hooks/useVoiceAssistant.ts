@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { addToHistory, incrementFavoriteUsage } from '@/lib/voiceFavorites';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'wake_listening';
 
