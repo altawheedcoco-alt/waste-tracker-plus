@@ -19,16 +19,20 @@ export default function PartnerScopeSelector({ selectedIds, onChange }: Props) {
     queryKey: ['org-partners-for-scope', profile?.organization_id],
     queryFn: async () => {
       if (!profile?.organization_id) return [];
-      // Fetch partner organizations linked to current org
       const { data } = await supabase
-        .from('organization_partnerships')
-        .select('partner_organization_id, partner_organization:organizations!organization_partnerships_partner_organization_id_fkey(id, name)')
+        .from('partner_links')
+        .select('partner_organization_id')
         .eq('organization_id', profile.organization_id)
-        .eq('status', 'active');
-      return (data || []).map((p: any) => ({
-        id: p.partner_organization_id,
-        name: p.partner_organization?.name || 'جهة غير معروفة',
-      }));
+        .eq('status', 'active')
+        .not('partner_organization_id', 'is', null);
+      
+      if (!data?.length) return [];
+      const orgIds = data.map((p: any) => p.partner_organization_id).filter(Boolean);
+      const { data: orgs } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .in('id', orgIds);
+      return (orgs || []).map((o: any) => ({ id: o.id, name: o.name }));
     },
     enabled: !!profile?.organization_id,
   });
