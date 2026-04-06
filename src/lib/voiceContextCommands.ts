@@ -608,6 +608,11 @@ const PAGE_COMMANDS: Record<string, ContextualCommand[]> = {
     { label: 'العمليات', command: 'ورّيني عمليات التخلص', icon: '⚙️' },
     { label: 'عملية جديدة', command: 'ابدأ عملية تخلص جديدة', icon: '➕' },
   ],
+  '/dashboard/disposal/operations/new': [
+    { label: 'عملية جديدة', command: 'أنشئ عملية تخلص جديدة', icon: '➕' },
+    { label: 'اختر النوع', command: 'حدد نوع المخلفات', icon: '🏷️' },
+    { label: 'بيانات العملية', command: 'أكمل بيانات العملية', icon: '📝' },
+  ],
   '/dashboard/disposal/certificates': [
     { label: 'شهادات التخلص', command: 'ورّيني شهادات التخلص', icon: '📜' },
     { label: 'شهادة جديدة', command: 'أصدر شهادة تخلص', icon: '➕' },
