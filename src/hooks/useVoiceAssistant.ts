@@ -48,10 +48,11 @@ interface UseVoiceAssistantOptions {
   wakeWord?: string;
 }
 
-const AUTO_LISTEN_DELAY = 500;
+const AUTO_LISTEN_DELAY = 600;
 const SESSION_TIMEOUT = 120_000; // 120 ثانية — دقيقتين
 const MAX_RETRIES = 2;
-const SILENCE_RESTART_DELAY = 300;
+const SILENCE_RESTART_DELAY = 500;
+const SYNTH_WATCHDOG_MS = 15_000; // Chrome speechSynthesis hang guard
 
 // Haptic feedback
 function haptic(type: 'light' | 'medium' | 'heavy' = 'light') {
@@ -99,6 +100,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const bestArabicVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const retryCountRef = useRef(0);
   const sessionStartRef = useRef(0);
+  const isRestartingRef = useRef(false); // Guard against duplicate restarts
+  const synthWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Find best Arabic voice
   useEffect(() => {
@@ -256,21 +259,26 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
+    if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
     
     const processedText = preprocessForTTS(text);
+    if (!processedText.trim()) { setState('idle'); return; }
     
     // Split long text into chunks for better quality
-    const chunks = processedText.length > 200
-      ? processedText.match(/[^،.!؟]+[،.!؟]?/g) || [processedText]
+    const chunks = processedText.length > 150
+      ? processedText.match(/[^،.!؟]+[،.!؟]?/g)?.filter(c => c.trim()) || [processedText]
       : [processedText];
+    
+    let currentChunkIndex = 0;
     
     const speakChunks = (index: number) => {
       if (index >= chunks.length) {
         synthRef.current = null;
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
         if (conversationActiveRef.current) {
           resetSessionTimer();
           setTimeout(() => {
-            if (conversationActiveRef.current) startListeningInternal(true);
+            if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
           }, AUTO_LISTEN_DELAY);
         } else {
           setState('idle');
@@ -278,7 +286,10 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(chunks[index].trim());
+      const chunkText = chunks[index].trim();
+      if (!chunkText) { speakChunks(index + 1); return; }
+
+      const utterance = new SpeechSynthesisUtterance(chunkText);
       utterance.lang = 'ar-EG';
       if (bestArabicVoiceRef.current) utterance.voice = bestArabicVoiceRef.current;
 
@@ -297,11 +308,28 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       }
 
       if (index === 0) utterance.onstart = () => setState('speaking');
-      utterance.onend = () => speakChunks(index + 1);
-      utterance.onerror = () => speakChunks(index + 1);
+      utterance.onend = () => {
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
+        speakChunks(index + 1);
+      };
+      utterance.onerror = (e) => {
+        console.warn('TTS chunk error:', e);
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
+        speakChunks(index + 1);
+      };
       
+      currentChunkIndex = index;
       synthRef.current = utterance;
       window.speechSynthesis.speak(utterance);
+
+      // Chrome watchdog: speechSynthesis can hang silently
+      synthWatchdogRef.current = setTimeout(() => {
+        if (synthRef.current === utterance) {
+          console.warn('TTS watchdog: forcing next chunk');
+          window.speechSynthesis.cancel();
+          speakChunks(currentChunkIndex + 1);
+        }
+      }, SYNTH_WATCHDOG_MS);
     };
 
     speakChunks(0);
@@ -568,8 +596,13 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   }, [location.pathname, userRole, executeCommand, speak, resetSessionTimer, playNotificationSound, playErrorSound, isActionCommand, processViaActionEngine]);
 
   const startListeningInternal = useCallback((isConversation: boolean) => {
+    // Guard against duplicate restarts
+    if (isRestartingRef.current) return;
+    isRestartingRef.current = true;
+    setTimeout(() => { isRestartingRef.current = false; }, 200);
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) { isRestartingRef.current = false; return; }
 
     if (wakeRecognitionRef.current) { try { wakeRecognitionRef.current.stop(); } catch {} wakeRecognitionRef.current = null; }
     if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
@@ -580,6 +613,8 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+
+    let handledEnd = false; // Prevent onerror + onend both restarting
 
     recognition.onstart = () => setState('listening');
 
@@ -594,6 +629,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (interim) setInterimTranscript(interim);
       setTranscript(finalTranscript || interim);
       if (finalTranscript) {
+        handledEnd = true; // Processing will handle restart
         setInterimTranscript('');
         const endPhrases = ['خلاص', 'كفاية', 'شكرا', 'شكراً', 'باي', 'مع السلامة', 'سلام', 'اقفل', 'وقف', 'تصبح على خير', 'يلا باي'];
         const isEndPhrase = endPhrases.some(p => finalTranscript.trim().includes(p));
@@ -618,11 +654,17 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     };
 
     recognition.onerror = (event: any) => {
+      if (handledEnd) return;
+      handledEnd = true;
+
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.warn('SpeechRecognition error:', event.error);
         toast.error('خطأ في التعرف على الصوت');
       }
+      recognitionRef.current = null;
+
       if (conversationActiveRef.current && (event.error === 'no-speech' || event.error === 'aborted')) {
-        setTimeout(() => { if (conversationActiveRef.current) startListeningInternal(true); }, SILENCE_RESTART_DELAY);
+        setTimeout(() => { if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true); }, SILENCE_RESTART_DELAY);
         return;
       }
       setState('idle');
@@ -631,6 +673,9 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
 
     recognition.onend = () => {
       recognitionRef.current = null;
+      if (handledEnd) return; // Already handled by onerror or onresult
+      handledEnd = true;
+
       if (conversationActiveRef.current && !isProcessingRef.current) {
         setTimeout(() => {
           if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
@@ -644,7 +689,16 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (e) {
+      console.warn('Recognition start failed:', e);
+      recognitionRef.current = null;
+      // Retry once after a delay
+      setTimeout(() => {
+        if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
+      }, 1000);
+    }
   }, [processTranscript, wakeWordEnabled, speak, playEndSound]);
 
   const startListening = useCallback(() => {
@@ -759,6 +813,7 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       if (wakeRecognitionRef.current) try { wakeRecognitionRef.current.stop(); } catch {}
       if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
       if (sessionIntervalRef.current) clearInterval(sessionIntervalRef.current);
+      if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
       window.speechSynthesis.cancel();
     };
   }, []);
