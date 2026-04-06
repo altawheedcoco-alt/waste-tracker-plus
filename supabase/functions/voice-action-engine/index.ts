@@ -424,11 +424,11 @@ ${actionContext ? JSON.stringify(actionContext) : "لا يوجد سياق إضا
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: aiMessages,
-          tools: DB_TOOLS,
-        }),
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: aiMessages,
+        tools: DB_TOOLS,
+      }),
       });
 
       if (!response.ok) {
