@@ -17,6 +17,11 @@ export type EmployeePermission =
 /** High-level member_roles that get management-level access */
 const MANAGEMENT_MEMBER_ROLES = ['entity_head', 'assistant', 'deputy_assistant'];
 
+export interface ScopedPermission {
+  permission_key: string;
+  scoped_partner_ids: string[];
+}
+
 export const useMyPermissions = () => {
   const { user, roles } = useAuth();
   
@@ -24,26 +29,47 @@ export const useMyPermissions = () => {
   const isCompanyAdmin = roles.includes('company_admin');
   const isEmployee = roles.includes('employee');
 
-  // Fetch member_role from organization_members to determine management access
-  const { data: memberRole } = useQuery({
-    queryKey: ['my-member-role', user?.id],
-    queryFn: async (): Promise<string | null> => {
+  // Fetch member info (role + type)
+  const { data: memberInfo } = useQuery({
+    queryKey: ['my-member-info', user?.id],
+    queryFn: async () => {
       if (!user?.id) return null;
       const { data } = await supabase
         .from('organization_members')
-        .select('member_role')
+        .select('id, member_role, member_type')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .maybeSingle();
-      return (data?.member_role as string) || null;
+      return data as { id: string; member_role: string; member_type: string } | null;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 10,
   });
 
+  const memberRole = memberInfo?.member_role || null;
+  const memberType = (memberInfo?.member_type as string) || 'board_member';
+  const isBoardMember = memberType === 'board_member';
+  const isOperationalEmployee = memberType === 'employee';
+
   // High-level member_roles get management access equivalent to company_admin
   const isManagementMember = !!memberRole && MANAGEMENT_MEMBER_ROLES.includes(memberRole);
-  const effectiveCompanyAdmin = isCompanyAdmin || isManagementMember;
+  const effectiveCompanyAdmin = isCompanyAdmin || (isManagementMember && isBoardMember);
+
+  // Fetch scoped task assignments for employees
+  const { data: taskAssignments = [] } = useQuery({
+    queryKey: ['my-task-assignments', memberInfo?.id],
+    queryFn: async (): Promise<ScopedPermission[]> => {
+      if (!memberInfo?.id) return [];
+      const { data } = await supabase
+        .from('employee_task_assignments')
+        .select('permission_key, scoped_partner_ids')
+        .eq('member_id', memberInfo.id)
+        .eq('is_active', true);
+      return (data || []) as unknown as ScopedPermission[];
+    },
+    enabled: !!memberInfo?.id && isOperationalEmployee,
+    staleTime: 1000 * 60 * 10,
+  });
 
   const { data: permissions = [], isLoading } = useQuery({
     queryKey: ['my-permissions', user?.id],
@@ -58,7 +84,6 @@ export const useMyPermissions = () => {
       
       if (!profile) return [];
 
-      // Fetch from employee_permissions table
       const { data: empPerms } = await supabase
         .from('employee_permissions')
         .select('permission_type')
@@ -66,7 +91,6 @@ export const useMyPermissions = () => {
       
       const empPermsList = empPerms?.map(p => p.permission_type) || [];
 
-      // Also fetch from organization_members.granted_permissions
       const { data: memberData } = await supabase
         .from('organization_members')
         .select('granted_permissions')
@@ -76,8 +100,10 @@ export const useMyPermissions = () => {
       
       const grantedPerms = (memberData?.granted_permissions as string[]) || [];
 
-      // Merge all permissions (both raw and mapped)
-      const allPerms = [...new Set([...empPermsList, ...grantedPerms])];
+      // For operational employees, also include task-based permissions
+      const taskPerms = taskAssignments.map(t => t.permission_key);
+
+      const allPerms = [...new Set([...empPermsList, ...grantedPerms, ...taskPerms])];
       return allPerms;
     },
     enabled: !!user?.id && (isEmployee || isManagementMember),
@@ -96,15 +122,41 @@ export const useMyPermissions = () => {
     return perms.some(p => permissions.includes(p));
   };
 
+  /**
+   * Check if permission is scoped to specific partners.
+   * Returns true if allowed for the given partnerId.
+   * If no scoping (empty array), permission applies to ALL partners.
+   */
+  const hasPermissionForPartner = (permission: EmployeePermission, partnerId: string): boolean => {
+    if (isAdmin || effectiveCompanyAdmin) return true;
+    if (permissions.includes('full_access')) return true;
+    
+    // Board members with the permission have access to all partners
+    if (isBoardMember && permissions.includes(permission)) return true;
+
+    // For operational employees, check scoped assignments
+    const assignment = taskAssignments.find(t => t.permission_key === permission);
+    if (!assignment) return false;
+    
+    // Empty scoped_partner_ids means all partners
+    if (!assignment.scoped_partner_ids?.length) return true;
+    return assignment.scoped_partner_ids.includes(partnerId);
+  };
+
   return {
     permissions,
+    taskAssignments,
     isLoading,
     isAdmin,
     isCompanyAdmin: effectiveCompanyAdmin,
     isEmployee: isEmployee && !effectiveCompanyAdmin,
     isManagementMember,
+    isBoardMember,
+    isOperationalEmployee,
     memberRole,
+    memberType,
     hasPermission,
     hasAnyPermission,
+    hasPermissionForPartner,
   };
 };
