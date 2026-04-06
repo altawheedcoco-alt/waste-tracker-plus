@@ -15407,6 +15407,137 @@ export type Database = {
           },
         ]
       }
+      employee_task_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          member_id: string
+          notes: string | null
+          organization_id: string
+          permission_key: string
+          scoped_department_ids: string[] | null
+          scoped_partner_ids: string[] | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id: string
+          notes?: string | null
+          organization_id: string
+          permission_key: string
+          scoped_department_ids?: string[] | null
+          scoped_partner_ids?: string[] | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_id?: string
+          notes?: string | null
+          organization_id?: string
+          permission_key?: string
+          scoped_department_ids?: string[] | null
+          scoped_partner_ids?: string[] | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_task_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_task_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_task_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_task_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "employee_task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_task_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          organization_id: string
+          task_permissions: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          organization_id: string
+          task_permissions?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          organization_id?: string
+          task_permissions?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_task_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_task_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_waste_access: {
         Row: {
           created_at: string
@@ -28091,6 +28222,7 @@ export type Database = {
           left_at: string | null
           max_grantable_level: number | null
           member_role: Database["public"]["Enums"]["member_role"]
+          member_type: string
           notes: string | null
           organization_id: string
           position_id: string | null
@@ -28118,6 +28250,7 @@ export type Database = {
           left_at?: string | null
           max_grantable_level?: number | null
           member_role?: Database["public"]["Enums"]["member_role"]
+          member_type?: string
           notes?: string | null
           organization_id: string
           position_id?: string | null
@@ -28145,6 +28278,7 @@ export type Database = {
           left_at?: string | null
           max_grantable_level?: number | null
           member_role?: Database["public"]["Enums"]["member_role"]
+          member_type?: string
           notes?: string | null
           organization_id?: string
           position_id?: string | null
