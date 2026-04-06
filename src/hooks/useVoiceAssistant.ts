@@ -259,21 +259,26 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
   const speak = useCallback((text: string, sentiment?: VoiceSentiment) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
+    if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
     
     const processedText = preprocessForTTS(text);
+    if (!processedText.trim()) { setState('idle'); return; }
     
     // Split long text into chunks for better quality
-    const chunks = processedText.length > 200
-      ? processedText.match(/[^،.!؟]+[،.!؟]?/g) || [processedText]
+    const chunks = processedText.length > 150
+      ? processedText.match(/[^،.!؟]+[،.!؟]?/g)?.filter(c => c.trim()) || [processedText]
       : [processedText];
+    
+    let currentChunkIndex = 0;
     
     const speakChunks = (index: number) => {
       if (index >= chunks.length) {
         synthRef.current = null;
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
         if (conversationActiveRef.current) {
           resetSessionTimer();
           setTimeout(() => {
-            if (conversationActiveRef.current) startListeningInternal(true);
+            if (conversationActiveRef.current && !isProcessingRef.current) startListeningInternal(true);
           }, AUTO_LISTEN_DELAY);
         } else {
           setState('idle');
@@ -281,7 +286,10 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(chunks[index].trim());
+      const chunkText = chunks[index].trim();
+      if (!chunkText) { speakChunks(index + 1); return; }
+
+      const utterance = new SpeechSynthesisUtterance(chunkText);
       utterance.lang = 'ar-EG';
       if (bestArabicVoiceRef.current) utterance.voice = bestArabicVoiceRef.current;
 
@@ -300,11 +308,28 @@ export function useVoiceAssistant(options: UseVoiceAssistantOptions = {}) {
       }
 
       if (index === 0) utterance.onstart = () => setState('speaking');
-      utterance.onend = () => speakChunks(index + 1);
-      utterance.onerror = () => speakChunks(index + 1);
+      utterance.onend = () => {
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
+        speakChunks(index + 1);
+      };
+      utterance.onerror = (e) => {
+        console.warn('TTS chunk error:', e);
+        if (synthWatchdogRef.current) clearTimeout(synthWatchdogRef.current);
+        speakChunks(index + 1);
+      };
       
+      currentChunkIndex = index;
       synthRef.current = utterance;
       window.speechSynthesis.speak(utterance);
+
+      // Chrome watchdog: speechSynthesis can hang silently
+      synthWatchdogRef.current = setTimeout(() => {
+        if (synthRef.current === utterance) {
+          console.warn('TTS watchdog: forcing next chunk');
+          window.speechSynthesis.cancel();
+          speakChunks(currentChunkIndex + 1);
+        }
+      }, SYNTH_WATCHDOG_MS);
     };
 
     speakChunks(0);
